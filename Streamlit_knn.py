@@ -52,7 +52,7 @@ def task1():
             sorted_mov = list(np.argsort(recommended_amount_of_dedotated_wam))[::-1]
             print(sorted_mov[0:10])
             output = movies.iloc[sorted_mov[0:10]][['title', 'genres']]
-            st.write(output)
+    st.write(output)
 
 
 if __name__ == "__main__":
