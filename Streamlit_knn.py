@@ -59,7 +59,7 @@ def task1():
                     fill_color='paleturquoise',
                     align='left'),
         cells=dict(values=[output.title, output.genres],
-                   fill_color='lavender',
+                   fill_color='black',
                    align='left'))
     ])
     st.plotly_chart(fig)
