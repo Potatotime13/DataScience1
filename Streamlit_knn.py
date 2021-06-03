@@ -10,7 +10,7 @@ def main():
     with st.sidebar:
         st.write('Dataset selection')
 
-    #task1()
+    task1()
 
     c_task = st.sidebar.selectbox(
         "",
@@ -51,6 +51,7 @@ def task1():
             recommended_amount_of_dedotated_wam *= df_rating_raw[user_number].isnull().values
             sorted_mov = list(np.argsort(recommended_amount_of_dedotated_wam))[::-1]
             print(sorted_mov[0:10])
+            st.write(movies.iloc[sorted_mov[0:10]][['title', 'genres']])
 
 
 if __name__ == "__main__":
