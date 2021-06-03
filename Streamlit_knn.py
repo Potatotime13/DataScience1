@@ -29,6 +29,7 @@ def task1():
     st.write('K nearest neighbor centered cosine distance')
     user_number = st.sidebar.selectbox("User ID", (10, 12))
     k_users = st.sidebar.selectbox("K nearest", (15, 20))
+    list_len = st.sidebar.selectbox("Recommendations", (10, 40))
 
     with st.beta_expander("display code"):
         with st.echo('below'):
@@ -51,8 +52,8 @@ def task1():
                 recommended_amount_of_dedotated_wam += mov
             recommended_amount_of_dedotated_wam *= df_rating_raw[user_number].isnull().values
             sorted_mov = list(np.argsort(recommended_amount_of_dedotated_wam))[::-1]
-            print(sorted_mov[0:10])
-            output = movies.iloc[sorted_mov[0:10]][['title', 'genres']]
+            print(sorted_mov[0:list_len])
+            output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
 
     fig = go.Figure(data=[go.Table(
         header=dict(values=list(output.columns),
