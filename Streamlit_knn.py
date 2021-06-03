@@ -25,7 +25,11 @@ def task1():
     movies = pd.read_csv('movies.csv')
     ratings = pd.read_csv('ratings.csv')
     tags = pd.read_csv('tags.csv')
-    st.write('Task 1')
+    st.write('K nearest neighbor centered cosine distance')
+    user = st.sidebar.selectbox(
+        "",
+        (10, 12)
+    )
     with st.beta_expander("display code"):
         with st.echo('below'):
             # rating table
