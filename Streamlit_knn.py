@@ -3,6 +3,7 @@ import streamlit as st
 # working with sample data.
 import numpy as np
 import pandas as pd
+import plotly.graph_objects as go
 
 
 def main():
@@ -53,7 +54,16 @@ def task1():
             print(sorted_mov[0:10])
             output = movies.iloc[sorted_mov[0:10]][['title', 'genres']]
 
-    st.dataframe(output)
+    fig = go.Figure(data=[go.Table(
+        header=dict(values=list(output.columns),
+                    fill_color='paleturquoise',
+                    align='left'),
+        cells=dict(values=[output.title, output.genres],
+                   fill_color='lavender',
+                   align='left'))
+    ])
+    st.plotly_chart(fig)
+    #st.dataframe(output)
 
 
 if __name__ == "__main__":
