@@ -26,10 +26,9 @@ def task1():
     ratings = pd.read_csv('ratings.csv')
     tags = pd.read_csv('tags.csv')
     st.write('K nearest neighbor centered cosine distance')
-    user = st.sidebar.selectbox(
-        "",
-        (10, 12)
-    )
+    user_number = st.sidebar.selectbox("User ID", (10, 12))
+    k_users = st.sidebar.selectbox("K nearest", (15, 20))
+
     with st.beta_expander("display code"):
         with st.echo('below'):
             # rating table
@@ -44,8 +43,6 @@ def task1():
             user_corr = df_rating.cov() / (user_std.values.reshape((-1, 1)) @ user_std.values.reshape((1, -1)))
             user_corr = user_corr.fillna(0)
 
-            user_number = 10
-            k_users = 15
             sorted_index = list(np.argsort(user_corr[user_number]))[::-1]
             recommended_amount_of_dedotated_wam = np.zeros(len(df_rating))
             for k in range(1, k_users+1):
