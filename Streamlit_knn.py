@@ -16,7 +16,7 @@ def main():
         "",
         ("MovieLens", "Books")
     )
-    if c_task == "1.1 Clustering":
+    if c_task == "MovieLens":
         task1()
 
 
