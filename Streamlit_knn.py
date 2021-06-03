@@ -62,7 +62,7 @@ def task1():
                    fill_color='black',
                    align='left'))
     ])
-    st.plotly_chart(fig)
+    st.write(fig)
     #st.dataframe(output)
 
 
