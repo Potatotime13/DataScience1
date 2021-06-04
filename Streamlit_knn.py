@@ -69,7 +69,16 @@ def task1():
     info = ['ein Film', 'noch ein Film', 'aller guten dinge sind drei']
     #fig.show()
     st.write('Deine Top auswahl')
-    st.image(url[0], caption=info[0], width=200)
+
+    col1, col2, col3 = st.beta_columns(3)
+
+    col1.header(info[0])
+    col1.image(url[0])
+    col2.header(info[1])
+    col2.image(url[1])
+    col3.header(info[2])
+    col3.image(url[2])
+
     st.image(url[1], caption=info[1], width=200)
     st.image(url[2], caption=info[2], width=200)
 
