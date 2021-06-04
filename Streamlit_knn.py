@@ -65,7 +65,6 @@ def task1():
     ])
     fig.update_layout(
         autosize=True,
-        use_container_width=True,
         showlegend=False,
     )
     #fig.show()
