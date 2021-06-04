@@ -11,14 +11,14 @@ def main():
     with st.sidebar:
         st.write('Dataset selection')
 
-    #task1()
+    task1()
 
     c_task = st.sidebar.selectbox(
         "",
         ("MovieLens", "Books")
     )
-    if c_task == "MovieLens":
-        task1()
+    #if c_task == "MovieLens":
+    #    task1()
 
 
 def task1():
@@ -65,11 +65,12 @@ def task1():
     ])
     fig.update_layout(
         autosize=True,
+        use_container_width=True,
         showlegend=False,
     )
-    #fig.show()
-    table_style = {'width': '100%', 'border': '1px solid black'}
-    st.table(output, style=table_style)
+    fig.show()
+    #table_style = {'width': '100%', 'border': '1px solid black'}
+    #st.table(output, style=table_style)
 
 
 if __name__ == "__main__":
