@@ -63,8 +63,8 @@ def task1():
         showlegend=False,
     )
 
-    url = [['https://images-na.ssl-images-amazon.com/images/G/01/ape/sf/desktop/DAsf-1.50.996289c._V428881811_.js']]
-    info = [['ein Film']]
+    url = ['https://images-na.ssl-images-amazon.com/images/G/01/ape/sf/desktop/DAsf-1.50.996289c._V428881811_.js']
+    info = ['ein Film']
     #fig.show()
     st.image(url[0], caption=info[0], width=300)
     st.table(output)
