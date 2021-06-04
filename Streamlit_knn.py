@@ -52,22 +52,21 @@ def task1():
                 recommended_amount_of_dedotated_wam += mov
             recommended_amount_of_dedotated_wam *= df_rating_raw[user_number].isnull().values
             sorted_mov = list(np.argsort(recommended_amount_of_dedotated_wam))[::-1]
-            print(sorted_mov[0:list_len])
             output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
 
     fig = go.Figure(data=[go.Table(
-        header=dict(values=list(output.columns),
-                    fill_color='paleturquoise',
-                    align='left'),
-        cells=dict(values=[output.title, output.genres],
-                   fill_color='black',
-                   align='left'))
+        header=dict(values=list(output.columns)),
+        cells=dict(values=[output.title, output.genres]))
     ])
     fig.update_layout(
         autosize=True,
         showlegend=False,
     )
+
+    url = [['https://images-na.ssl-images-amazon.com/images/G/01/ape/sf/desktop/DAsf-1.50.996289c._V428881811_.js']]
+    info = [['ein Film']]
     #fig.show()
+    st.image(url[0], caption=info[0], width=300)
     st.table(output)
 
 
