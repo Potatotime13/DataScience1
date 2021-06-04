@@ -90,7 +90,7 @@ def task1():
         colors.append('rgba(255,185,15,' + str(percentage ** 3) + ')')
 
     layout = go.Layout(
-        margin=dict(r=1, l=1, b=1, t=1))
+        margin=dict(r=1, l=1, b=20, t=20))
 
     fig = go.Figure(data=[go.Table(
         header=dict(values=rec_header,
