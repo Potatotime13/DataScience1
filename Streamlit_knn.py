@@ -63,10 +63,17 @@ def task1():
         showlegend=False,
     )
 
-    url = ['https://m.media-amazon.com/images/M/MV5BNGVkOTlhOTktNjZiNS00NDg3LWIxMDAtZTY5Y2E0YjllN2IxXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_UX182_CR0,0,182,268_AL_.jpg']
-    info = ['ein Film']
+    url = ['https://m.media-amazon.com/images/M/MV5BNGVkOTlhOTktNjZiNS00NDg3LWIxMDAtZTY5Y2E0YjllN2IxXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_UX182_CR0,0,182,268_AL_.jpg',
+           'https://m.media-amazon.com/images/M/MV5BYzg0NGM2NjAtNmIxOC00MDJmLTg5ZmYtYzM0MTE4NWE2NzlhXkEyXkFqcGdeQXVyMTA4NjE0NjEy._V1_UX182_CR0,0,182,268_AL_.jpg',
+           'https://m.media-amazon.com/images/M/MV5BNGVjNWI4ZGUtNzE0MS00YTJmLWE0ZDctN2ZiYTk2YmI3NTYyXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_UX182_CR0,0,182,268_AL_.jpg']
+    info = ['ein Film', 'noch ein Film', 'aller guten dinge sind drei']
     #fig.show()
-    st.image(url[0], caption=info[0], width=300)
+    st.write('Deine Top auswahl')
+    st.image(url[0], caption=info[0], width=200)
+    st.image(url[1], caption=info[1], width=200)
+    st.image(url[2], caption=info[2], width=200)
+
+    st.write('Alle Empfehlungen für dich:')
     st.table(output)
 
 
