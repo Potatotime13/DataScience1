@@ -23,11 +23,27 @@ def main():
         task1()
 
 
+def movie_url(ids):
+    tmdb = TMDb()
+    tmdb.api_key = '52f358adec9f89bb2d9a47fceda64fdc'
+    tmdb.language = 'en'
+    tmdb.debug = True
+    movie_api = Movie()
+    urls = []
+    info = []
+    for m_id in ids:
+        urls.append(movie_api.details(m_id).poster_path)
+        info.append(movie_api.details(m_id).title)
+
+    return urls
+
+
 def task1():
     # read movie lens
     movies = pd.read_csv('movies.csv')
     ratings = pd.read_csv('ratings.csv')
     tags = pd.read_csv('tags.csv')
+    links = pd.read_csv('links.csv')
     st.write('K nearest neighbor centered cosine distance')
     user_number = st.sidebar.selectbox("User ID", (10, 12, 52, 53))
     k_users = st.sidebar.selectbox("K nearest", (15, 20))
@@ -65,19 +81,9 @@ def task1():
         showlegend=False,
     )
 
-    tmdb = TMDb()
-    tmdb.api_key = '52f358adec9f89bb2d9a47fceda64fdc'
-    tmdb.language = 'en'
-    tmdb.debug = True
-    movie_api = Movie()
-    m = movie_api.details(343611)
-    print(m.poster_path)
+    # fig.show()
 
-    url = [m.poster_path,
-           'https://m.media-amazon.com/images/M/MV5BYzg0NGM2NjAtNmIxOC00MDJmLTg5ZmYtYzM0MTE4NWE2NzlhXkEyXkFqcGdeQXVyMTA4NjE0NjEy._V1_UX182_CR0,0,182,268_AL_.jpg',
-           'https://m.media-amazon.com/images/M/MV5BNGVjNWI4ZGUtNzE0MS00YTJmLWE0ZDctN2ZiYTk2YmI3NTYyXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_UX182_CR0,0,182,268_AL_.jpg']
-    info = ['ein Film', 'noch ein Film', 'noch einer']
-    #fig.show()
+    url, info = movie_url(links.iloc[sorted_mov[0:3]][['tmdbId']])
 
     st.write('Deine Top auswahl')
 
@@ -86,9 +92,9 @@ def task1():
     col1.header(info[0])
     col1.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[0])
     col2.header(info[1])
-    col2.image(url[1])
+    col2.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[1])
     col3.header(info[2])
-    col3.image(url[2])
+    col3.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[2])
 
     st.write('Alle Empfehlungen für dich:')
     st.table(output)
