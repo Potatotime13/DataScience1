@@ -90,18 +90,18 @@ def task1():
         colors.append('rgba(255,185,15,' + str(percentage ** 3) + ')')
 
     layout = go.Layout(
-        width=1000,
-        height=1000,
-        margin=dict(r=20, l=10, b=10, t=10))
+        width=700,
+        height=400,
+        margin=dict(r=1, l=1, b=1, t=1))
 
     fig = go.Figure(data=[go.Table(
         header=dict(values=rec_header,
                     fill_color=['black', 'black', 'black'],
-                    align='center', font=dict(color='white', size=16)
+                    align='center', font=dict(color='white', size=26)
                     ),
         cells=dict(values=[out2, output.title, output.genres],
                    fill_color=[np.array(colors), 'rgb(39,64,139)', 'rgb(39,64,139)'],
-                   align='center', font=dict(color='white', size=12)
+                   align='center', font=dict(color='white', size=16)
                    ))
     ], layout=layout)
 
