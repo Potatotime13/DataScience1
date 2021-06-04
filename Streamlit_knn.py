@@ -68,7 +68,8 @@ def task1():
         showlegend=False,
     )
     #fig.show()
-    st.dataframe(output)
+    table_style = {'width': '100%', 'border': '1px solid black'}
+    st.dataframe(output, style=table_style)
 
 
 if __name__ == "__main__":
