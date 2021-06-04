@@ -9,7 +9,7 @@ from tmdbv3api import Movie
 
 
 def main():
-    st.title('KNN')
+    st.title('Data Science: Recommender Systems')
     with st.sidebar:
         st.write('Dataset selection')
 
@@ -50,6 +50,9 @@ def task1():
     k_users = st.sidebar.selectbox("K nearest", (15, 20))
     list_len = st.sidebar.selectbox("Recommendations", (10, 40))
 
+    # split the genres per movie
+    movies["genres"] = movies["genres"].str.split('|')
+
     # rating table
     df_rating = ratings.pivot(index="movieId", columns="userId", values="rating")
     df_rating_raw = df_rating
@@ -63,25 +66,41 @@ def task1():
     user_corr = user_corr.fillna(0)
 
     sorted_index = list(np.argsort(user_corr[user_number]))[::-1]
-    recommended_amount_of_dedotated_wam = np.zeros(len(df_rating))
+    recommended = np.zeros(len(df_rating))
+
     for k in range(1, k_users+1):
         mov = user_corr[user_number][sorted_index[k]] * df_rating[sorted_index[k]].values
-        recommended_amount_of_dedotated_wam += mov
-    recommended_amount_of_dedotated_wam *= df_rating_raw[user_number].isnull().values
-    sorted_mov = list(np.argsort(recommended_amount_of_dedotated_wam))[::-1]
+        recommended += mov / sum(user_corr.iloc[sorted_index[1:k_users + 1]][[user_number]].values)[0]
+
+    rec = recommended.copy()
+    unseen = df_rating_raw[user_number].isnull().values
+    recommended *= unseen
+    sorted_mov = list(np.argsort(recommended))[::-1]
     output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
 
+    recommended += abs(rec.min())
+    recommended *= (rec.max() + abs(rec.min())) ** -1
+
+    out2 = recommended[sorted_mov[0:list_len]]
+
+    rec_header = list(output.columns)
+    rec_header.insert(0, 'predict')
+    colors = []
+    for percentage in out2:
+        colors.append('rgba(255,185,15,' + str(percentage ** 3) + ')')
+
     fig = go.Figure(data=[go.Table(
-        header=dict(values=list(output.columns)),
-        cells=dict(values=[output.title, output.genres]))
+        header=dict(values=rec_header,
+                    fill_color=['black', 'black', 'black'],
+                    align='center', font=dict(color='white', size=16)
+                    ),
+        cells=dict(values=[out2, output.title, output.genres],
+                   fill_color=[np.array(colors), 'rgb(39,64,139)', 'rgb(39,64,139)'],
+                   align='center', font=dict(color='white', size=12)
+                   ))
     ])
-    fig.update_layout(
-        autosize=True,
-        showlegend=False,
-    )
 
-    fig.show()
-
+    # get movie info / covers
     url, info = movie_url(links.iloc[sorted_mov[0:3]][['tmdbId']].values)
 
     st.write('Deine Top auswahl')
