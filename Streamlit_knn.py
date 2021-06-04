@@ -89,13 +89,14 @@ def task1():
     st.write('Deine Top auswahl')
 
     col1, col2, col3 = st.beta_columns(3)
+    col4, col5, col6 = st.beta_columns(3)
 
     col1.header(info[0])
-    col1.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[0])
+    col4.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[0])
     col2.header(info[1])
-    col2.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[1])
+    col5.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[1])
     col3.header(info[2])
-    col3.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[2])
+    col6.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[2])
 
     st.write('Alle Empfehlungen für dich:')
     st.table(output)
