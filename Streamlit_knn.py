@@ -27,7 +27,7 @@ def task1():
     ratings = pd.read_csv('ratings.csv')
     tags = pd.read_csv('tags.csv')
     st.write('K nearest neighbor centered cosine distance')
-    user_number = st.sidebar.selectbox("User ID", (10, 12))
+    user_number = st.sidebar.selectbox("User ID", (10, 12, 52, 53))
     k_users = st.sidebar.selectbox("K nearest", (15, 20))
     list_len = st.sidebar.selectbox("Recommendations", (10, 40))
 
