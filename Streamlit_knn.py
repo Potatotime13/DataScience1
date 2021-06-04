@@ -63,6 +63,11 @@ def task1():
                    fill_color='black',
                    align='left'))
     ])
+    fig.update_layout(
+        autosize=False,
+        height=1200,
+        showlegend=False,
+    )
     st.write(fig)
     #st.dataframe(output)
 
