@@ -98,7 +98,7 @@ def task1():
                    fill_color=[np.array(colors), 'rgb(39,64,139)', 'rgb(39,64,139)'],
                    align='center', font=dict(color='white', size=12)
                    ))
-    ])
+    ], layout=dict(width=1000))
 
     # get movie info / covers
     url, info = movie_url(links.iloc[sorted_mov[0:3]][['tmdbId']].values)

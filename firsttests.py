@@ -83,6 +83,6 @@ fig = go.Figure(data=[go.Table(
                fill_color=[np.array(colors), 'rgb(39,64,139)', 'rgb(39,64,139)'],
                align='center', font=dict(color='white', size=12)
                ))
-])
+], layout=dict(width=700))
 
 fig.show()
