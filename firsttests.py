@@ -74,6 +74,11 @@ colors = []
 for percentage in out2:
     colors.append('rgba(255,185,15,' + str(percentage ** 3) + ')')
 
+layout = go.Layout(
+        width=1000,
+        height=1000,
+        margin=dict(r=20, l=10, b=10, t=10))
+
 fig = go.Figure(data=[go.Table(
     header=dict(values=rec_header,
                 fill_color=['black', 'black', 'black'],
@@ -83,6 +88,6 @@ fig = go.Figure(data=[go.Table(
                fill_color=[np.array(colors), 'rgb(39,64,139)', 'rgb(39,64,139)'],
                align='center', font=dict(color='white', size=12)
                ))
-], layout=dict(width=700))
+], layout=layout)
 
 fig.show()
