@@ -32,10 +32,11 @@ def movie_url(ids):
     urls = []
     info = []
     for m_id in ids:
-        urls.append(movie_api.details(m_id).poster_path)
-        info.append(movie_api.details(m_id).title)
+        m = movie_api.details(int(m_id[0]))
+        urls.append(m.poster_path)
+        info.append(m.title)
 
-    return urls
+    return urls, info
 
 
 def task1():
@@ -83,7 +84,7 @@ def task1():
 
     # fig.show()
 
-    url, info = movie_url(links.iloc[sorted_mov[0:3]][['tmdbId']])
+    url, info = movie_url(links.iloc[sorted_mov[0:3]][['tmdbId']].values)
 
     st.write('Deine Top auswahl')
 
