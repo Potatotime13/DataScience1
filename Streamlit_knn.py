@@ -116,7 +116,8 @@ def task1():
     col6.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[2])
 
     st.write('Alle Empfehlungen für dich:')
-    st.table(output)
+    st.write(fig)
+    #st.table(output)
 
 
 def task2():
