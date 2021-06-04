@@ -13,8 +13,6 @@ def main():
     with st.sidebar:
         st.write('Dataset selection')
 
-    task1()
-
     c_task = st.sidebar.selectbox(
         "",
         ("MovieLens", "MovieLens-Tech", "Books")
