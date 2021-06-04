@@ -64,12 +64,12 @@ def task1():
                    align='left'))
     ])
     fig.update_layout(
-        autosize=False,
-        height=1200,
+        autosize=True,
+        overflowY='auto',
         showlegend=False,
     )
-    st.write(fig)
-    #st.dataframe(output)
+    #fig.show()
+    st.dataframe(output)
 
 
 if __name__ == "__main__":
