@@ -4,6 +4,8 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+from tmdbv3api import TMDb
+from tmdbv3api import Movie
 
 
 def main():
@@ -63,17 +65,26 @@ def task1():
         showlegend=False,
     )
 
-    url = ['https://m.media-amazon.com/images/M/MV5BNGVkOTlhOTktNjZiNS00NDg3LWIxMDAtZTY5Y2E0YjllN2IxXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_UX182_CR0,0,182,268_AL_.jpg',
+    tmdb = TMDb()
+    tmdb.api_key = '52f358adec9f89bb2d9a47fceda64fdc'
+    tmdb.language = 'en'
+    tmdb.debug = True
+    movie_api = Movie()
+    m = movie_api.details(343611)
+    print(m.poster_path)
+
+    url = [m.poster_path,
            'https://m.media-amazon.com/images/M/MV5BYzg0NGM2NjAtNmIxOC00MDJmLTg5ZmYtYzM0MTE4NWE2NzlhXkEyXkFqcGdeQXVyMTA4NjE0NjEy._V1_UX182_CR0,0,182,268_AL_.jpg',
            'https://m.media-amazon.com/images/M/MV5BNGVjNWI4ZGUtNzE0MS00YTJmLWE0ZDctN2ZiYTk2YmI3NTYyXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_UX182_CR0,0,182,268_AL_.jpg']
     info = ['ein Film', 'noch ein Film', 'noch einer']
     #fig.show()
+
     st.write('Deine Top auswahl')
 
     col1, col2, col3 = st.beta_columns(3)
 
     col1.header(info[0])
-    col1.image(url[0])
+    col1.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[0])
     col2.header(info[1])
     col2.image(url[1])
     col3.header(info[2])
