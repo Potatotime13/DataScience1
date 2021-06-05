@@ -70,7 +70,6 @@ def task1():
 
     # index of nearest users
     sorted_index = list(np.argsort(user_corr[user_number]))[::-1]
-    # recommended = np.zeros(len(df_rating))
 
     # sum of their ratings weighted by the corr
     corr_k = user_corr.iloc[sorted_index[1:k_users+1]][[user_number]].values
@@ -80,12 +79,6 @@ def task1():
     seen_sim_len = mv_rated @ corr_k
     seen_sim_len = 1 / (seen_sim_len + (seen_sim_len == 0))
     recommended = w_sum_k * seen_sim_len
-
-    # old version
-    #for k in range(1, k_users+1):
-    #    mov = user_corr[user_number][sorted_index[k]] * df_rating[sorted_index[k]].values
-    #    recommended += mov / sum(user_corr.iloc[sorted_index[1:k_users + 1]][[user_number]].values)[0]
-
     rec = recommended.copy()
 
     # recommended movies
@@ -145,7 +138,6 @@ def task1():
 
     st.write('Alle Empfehlungen für dich:')
     st.write(fig)
-    #st.table(output)
 
 
 def task2():
