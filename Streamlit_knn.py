@@ -94,13 +94,13 @@ def task1():
 
     fig = go.Figure(data=[go.Table(
         header=dict(values=rec_header,
-                    line_color=['rgba(18, 16, 23, 1)', 'rgba(18, 16, 23, 1)', 'rgba(18, 16, 23, 1)'],
-                    fill_color=['rgba(18, 16, 23, 1)', 'rgba(18, 16, 23, 1)', 'rgba(18, 16, 23, 1)'],
+                    line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
+                    fill_color=['rgb(14, 17, 23)', 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
                     align='center', font=dict(color='white', size=18)
                     ),
         cells=dict(values=[out2, output.title, output.genres],
-                   line_color=['rgba(18, 16, 23, 1)', 'rgba(18, 16, 23, 1)', 'rgba(18, 16, 23, 1)'],
-                   fill_color=[np.array(colors), 'rgb(39,64,139)', 'rgb(39,64,139)'],
+                   line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
+                   fill_color=[np.array(colors), 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
                    align='center', font=dict(color='white', size=14)
                    ))
     ], layout=layout)
