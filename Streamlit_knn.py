@@ -93,8 +93,8 @@ def task1():
     output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
 
     # percent of rating of recommendation
-    #recommended += abs(rec.min())
-    #recommended *= (rec.max() + abs(rec.min())) ** -1
+    color_grade = recommended + abs(rec.min())
+    color_grade *= (rec.max() + abs(rec.min())) ** -1
 
     # display results
     out2 = recommended[sorted_mov[0:list_len]]
@@ -102,7 +102,7 @@ def task1():
     rec_header.insert(0, 'predict')
     colors = []
     for percentage in out2:
-        colors.append('rgba(255,185,15,' + str(percentage ** 3) + ')')
+        colors.append('rgba(255,185,15,' + str(color_grade.sort()) + ')')
 
     layout = go.Layout(
         margin=dict(r=1, l=1, b=20, t=20))
