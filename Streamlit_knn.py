@@ -74,11 +74,12 @@ def task1():
 
     # sum of their ratings weighted by the corr
     corr_k = user_corr.iloc[sorted_index[1:k_users+1]][[user_number]].values
-    ratings_k = df_rating[sorted_index[1:k_users+1]].values
+    ratings_k = df_rating.iloc[:, sorted_index[1:k_users+1]].values
     w_sum_k = ratings_k @ corr_k
     mv_rated = df_rating_raw.iloc[:, sorted_index[1:k_users + 1]].notnull().values
     seen_sim_len = mv_rated @ corr_k
-    recommended = w_sum_k # / (seen_sim_len + (seen_sim_len == 0))
+    seen_sim_len = 1 / (seen_sim_len + (seen_sim_len == 0))
+    recommended = w_sum_k * seen_sim_len
 
     # old version
     #for k in range(1, k_users+1):
