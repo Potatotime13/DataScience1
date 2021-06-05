@@ -103,8 +103,8 @@ def task1():
     rec_header = list(output.columns)
     rec_header.insert(0, 'predict')
     colors = []
-    for percentage in out2:
-        colors.append('rgba(255,185,15,' + str(color_grade) + ')')
+    for percentage in color_grade:
+        colors.append('rgba(255,185,15,' + str(percentage) + ')')
 
     layout = go.Layout(
         margin=dict(r=1, l=1, b=20, t=20))
