@@ -96,7 +96,10 @@ def task1():
 
     # percent of best rating
     color_grade = recommended + abs(rec.min())
-    color_grade *= (rec.max() + abs(rec.min())) ** -1
+    if rec.max() + abs(rec.min()) > 0:
+        color_grade *= (rec.max() + abs(rec.min())) ** -1
+    else:
+        color_grade *= 1
     color_grade.sort()
     color_grade = np.flip(color_grade)
 
