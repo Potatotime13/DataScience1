@@ -98,7 +98,7 @@ def task1():
                     fill_color=['rgb(14, 17, 23)', 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
                     align='center', font=dict(color='white', size=18)
                     ),
-        cells=dict(values=[out2, output.title, output.genres],
+        cells=dict(values=[np.round(out2, 2), output.title, output.genres],
                    line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
                    fill_color=[np.array(colors), 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
                    align='center', font=dict(color='white', size=14), height=30
