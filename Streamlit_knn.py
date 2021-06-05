@@ -46,6 +46,8 @@ def task1():
     tags = pd.read_csv('tags.csv')
     links = pd.read_csv('links.csv')
     st.write('K nearest neighbor centered cosine distance')
+
+    # get settings from sidebar
     user_number = st.sidebar.selectbox("User ID", (10, 12, 52, 53))
     k_users = st.sidebar.selectbox("K nearest", (15, 20))
     list_len = st.sidebar.selectbox("Recommendations", (10, 40))
@@ -57,7 +59,7 @@ def task1():
     df_rating = ratings.pivot(index="movieId", columns="userId", values="rating")
     df_rating_raw = df_rating
 
-    # centering
+    # centering by subtract mean
     df_rating = df_rating - df_rating.mean()
     df_rating = df_rating.fillna(0)
     user_std = (df_rating * df_rating).mean() ** 0.5
@@ -68,16 +70,15 @@ def task1():
 
     # index of nearest users
     sorted_index = list(np.argsort(user_corr[user_number]))[::-1]
-    recommended = np.zeros(len(df_rating))
+    # recommended = np.zeros(len(df_rating))
 
     # sum of their ratings weighted by the corr
-
     corr_k = user_corr.iloc[sorted_index[1:k_users+1]][[user_number]].values
     ratings_k = df_rating[sorted_index[1:k_users+1]].values
     w_sum_k = ratings_k @ corr_k
     mv_rated = df_rating_raw.iloc[:, sorted_index[1:k_users + 1]].notnull().values
     seen_sim_len = mv_rated @ corr_k
-    recommended = w_sum_k / (seen_sim_len + (seen_sim_len == 0))
+    recommended = w_sum_k # / (seen_sim_len + (seen_sim_len == 0))
 
     # old version
     #for k in range(1, k_users+1):
@@ -92,7 +93,7 @@ def task1():
     sorted_mov = list(np.argsort(recommended))[::-1]
     output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
 
-    # percent of rating of recommendation
+    # percent of best rating
     color_grade = recommended + abs(rec.min())
     color_grade *= (rec.max() + abs(rec.min())) ** -1
     color_grade.sort()
