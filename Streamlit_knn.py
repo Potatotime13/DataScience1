@@ -61,28 +61,43 @@ def task1():
     df_rating = df_rating - df_rating.mean()
     df_rating = df_rating.fillna(0)
     user_std = (df_rating * df_rating).mean() ** 0.5
+
     # calc cov matrix
     user_corr = df_rating.cov() / (user_std.values.reshape((-1, 1)) @ user_std.values.reshape((1, -1)))
     user_corr = user_corr.fillna(0)
 
+    # index of nearest users
     sorted_index = list(np.argsort(user_corr[user_number]))[::-1]
     recommended = np.zeros(len(df_rating))
 
-    for k in range(1, k_users+1):
-        mov = user_corr[user_number][sorted_index[k]] * df_rating[sorted_index[k]].values
-        recommended += mov / sum(user_corr.iloc[sorted_index[1:k_users + 1]][[user_number]].values)[0]
+    # sum of their ratings weighted by the corr
+
+    corr_k = user_corr.iloc[sorted_index[1:k_users+1]][[user_number]].values
+    ratings_k = df_rating[sorted_index[1:k_users+1]].values
+    w_sum_k = ratings_k @ corr_k
+    mv_rated = df_rating_raw.iloc[:, sorted_index[1:k_users + 1]].notnull().values
+    seen_sim_len = mv_rated @ (corr_k ** 2)
+    recommended = w_sum_k / (seen_sim_len + (seen_sim_len == 0)) ** 0.5
+
+    # old version
+    #for k in range(1, k_users+1):
+    #    mov = user_corr[user_number][sorted_index[k]] * df_rating[sorted_index[k]].values
+    #    recommended += mov / sum(user_corr.iloc[sorted_index[1:k_users + 1]][[user_number]].values)[0]
 
     rec = recommended.copy()
+
+    # recommended movies
     unseen = df_rating_raw[user_number].isnull().values
-    recommended *= unseen
+    recommended = recommended.T[0] * unseen
     sorted_mov = list(np.argsort(recommended))[::-1]
     output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
 
-    recommended += abs(rec.min())
-    recommended *= (rec.max() + abs(rec.min())) ** -1
+    # percent of rating of recommendation
+    #recommended += abs(rec.min())
+    #recommended *= (rec.max() + abs(rec.min())) ** -1
 
+    # display results
     out2 = recommended[sorted_mov[0:list_len]]
-
     rec_header = list(output.columns)
     rec_header.insert(0, 'predict')
     colors = []
