@@ -76,8 +76,8 @@ def task1():
     ratings_k = df_rating[sorted_index[1:k_users+1]].values
     w_sum_k = ratings_k @ corr_k
     mv_rated = df_rating_raw.iloc[:, sorted_index[1:k_users + 1]].notnull().values
-    seen_sim_len = mv_rated @ (corr_k ** 2)
-    recommended = w_sum_k / (seen_sim_len + (seen_sim_len == 0)) ** 0.5
+    seen_sim_len = mv_rated @ corr_k
+    recommended = w_sum_k / (seen_sim_len + (seen_sim_len == 0))
 
     # old version
     #for k in range(1, k_users+1):
