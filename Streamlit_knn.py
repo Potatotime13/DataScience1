@@ -93,6 +93,7 @@ def task1():
         margin=dict(r=1, l=1, b=20, t=20))
 
     fig = go.Figure(data=[go.Table(
+        columnwidth=[100, 300, 300],
         header=dict(values=rec_header,
                     line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
                     fill_color=['rgb(14, 17, 23)', 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
