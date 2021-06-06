@@ -209,6 +209,7 @@ def task2():
                     err = np.mean((recommended.T - test_mov.values)**2)
                     errors.append(err)
 
+    st.write("average error of a random test set containing 5000 data points:")
     st.write(sum(errors)/len(errors))
 
     fig = go.Figure(data=[go.Surface(z=user_corr)])
