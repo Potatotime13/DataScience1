@@ -168,7 +168,10 @@ def task2():
             df_rating_raw = df_rating
 
             # centering by subtract mean
-            df_rating = (df_rating - df_rating.mean()) / df_rating.var() ** 0.5
+            if normalization == 'centering + division by variance':
+                df_rating = (df_rating - df_rating.mean()) / df_rating.var() ** 0.5
+            elif normalization == 'centering':
+                df_rating = df_rating - df_rating.mean()
             df_rating = df_rating.fillna(0)
             user_std = (df_rating * df_rating).mean() ** 0.5
 
