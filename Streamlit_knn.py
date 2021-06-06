@@ -215,7 +215,7 @@ def task2():
     fig.update_traces(contours_z=dict(show=True, usecolormap=True,
                                       highlightcolor="limegreen", project_z=True))
     fig.update_layout(title='Correlation surface', autosize=True,
-                      width=700, height=700,
+                      width=800, height=700,
                       margin=dict(l=1, r=1, b=40, t=40)
                       )
 
