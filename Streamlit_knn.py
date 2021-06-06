@@ -214,10 +214,9 @@ def task2():
     fig = go.Figure(data=[go.Surface(z=user_corr)])
     fig.update_traces(contours_z=dict(show=True, usecolormap=True,
                                       highlightcolor="limegreen", project_z=True))
-    fig.update_layout(title='Mt Bruno Elevation', autosize=False,
-                      scene_camera_eye=dict(x=1.87, y=0.88, z=-0.64),
-                      width=500, height=500,
-                      margin=dict(l=65, r=50, b=65, t=90)
+    fig.update_layout(title='Correlation surface', autosize=True,
+                      scene_camera_eye=dict(x=300, y=300, z=1),
+                      margin=dict(l=1, r=1, b=40, t=40)
                       )
 
     st.write(fig)
