@@ -18,7 +18,7 @@ def main():
         ("MovieLens", "MovieLens-Tech", "Books")
     )
     if c_task == "MovieLens":
-        task2()
+        task1()
     if c_task == "MovieLens-Tech":
         task2()
 
