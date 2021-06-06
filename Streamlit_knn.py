@@ -18,7 +18,7 @@ def main():
         ("MovieLens", "MovieLens-Tech", "Books")
     )
     if c_task == "MovieLens":
-        task1()
+        task2()
     if c_task == "MovieLens-Tech":
         task2()
 
@@ -147,31 +147,62 @@ def task2():
     tags = pd.read_csv('tags.csv')
     links = pd.read_csv('links.csv')
     st.write('K nearest neighbor centered cosine distance')
-    user_number = 10
-    k_users = 10
-    list_len = 10
+
+    # get settings from sidebar
+    k_users = st.sidebar.selectbox("K nearest", (15, 20))
+    normalization = st.sidebar.selectbox("Normalization", ('centering', 'centering + division by variance'))
+
+    # exclude test set
+    ind_exc = np.random.permutation(len(ratings))[0:5000]
+    test_set = ratings.iloc[ind_exc]
+    ratings.drop(index=ind_exc, inplace=True)
+
     with st.beta_expander("display code"):
         with st.echo('below'):
+            # split the genres per movie
+            movies["genres"] = movies["genres"].str.split('|')
+
             # rating table
             df_rating = ratings.pivot(index="movieId", columns="userId", values="rating")
+            df_test_set = test_set.pivot(index="movieId", columns="userId", values="rating")
             df_rating_raw = df_rating
 
-            # centering
-            df_rating = df_rating - df_rating.mean()
+            # centering by subtract mean
+            df_rating = (df_rating - df_rating.mean()) / df_rating.var() ** 0.5
             df_rating = df_rating.fillna(0)
             user_std = (df_rating * df_rating).mean() ** 0.5
+
             # calc cov matrix
             user_corr = df_rating.cov() / (user_std.values.reshape((-1, 1)) @ user_std.values.reshape((1, -1)))
             user_corr = user_corr.fillna(0)
 
-            sorted_index = list(np.argsort(user_corr[user_number]))[::-1]
-            recommended_amount_of_dedotated_wam = np.zeros(len(df_rating))
-            for k in range(1, k_users+1):
-                mov = user_corr[user_number][sorted_index[k]] * df_rating[sorted_index[k]].values
-                recommended_amount_of_dedotated_wam += mov
-            recommended_amount_of_dedotated_wam *= df_rating_raw[user_number].isnull().values
-            sorted_mov = list(np.argsort(recommended_amount_of_dedotated_wam))[::-1]
-            output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
+            # calc errors
+            errors = []
+
+            for user_number, val in df_test_set.iteritems():
+                # index of nearest users
+                sorted_index = list(np.argsort(user_corr[user_number]))[::-1]
+
+                # test set movies
+                test_mov = val.dropna()
+                test_mov_id = list(test_mov.index)
+                train_mov_id = list(df_rating.index)
+                test_mov_id = list(set(test_mov_id) & set(train_mov_id))
+                test_mov = test_mov[test_mov_id]
+
+                # sum of their ratings weighted by the corr
+                if len(test_mov) > 0:
+                    corr_k = user_corr.iloc[sorted_index[1:k_users + 1]][[user_number]].values
+                    ratings_k = df_rating.loc[test_mov_id].iloc[:, sorted_index[1:k_users + 1]].values
+                    w_sum_k = ratings_k @ corr_k
+                    mv_rated = df_rating_raw.loc[test_mov_id].iloc[:, sorted_index[1:k_users + 1]].notnull().values
+                    seen_sim_len = mv_rated @ corr_k
+                    seen_sim_len = 1 / (seen_sim_len + (seen_sim_len == 0))
+                    recommended = w_sum_k * seen_sim_len * df_rating_raw[user_number].var() ** 0.5 + df_rating_raw[user_number].mean()
+                    err = np.mean((recommended.T - test_mov.values)**2)
+                    errors.append(err)
+
+    st.write(sum(errors)/len(errors))
 
 
 if __name__ == "__main__":
