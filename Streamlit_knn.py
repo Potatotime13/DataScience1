@@ -51,6 +51,7 @@ def task1():
     user_number = st.sidebar.selectbox("User ID", (10, 12, 52, 53))
     k_users = st.sidebar.selectbox("K nearest", (15, 20))
     list_len = st.sidebar.selectbox("Recommendations", (10, 40))
+    normalization = st.sidebar.selectbox("Normalization", ('centering', 'centering + division by variance'))
 
     # split the genres per movie
     movies["genres"] = movies["genres"].str.split('|')
@@ -59,8 +60,11 @@ def task1():
     df_rating = ratings.pivot(index="movieId", columns="userId", values="rating")
     df_rating_raw = df_rating
 
-    # centering by subtract mean
-    df_rating = df_rating - df_rating.mean()
+    # normalization procedure
+    if normalization == 'centering + division by variance':
+        df_rating = (df_rating - df_rating.mean()) / df_rating.var() ** 0.5
+    elif normalization == 'centering':
+        df_rating = df_rating - df_rating.mean()
     df_rating = df_rating.fillna(0)
     user_std = (df_rating * df_rating).mean() ** 0.5
 
@@ -167,7 +171,7 @@ def task2():
             df_test_set = test_set.pivot(index="movieId", columns="userId", values="rating")
             df_rating_raw = df_rating
 
-            # centering by subtract mean
+            # normalization procedure
             if normalization == 'centering + division by variance':
                 df_rating = (df_rating - df_rating.mean()) / df_rating.var() ** 0.5
             elif normalization == 'centering':
