@@ -218,7 +218,26 @@ def task2():
     error = (1/num_err) * sum(errors)
     st.write(error)
 
-    fig = go.Figure(data=[go.Surface(z=user_corr)])
+    sorted_index = pd.DataFrame(np.argsort(user_corr.values))
+    a = sorted_index.iloc[:, [608, 609]]
+
+    largest = []
+    for i in range(a.shape[0]):
+        largest.append(user_corr.iloc[a.iloc[i, 0], a.iloc[i, 1]])
+    top = a.iloc[(list(np.argsort(largest))[::-1])[0:20]].index
+
+    classes = [[] for i_1 in range(20)]
+
+    for i_2 in range(user_corr.shape[0]):
+        sims = user_corr.iloc[[i_2], top].values
+        j = list(np.argsort(sims))[::-1]
+        classes[j[0][0]].append(int(i_2))
+    final_index = []
+    for cl in classes:
+        final_index += cl
+    plot_surf = user_corr.iloc[final_index, final_index]
+
+    fig = go.Figure(data=[go.Surface(z=plot_surf)])
     fig.update_traces(contours_z=dict(show=True, usecolormap=True,
                                       highlightcolor="limegreen", project_z=True))
     fig.update_layout(title='Correlation surface', autosize=True,
