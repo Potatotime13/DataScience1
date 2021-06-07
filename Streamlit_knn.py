@@ -220,13 +220,13 @@ def task2():
 
     sorted_index = pd.DataFrame(np.argsort(user_corr.values))
     a = sorted_index.iloc[:, [608, 609]]
-
+    num_cla = 5
     largest = []
     for i in range(a.shape[0]):
         largest.append(user_corr.iloc[a.iloc[i, 0], a.iloc[i, 1]])
-    top = a.iloc[(list(np.argsort(largest))[::-1])[0:20]].index
+    top = a.iloc[(list(np.argsort(largest))[::-1])[0:num_cla]].index
 
-    classes = [[] for i_1 in range(20)]
+    classes = [[] for i_1 in range(num_cla)]
 
     for i_2 in range(user_corr.shape[0]):
         sims = user_corr.iloc[[i_2], top].values
