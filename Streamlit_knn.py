@@ -210,7 +210,8 @@ def task2():
                     errors.append(err)
 
     st.write("average error of a random test set containing 5000 data points:")
-    st.write(sum(errors) ** 0.5)
+    error = sum(errors) ** 0.5
+    st.write(error)
 
     fig = go.Figure(data=[go.Surface(z=user_corr)])
     fig.update_traces(contours_z=dict(show=True, usecolormap=True,
