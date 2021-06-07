@@ -207,7 +207,10 @@ def task2():
                     mv_rated = df_rating_raw.loc[test_mov_id].iloc[:, sorted_index[1:k_users + 1]].notnull().values
                     seen_sim_len = mv_rated @ corr_k
                     seen_sim_len = 1 / (seen_sim_len + (seen_sim_len == 0))
-                    recommended = w_sum_k * seen_sim_len * df_rating_raw[user_number].var() ** 0.5 + df_rating_raw[user_number].mean()
+                    if normalization == 'centering + division by variance':
+                        recommended = w_sum_k * seen_sim_len * df_rating_raw[user_number].var() ** 0.5 + df_rating_raw[user_number].mean()
+                    elif normalization == 'centering':
+                        recommended = w_sum_k * seen_sim_len + df_rating_raw[user_number].mean()
                     err = np.sum(np.abs(recommended.T - test_mov.values))
                     errors.append(err)
 
