@@ -206,11 +206,11 @@ def task2():
                     seen_sim_len = mv_rated @ corr_k
                     seen_sim_len = 1 / (seen_sim_len + (seen_sim_len == 0))
                     recommended = w_sum_k * seen_sim_len * df_rating_raw[user_number].var() ** 0.5 + df_rating_raw[user_number].mean()
-                    err = np.mean((recommended.T - test_mov.values)**2)
+                    err = (recommended.T - test_mov.values)**2 / df_test_set.shape[1]
                     errors.append(err)
 
     st.write("average error of a random test set containing 5000 data points:")
-    st.write(sum(errors)/len(errors))
+    st.write(sum(errors) ** 0.5)
 
     fig = go.Figure(data=[go.Surface(z=user_corr)])
     fig.update_traces(contours_z=dict(show=True, usecolormap=True,
