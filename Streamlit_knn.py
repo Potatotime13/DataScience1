@@ -237,7 +237,7 @@ def task2():
         final_index += cl
     plot_surf = user_corr.iloc[final_index, final_index]
 
-    fig = go.Figure(data=[go.Surface(z=plot_surf)])
+    fig = go.Figure(data=[go.Surface(z=user_corr)])
     fig.update_traces(contours_z=dict(show=True, usecolormap=True,
                                       highlightcolor="limegreen", project_z=True))
     fig.update_layout(title='Correlation surface', autosize=True,
