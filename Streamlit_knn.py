@@ -185,6 +185,7 @@ def task2():
 
             # calc errors
             errors = []
+            num_err = 0
 
             for user_number, val in df_test_set.iteritems():
                 # index of nearest users
@@ -196,6 +197,7 @@ def task2():
                 train_mov_id = list(df_rating.index)
                 test_mov_id = list(set(test_mov_id) & set(train_mov_id))
                 test_mov = test_mov[test_mov_id]
+                num_err += len(test_mov)
 
                 # sum of their ratings weighted by the corr
                 if len(test_mov) > 0:
@@ -206,11 +208,11 @@ def task2():
                     seen_sim_len = mv_rated @ corr_k
                     seen_sim_len = 1 / (seen_sim_len + (seen_sim_len == 0))
                     recommended = w_sum_k * seen_sim_len * df_rating_raw[user_number].var() ** 0.5 + df_rating_raw[user_number].mean()
-                    err = sum((recommended.T - test_mov.values)**2) / df_test_set.shape[1]
+                    err = np.sum(np.abs(recommended.T - test_mov.values))
                     errors.append(err)
 
     st.write("average error of a random test set containing 5000 data points:")
-    error = sum(errors) ** 0.5
+    error = (1/num_err) * sum(errors)
     st.write(error)
 
     fig = go.Figure(data=[go.Surface(z=user_corr)])
