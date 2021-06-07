@@ -220,7 +220,7 @@ def task2():
 
     sorted_index = pd.DataFrame(np.argsort(user_corr.values))
     a = sorted_index.iloc[:, [608, 609]]
-    num_cla = 5
+    num_cla = 30
     largest = []
     for i in range(a.shape[0]):
         largest.append(user_corr.iloc[a.iloc[i, 0], a.iloc[i, 1]])
