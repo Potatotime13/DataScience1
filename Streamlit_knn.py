@@ -83,8 +83,7 @@ def task1():
     user_number = 15
     k_users =  15
     list_len = 30
-    normalization = "centering"
-    distance_measure = "chebyshev"
+
     # calc cov matrix
     ### calc sim with given distance measure
     distances = []
@@ -123,6 +122,7 @@ def task1():
     sim_k = np.array(similarities)[sorted_index]
     dist_k = np.array(distances)[sorted_index]
     ratings_k = df_rating_raw.iloc[:, sorted_index].values
+    print(sim_k)
     # w_sum_k = rating_k * weighting vector (abhängig von sim!)
     mv_rated = df_rating_raw.iloc[:, sorted_index].notnull().values
     seen_sim_len = mv_rated @ sim_k
