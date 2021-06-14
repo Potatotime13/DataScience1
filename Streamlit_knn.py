@@ -61,11 +61,6 @@ def task1():
     # rating table
     df_rating = ratings.pivot(index="movieId", columns="userId", values="rating")
     df_rating_raw = df_rating
-    user_number = 15
-    k_users =  15
-    list_len = 30
-    normalization = "0-1 normalization"
-    distance_measure == "manhattan (city block)"
 
     # normalization procedure
     if normalization == 'centering + division by variance':
@@ -85,12 +80,13 @@ def task1():
         df_rating = df_rating.fillna(df_rating.mean())
         pass
 
-
+    print("53:",df_rating[53].std()) ####!!!!! std of 0
 
     # calc cov matrix
     ### calc sim with given distance measure
     distances = []
     similarities = []
+
     for x in range(df_rating.shape[1]):
         if distance_measure == "cosine":
             dist = cosine(df_rating.loc[:,user_number],df_rating.iloc[:,x])
@@ -120,12 +116,19 @@ def task1():
             distances.append(dist)
             similarities.append(1/(1+dist))
     # index of nearest users
-    sorted_index = list(np.argsort(similarities))[::-1][1:k_users + 1]
+    # replace nans with 0s, as nan != nan
+    similarities = similarities = [0 if x != x else x for x in similarities]
+    sorted_index = list(np.argsort(similarities))[::-1][0:k_users + 1]
     # get the k best similarities and distances
     sim_k = np.array(similarities)[sorted_index]
+    print("sims:",sim_k)
     dist_k = np.array(distances)[sorted_index]
-    ratings_k = df_rating_raw.iloc[:, sorted_index].values
-    print(sim_k)
+    ratings_k = df_rating_raw.iloc[:, sorted_index]
+    #print(ratings_k)
+#    print("raw",df_rating_raw[9][~np.isnan(df_rating_raw[9])])
+#    print(ratings_k[9])
+#    print("processed",ratings_k[9][~np.isnan(ratings_k[9])])
+    #print(sim_k)
     # w_sum_k = rating_k * weighting vector (abhängig von sim!)
     mv_rated = df_rating_raw.iloc[:, sorted_index].notnull().values
     seen_sim_len = mv_rated @ sim_k
