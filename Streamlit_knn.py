@@ -48,7 +48,7 @@ def task1():
     st.write('K nearest neighbor centered cosine distance')
 
     # get settings from sidebar
-    user_number = st.sidebar.selectbox("User ID", (10, 12, 52, 53))
+    user_number = st.sidebar.selectbox("User ID", (10, 12, 52, 153))
     k_users = st.sidebar.selectbox("K nearest", (15, 20))
     list_len = st.sidebar.selectbox("Recommendations", (10, 40))
     normalization = st.sidebar.selectbox("Normalization", ('centering', 'centering + division by variance'))
