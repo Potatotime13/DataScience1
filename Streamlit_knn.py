@@ -54,7 +54,7 @@ def task1():
     normalization = st.sidebar.selectbox("Normalization",
                                          ('centering', 'centering + division by variance', "0-1 normalizatoin", "None"))
     distance_measure = st.sidebar.selectbox("distance_measure",
-                                         ('cosine', 'correlation', "euclidean", "manhattan (city block)","hamming", "chebyshev"))
+                                         ("euclidean",'cosine',  "euclidean", "manhattan (city block)","hamming", "chebyshev"))
     # split the genres per movie
     movies["genres"] = movies["genres"].str.split('|')
     # rating table
@@ -78,11 +78,6 @@ def task1():
     elif normalization == "None":
         df_rating = df_rating.fillna(df_rating.mean())
         pass
-
-    # calc cov matrix
-    ### calc sim with given distance measure
-    distances = []
-    similarities = []
 
 
     if distance_measure == "cosine":
@@ -115,6 +110,8 @@ def task1():
             output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
 
     else:
+        distances = []
+        similarities = []
         for x in range(df_rating.shape[1]):
             if distance_measure == "euclidean":
                 dist = euclidean(df_rating.loc[:,user_number],df_rating.iloc[:,x])
@@ -135,29 +132,32 @@ def task1():
         # index of nearest users
         # replace nans with 0s, as nan != nan
         similarities = similarities = [0 if x != x else x for x in similarities]
-        sorted_index = list(np.argsort(similarities))[::-1][0:k_users + 1]
+        sorted_index = list(np.argsort(similarities))[::-1][1:k_users + 1]
         # get the k best similarities and distances
         sim_k = np.array(similarities)[sorted_index]
         print("sims:",sim_k)
         print("k_user:",sorted_index)
-        dist_k = np.array(distances)[sorted_index]
-        ratings_k = df_rating_raw.iloc[:, sorted_index]
+
         # w_sum_k = rating_k * weighting vector (abhängig von sim!)
         mv_rated = df_rating_raw.iloc[:, sorted_index]
-        sorted_mov = mv_rated.mean(axis=1).sort_values(ascending=False)
-        sorted_mov.fillna(0, inplace=True)
-        print(sorted_mov)
-        # recommended = w_sum_k * seen_sim_len
-        #recommended = seen_sim_len
-        rec = recommended.copy()
+        mv_rated = mv_rated[df_rating_raw[user_number].isnull()]
+        # weighting
+        predicted_ratings = mv_rated.mean(axis=1)#.sort_values()
+        predicted_ratings.fillna(0, inplace=True)
+        sorted_mov = list(np.argsort(predicted_ratings))[::-1]
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
+        print(output)
+        #pd.set_option('display.max_columns', None)
+        #pd.set_option('display.max_rows', None)
+
+        ## get movies seen by the user ##############################################################################
+        df_seen = df_rating_raw.loc[:, user_number].replace(0, np.nan)
+        df_seen = df_seen.dropna(how="all", axis=0)
+        # prints a sorted list of the users movies
+        #print("already seen:",df_seen.sort_values(ascending=True))
 
 
-        # recommended movies
-        unseen = df_rating_raw[user_number].isnull().values
-        recommended = recommended.T[0] * unseen
-        sorted_mov = list(np.argsort(recommended))[::-1]
-        output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
+
 
 
     color_grade = recommended + abs(rec.min())
