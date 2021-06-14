@@ -61,11 +61,11 @@ def task1():
     # rating table
     df_rating = ratings.pivot(index="movieId", columns="userId", values="rating")
     df_rating_raw = df_rating
-    user_number = 15
-    k_users =  15
-    list_len = 30
-    normalization = "0-1 normalization"
-    distance_measure == "manhattan (city block)"
+#    user_number = 15
+#    k_users =  15
+#    list_len = 30
+#    normalization = 'centering + division by variance'
+#    distance_measure == "euclidean"
 
     # normalization procedure
     if normalization == 'centering + division by variance':
@@ -84,8 +84,6 @@ def task1():
     elif normalization == "None":
         df_rating = df_rating.fillna(df_rating.mean())
         pass
-
-
 
     # calc cov matrix
     ### calc sim with given distance measure
@@ -126,6 +124,7 @@ def task1():
     dist_k = np.array(distances)[sorted_index]
     ratings_k = df_rating_raw.iloc[:, sorted_index].values
     print(sim_k)
+    print(sorted_index)
     # w_sum_k = rating_k * weighting vector (abhängig von sim!)
     mv_rated = df_rating_raw.iloc[:, sorted_index].notnull().values
     seen_sim_len = mv_rated @ sim_k
