@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from tmdbv3api import TMDb
 from tmdbv3api import Movie
-
+from scipy.spatial.distance import cosine, hamming, euclidean, chebyshev, cityblock
 
 def main():
     st.title('Data Science: Recommender Systems')
