@@ -38,7 +38,7 @@ def task1():
     user_number = 15
     k_users =  15
     list_len = 30
-    normalization = "centering"
+    normalization = "0-1 normalization"
     distance_measure = "chebyshev"
 ########
 
