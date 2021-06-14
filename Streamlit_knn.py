@@ -51,8 +51,10 @@ def task1():
     user_number = st.sidebar.selectbox("User ID", (10, 12, 52, 153))
     k_users = st.sidebar.selectbox("K nearest", (15, 20))
     list_len = st.sidebar.selectbox("Recommendations", (10, 40))
-    normalization = st.sidebar.selectbox("Normalization", ('centering', 'centering + division by variance'))
-
+    normalization = st.sidebar.selectbox("Normalization",
+                                         ('centering', 'centering + division by variance', "0-1 normalizatoin", "None"))
+    distance_measure = st.sidebar.selectbox("distance_measure",
+                                         ('cosine', 'correlation', "euclidean", "manhattan (city block)","hamming", "chebyshev"))
     # split the genres per movie
     movies["genres"] = movies["genres"].str.split('|')
 
@@ -63,27 +65,94 @@ def task1():
     # normalization procedure
     if normalization == 'centering + division by variance':
         df_rating = (df_rating - df_rating.mean()) / df_rating.var() ** 0.5
+        df_rating = df_rating.fillna(0)
+        user_std = (df_rating * df_rating).mean() ** 0.5
     elif normalization == 'centering':
         df_rating = df_rating - df_rating.mean()
-    df_rating = df_rating.fillna(0)
-    user_std = (df_rating * df_rating).mean() ** 0.5
+        df_rating = df_rating.fillna(0)
+        user_std = (df_rating * df_rating).mean() ** 0.5
+    ## changes
+    elif normalization == "0-1 normalization":
+        df_rating = (df_rating - df_rating.min()) / (df_rating.max() - df_rating.min())
+        df_rating = df_rating.fillna(df_rating.average())
+    ###
+    elif normalization == "None":
+        df_rating = df_rating.fillna(df_rating.average())
+        pass
 
+    user_number = 15
+    k_users =  15
+    list_len = 30
+    normalization = "centering"
+    distance_measure = "chebyshev"
     # calc cov matrix
-    user_corr = df_rating.cov() / (user_std.values.reshape((-1, 1)) @ user_std.values.reshape((1, -1)))
-    user_corr = user_corr.fillna(0)
-
+    ### calc sim with given distance measure
+    distances = []
+    similarities = []
+    for x in range(df_rating.shape[1]):
+        if distance_measure == "cosine":
+            dist = cosine(df_rating.loc[:,user_number],df_rating.iloc[:,x])
+            distances.append(dist)
+            similarities.append(1-dist)
+        elif distance_measure == "correlation":
+            # calc cov matrix
+            user_corr = df_rating.cov() / (user_std.values.reshape((-1, 1)) @ user_std.values.reshape((1, -1)))
+            #print(user_corr)
+            user_corr = user_corr.fillna(0)
+            similarities = user_corr
+            break
+        elif distance_measure == "euclidean":
+            dist = euclidean(df_rating.loc[:,user_number],df_rating.iloc[:,x])
+            distances.append(dist)
+            similarities.append(1/(1+dist))
+        elif distance_measure == "manhattan (city block)":
+            dist = cityblock(df_rating.loc[:,user_number],df_rating.iloc[:,x])
+            distances.append(dist)
+            similarities.append(1/(1+dist))
+        elif distance_measure == "hamming":
+            dist = hamming(df_rating.loc[:,user_number],df_rating.iloc[:,x])
+            distances.append(dist)
+            similarities.append(1-dist)
+        elif distance_measure == "chebyshev":
+            dist = chebyshev(df_rating.loc[:,user_number],df_rating.iloc[:,x])
+            distances.append(dist)
+            similarities.append(1/(1+dist))
     # index of nearest users
-    sorted_index = list(np.argsort(user_corr[user_number]))[::-1]
-
-    # sum of their ratings weighted by the corr
-    corr_k = user_corr.iloc[sorted_index[1:k_users+1]][[user_number]].values
-    ratings_k = df_rating.iloc[:, sorted_index[1:k_users+1]].values
-    w_sum_k = ratings_k @ corr_k
-    mv_rated = df_rating_raw.iloc[:, sorted_index[1:k_users + 1]].notnull().values
-    seen_sim_len = mv_rated @ corr_k
+    sorted_index = list(np.argsort(similarities))[::-1][1:k_users + 1]
+    # get the k best similarities and distances
+    sim_k = np.array(similarities)[sorted_index]
+    dist_k = np.array(distances)[sorted_index]
+    ratings_k = df_rating_raw.iloc[:, sorted_index].values
+    # w_sum_k = rating_k * weighting vector (abhängig von sim!)
+    mv_rated = df_rating_raw.iloc[:, sorted_index].notnull().values
+    seen_sim_len = mv_rated @ sim_k
     seen_sim_len = 1 / (seen_sim_len + (seen_sim_len == 0))
-    recommended = w_sum_k * seen_sim_len
+    # recommended = w_sum_k * seen_sim_len
+    recommended = seen_sim_len
     rec = recommended.copy()
+
+    # recommended movies
+    unseen = df_rating_raw[user_number].isnull().values
+    recommended = recommended.T[0] * unseen
+    sorted_mov = list(np.argsort(recommended))[::-1]
+    output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
+
+
+
+
+
+
+
+    if distance_measure == "correlation":
+        # sum of their ratings weighted by the corr
+        corr_k = user_corr.iloc[sorted_index[1:k_users+1]][[user_number]].values
+        ratings_k = df_rating.iloc[:, sorted_index[1:k_users+1]].values
+        w_sum_k = ratings_k @ corr_k
+        mv_rated = df_rating_raw.iloc[:, sorted_index[1:k_users + 1]].notnull().values
+        seen_sim_len = mv_rated @ corr_k
+        seen_sim_len = 1 / (seen_sim_len + (seen_sim_len == 0))
+        recommended = w_sum_k * seen_sim_len
+        rec = recommended.copy()
 
     # recommended movies
     unseen = df_rating_raw[user_number].isnull().values
