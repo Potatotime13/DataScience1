@@ -54,7 +54,7 @@ def task1():
     normalization = st.sidebar.selectbox("Normalization",
                                          ('centering + division by variance', 'centering', "0-1 normalizatoin", "None"))
     distance_measure = st.sidebar.selectbox("distance_measure",
-                                            ('cosine',  "euclidean", "manhattan (city block)","hamming", "chebyshev"))
+                                            ("euclidean",'cosine',  "euclidean", "manhattan (city block)","hamming", "chebyshev"))
     # split the genres per movie
     movies["genres"] = movies["genres"].str.split('|')
     # rating table
@@ -98,7 +98,9 @@ def task1():
         seen_sim_len = mv_rated @ corr_k
         seen_sim_len = 1 / (seen_sim_len + (seen_sim_len == 0))
         recommended = w_sum_k * seen_sim_len
+        print("recommended:",recommended.shape)
         rec = recommended.copy()
+        print("rec:",rec.shape)
 
         # recommended movies
         unseen = df_rating_raw[user_number].isnull().values
@@ -106,7 +108,8 @@ def task1():
         sorted_mov = list(np.argsort(recommended))[::-1]
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
         print(output)
-
+        print("recommended:",recommended.shape)
+        out2 = recommended[sorted_mov[0:list_len]]
     else:
         distances = []
         similarities = []
@@ -142,9 +145,9 @@ def task1():
         mv_rated = mv_rated[df_rating_raw[user_number].isnull()]
         # weighting
         predicted_ratings = mv_rated.mean(axis=1)#.sort_values()
+        predicted_ratings.fillna(0, inplace=True)
         recommended = predicted_ratings.copy()
         rec = recommended.copy()
-        predicted_ratings.fillna(0, inplace=True)
         sorted_mov = list(np.argsort(predicted_ratings))[::-1]
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
         print(output)
@@ -156,7 +159,7 @@ def task1():
         df_seen = df_seen.dropna(how="all", axis=0)
         # prints a sorted list of the users movies
         #print("already seen:",df_seen.sort_values(ascending=True))
-
+        out2 = predicted_ratings[0:list_len]
 
 
     color_grade = recommended + abs(rec.min())
@@ -166,9 +169,10 @@ def task1():
         color_grade *= 1
     np.array(color_grade).sort()
     color_grade = np.flip(color_grade)
-
+    print(color_grade)
     # display results
-    out2 = recommended[sorted_mov[0:list_len]]
+
+    print(out2)
     rec_header = list(output.columns)
     rec_header.insert(0, 'predict')
     colors = []
