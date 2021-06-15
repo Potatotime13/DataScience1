@@ -159,7 +159,7 @@ def task1():
         df_seen = df_seen.dropna(how="all", axis=0)
         # prints a sorted list of the users movies
         #print("already seen:",df_seen.sort_values(ascending=True))
-        out2 = predicted_ratings[0:list_len]
+        out2 = sorted_mov[0:list_len]
 
 
     color_grade = recommended + abs(rec.min())
