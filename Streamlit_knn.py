@@ -39,7 +39,7 @@ def movie_url(ids):
     return urls, info
 
 
-def create_valid(dataset, test_len):
+def create_valid(dataset, test_len=5000):
     ind_exc = np.random.permutation(len(dataset))[0:test_len]
     test_set = dataset.iloc[ind_exc]
     dataset.drop(index=ind_exc, inplace=True)
