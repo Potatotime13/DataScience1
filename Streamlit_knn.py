@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from tmdbv3api import TMDb
 from tmdbv3api import Movie
-from scipy.spatial.distance import cosine, hamming, euclidean, chebyshev, cityblock
+from scipy.spatial.distance import  hamming, euclidean, chebyshev, cityblock
 
 def main():
     st.title('Data Science: Recommender Systems')
@@ -48,13 +48,13 @@ def task1():
     st.write('K nearest neighbor centered cosine distance')
 
     # get settings from sidebar
-    user_number = st.sidebar.selectbox("User ID", (153, 10, 12, 69, 52, 153))
+    user_number = st.sidebar.selectbox("User ID", (10, 12, 69, 52, 153))
     k_users = st.sidebar.selectbox("K nearest", (15, 20))
     list_len = st.sidebar.selectbox("Recommendations", (10, 40))
     normalization = st.sidebar.selectbox("Normalization",
                                          ('centering + division by variance', 'centering', "0-1 normalizatoin", "None"))
     distance_measure = st.sidebar.selectbox("distance_measure",
-                                            ("euclidean",'cosine',  "euclidean", "manhattan (city block)","hamming", "chebyshev"))
+                                            ('cosine',  "euclidean", "manhattan (city block)","hamming", "chebyshev"))
     # split the genres per movie
     movies["genres"] = movies["genres"].str.split('|')
     # rating table
@@ -159,33 +159,33 @@ def task1():
 
 
 
-#    color_grade = recommended + abs(rec.min())
-#    if rec.max() + abs(rec.min()) > 0:
-#        color_grade *= (rec.max() + abs(rec.min())) ** -1
-#    else:
-#        color_grade *= 1
-#    np.array(color_grade).sort()
-#    color_grade = np.flip(color_grade)
+    color_grade = recommended + abs(rec.min())
+    if rec.max() + abs(rec.min()) > 0:
+        color_grade *= (rec.max() + abs(rec.min())) ** -1
+    else:
+        color_grade *= 1
+    np.array(color_grade).sort()
+    color_grade = np.flip(color_grade)
 
     # display results
-#    out2 = recommended[sorted_mov[0:list_len]]
-#    rec_header = list(output.columns)
-#    rec_header.insert(0, 'predict')
-#    colors = []
-#    for percentage in color_grade:
-#        colors.append('rgba(255,185,15,' + str(percentage ** 2) + ')')
+    out2 = recommended[sorted_mov[0:list_len]]
+    rec_header = list(output.columns)
+    rec_header.insert(0, 'predict')
+    colors = []
+    for percentage in color_grade:
+        colors.append('rgba(255,185,15,' + str(percentage ** 2) + ')')
 
     layout = go.Layout(
         margin=dict(r=1, l=1, b=20, t=20))
 
     fig = go.Figure(data=[go.Table(
         columnwidth=[100, 300, 300],
-        header=dict(values=output.columns,
+        header=dict(values=rec_header,
                     line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
                     #fill_color=['rgb(14, 17, 23)', 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
                     align='center', font=dict(color='white', size=20), height=50
                     ),
-        cells=dict(values=[np.round(output, 2), output.title, output.genres],
+        cells=dict(values=[np.round(out2, 2), output.title, output.genres],
                    line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
                    #fill_color=[np.array(colors), 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
                    align='center', font=dict(color='white', size=14), height=30
