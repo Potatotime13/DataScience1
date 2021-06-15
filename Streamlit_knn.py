@@ -64,8 +64,6 @@ def task1():
     links = pd.read_csv('links.csv')
     st.write('K nearest neighbor centered cosine distance')
 
-    train_dat, test_dat = create_valid(ratings, 5000)
-
     # get settings from sidebar
     user_number = st.sidebar.selectbox("User ID", (10, 12, 69, 52, 153))
     k_users = st.sidebar.selectbox("K nearest", (5, 15, 20))
