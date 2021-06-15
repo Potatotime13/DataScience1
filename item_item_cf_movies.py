@@ -34,14 +34,17 @@ def item_item_cf():
     print("loop starts!")
     for x in user_movies:
         if counter%1000 == 0: print(counter)
-        if x == x:
+        if x != x:
             # find the index of the k most similar movies within the correlation matrix 
             current_movie_id = str(movie_indices[counter])
             k_most_similar = np.argpartition(corr_movies[current_movie_id],-k_items)
             k_most_similar = k_most_similar[-k_items:]
             
             # predict based on the average of the user for the k movies
-            predictions.append(np.mean(df_rating_average[user_number].iloc[k_most_similar]))
+            if np.mean(df_rating_raw[user_number].iloc[k_most_similar]) != np.mean(df_rating_raw[user_number].iloc[k_most_similar]):
+                predictions.append(np.nan)
+            else:
+                predictions.append(np.nanmean(df_rating_raw[user_number].iloc[k_most_similar]))
             counter += 1
         
         # nan is not equal to itself, so if movie is not seen
