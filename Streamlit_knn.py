@@ -6,7 +6,8 @@ import pandas as pd
 import plotly.graph_objects as go
 from tmdbv3api import TMDb
 from tmdbv3api import Movie
-from scipy.spatial.distance import  hamming, euclidean, chebyshev, cityblock
+from scipy.spatial.distance import hamming, euclidean, chebyshev, cityblock
+
 
 def main():
     st.title('Data Science: Recommender Systems')
@@ -35,8 +36,24 @@ def movie_url(ids):
         m = movie_api.details(int(m_id[0]))
         urls.append(m.poster_path)
         info.append(m.title)
-
     return urls, info
+
+
+def create_valid(dataset, test_len):
+    ind_exc = np.random.permutation(len(dataset))[0:test_len]
+    test_set = dataset.iloc[ind_exc]
+    dataset.drop(index=ind_exc, inplace=True)
+    use_v = test_set['userId'].unique()
+    mov_v = test_set['movieId'].unique()
+    use_t = dataset['userId'].unique()
+    mov_t = dataset['movieId'].unique()
+    index_u = list(np.intersect1d(use_v, use_t))
+    index_m = list(np.intersect1d(mov_v, mov_t))
+    dataset = dataset.pivot(index="movieId", columns="userId", values="rating")
+    test_set = test_set.pivot(index="movieId", columns="userId", values="rating")
+    dataset = dataset[index_u]
+    test_set = test_set.loc[index_m][index_u]
+    return dataset, test_set
 
 
 def task1():
@@ -47,6 +64,8 @@ def task1():
     links = pd.read_csv('links.csv')
     st.write('K nearest neighbor centered cosine distance')
 
+    train_dat, test_dat = create_valid(ratings, 5000)
+
     # get settings from sidebar
     user_number = st.sidebar.selectbox("User ID", (10, 12, 69, 52, 153))
     k_users = st.sidebar.selectbox("K nearest", (5, 15, 20))
@@ -54,7 +73,8 @@ def task1():
     normalization = st.sidebar.selectbox("Normalization",
                                          ('centering + division by variance', 'centering', "0-1 normalizatoin", "None"))
     distance_measure = st.sidebar.selectbox("distance_measure",
-                                            ("euclidean",'cosine',  "euclidean", "manhattan (city block)","hamming", "chebyshev"))
+                                            ("euclidean", 'cosine', "euclidean", "manhattan (city block)", "hamming",
+                                             "chebyshev"))
     # split the genres per movie
     movies["genres"] = movies["genres"].str.split('|')
     # rating table
@@ -77,7 +97,6 @@ def task1():
         df_rating = df_rating.fillna(df_rating.mean())
         pass
 
-
     if distance_measure == "cosine":
 
         df_rating = df_rating.fillna(0)
@@ -98,9 +117,9 @@ def task1():
         seen_sim_len = mv_rated @ corr_k
         seen_sim_len = 1 / (seen_sim_len + (seen_sim_len == 0))
         recommended = w_sum_k * seen_sim_len
-        print("recommended:",recommended.shape)
+        print("recommended:", recommended.shape)
         rec = recommended.copy()
-        print("rec:",rec.shape)
+        print("rec:", rec.shape)
 
         # recommended movies
         unseen = df_rating_raw[user_number].isnull().values
@@ -108,59 +127,58 @@ def task1():
         sorted_mov = list(np.argsort(recommended))[::-1]
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
         print(output)
-        print("recommended:",recommended.shape)
+        print("recommended:", recommended.shape)
         out2 = recommended[sorted_mov[0:list_len]]
     else:
         distances = []
         similarities = []
         for x in range(df_rating.shape[1]):
             if distance_measure == "euclidean":
-                dist = euclidean(df_rating.loc[:,user_number],df_rating.iloc[:,x])
+                dist = euclidean(df_rating.loc[:, user_number], df_rating.iloc[:, x])
                 distances.append(dist)
-                similarities.append(1/(1+dist))
+                similarities.append(1 / (1 + dist))
             elif distance_measure == "manhattan (city block)":
-                dist = cityblock(df_rating.loc[:,user_number],df_rating.iloc[:,x])
+                dist = cityblock(df_rating.loc[:, user_number], df_rating.iloc[:, x])
                 distances.append(dist)
-                similarities.append(1/(1+dist))
+                similarities.append(1 / (1 + dist))
             elif distance_measure == "hamming":
-                dist = hamming(df_rating.loc[:,user_number],df_rating.iloc[:,x])
+                dist = hamming(df_rating.loc[:, user_number], df_rating.iloc[:, x])
                 distances.append(dist)
-                similarities.append(1-dist)
+                similarities.append(1 - dist)
             elif distance_measure == "chebyshev":
-                dist = chebyshev(df_rating.loc[:,user_number],df_rating.iloc[:,x])
+                dist = chebyshev(df_rating.loc[:, user_number], df_rating.iloc[:, x])
                 distances.append(dist)
-                similarities.append(1/(1+dist))
+                similarities.append(1 / (1 + dist))
         # index of nearest users
         # replace nans with 0s, as nan != nan
         similarities = similarities = [0 if x != x else x for x in similarities]
         sorted_index = list(np.argsort(similarities))[::-1][1:k_users + 1]
         # get the k best similarities and distances
         sim_k = np.array(similarities)[sorted_index]
-        print("sims:",sim_k)
-        print("k_user:",sorted_index)
+        print("sims:", sim_k)
+        print("k_user:", sorted_index)
 
         # w_sum_k = rating_k * weighting vector (abhängig von sim!)
         mv_rated = df_rating_raw.iloc[:, sorted_index]
 
         mv_rated = mv_rated[df_rating_raw[user_number].isnull()]
         # weighting
-        predicted_ratings = mv_rated.mean(axis=1)#.sort_values()
+        predicted_ratings = mv_rated.mean(axis=1)  # .sort_values()
         predicted_ratings.fillna(0, inplace=True)
         recommended = predicted_ratings.copy()
         rec = recommended.copy()
         sorted_mov = list(np.argsort(predicted_ratings))[::-1]
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
         print(output)
-        #pd.set_option('display.max_columns', None)
-        #pd.set_option('display.max_rows', None)
+        # pd.set_option('display.max_columns', None)
+        # pd.set_option('display.max_rows', None)
 
         ## get movies seen by the user ##############################################################################
         df_seen = df_rating_raw.loc[:, user_number].replace(0, np.nan)
         df_seen = df_seen.dropna(how="all", axis=0)
         # prints a sorted list of the users movies
-        #print("already seen:",df_seen.sort_values(ascending=True))
+        # print("already seen:",df_seen.sort_values(ascending=True))
         out2 = predicted_ratings.sort_values(ascending=False)[0:list_len]
-
 
     color_grade = recommended + abs(rec.min())
     if rec.max() + abs(rec.min()) > 0:
@@ -279,14 +297,15 @@ def task2():
                     seen_sim_len = mv_rated @ corr_k
                     seen_sim_len = 1 / (seen_sim_len + (seen_sim_len == 0))
                     if normalization == 'centering + division by variance':
-                        recommended = w_sum_k * seen_sim_len * df_rating_raw[user_number].var() ** 0.5 + df_rating_raw[user_number].mean()
+                        recommended = w_sum_k * seen_sim_len * df_rating_raw[user_number].var() ** 0.5 + df_rating_raw[
+                            user_number].mean()
                     elif normalization == 'centering':
                         recommended = w_sum_k * seen_sim_len + df_rating_raw[user_number].mean()
                     err = np.sum(np.abs(recommended.T - test_mov.values))
                     errors.append(err)
 
     st.write("average error of a random test set containing 5000 data points:")
-    error = (1/num_err) * sum(errors)
+    error = (1 / num_err) * sum(errors)
     st.write(error)
 
     sorted_index = pd.DataFrame(np.argsort(user_corr.values))
