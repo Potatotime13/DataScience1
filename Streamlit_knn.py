@@ -48,13 +48,13 @@ def task1():
     st.write('K nearest neighbor centered cosine distance')
 
     # get settings from sidebar
-    user_number = st.sidebar.selectbox("User ID", (10, 12, 69, 52, 153))
+    user_number = st.sidebar.selectbox("User ID", (153, 10, 12, 69, 52, 153))
     k_users = st.sidebar.selectbox("K nearest", (15, 20))
     list_len = st.sidebar.selectbox("Recommendations", (10, 40))
     normalization = st.sidebar.selectbox("Normalization",
                                          ('centering + division by variance', 'centering', "0-1 normalizatoin", "None"))
     distance_measure = st.sidebar.selectbox("distance_measure",
-                                            ('cosine',  "euclidean", "manhattan (city block)","hamming", "chebyshev"))
+                                            ("euclidean",'cosine',  "euclidean", "manhattan (city block)","hamming", "chebyshev"))
     # split the genres per movie
     movies["genres"] = movies["genres"].str.split('|')
     # rating table
@@ -65,11 +65,9 @@ def task1():
     if normalization == 'centering + division by variance':
         df_rating = (df_rating - df_rating.mean()) / df_rating.var() ** 0.5
         df_rating = df_rating.fillna(0)
-        user_std = (df_rating * df_rating).mean() ** 0.5
     elif normalization == 'centering':
         df_rating = df_rating - df_rating.mean()
         df_rating = df_rating.fillna(0)
-        user_std = (df_rating * df_rating).mean() ** 0.5
     ## changes
     elif normalization == "0-1 normalization":
         df_rating = (df_rating - df_rating.min()) / (df_rating.max() - df_rating.min())
@@ -107,6 +105,7 @@ def task1():
         recommended = recommended.T[0] * unseen
         sorted_mov = list(np.argsort(recommended))[::-1]
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
+        print(output)
 
     else:
         distances = []
@@ -139,9 +138,12 @@ def task1():
 
         # w_sum_k = rating_k * weighting vector (abhängig von sim!)
         mv_rated = df_rating_raw.iloc[:, sorted_index]
+
         mv_rated = mv_rated[df_rating_raw[user_number].isnull()]
         # weighting
         predicted_ratings = mv_rated.mean(axis=1)#.sort_values()
+        recommended = predicted_ratings.copy()
+        rec = recommended.copy()
         predicted_ratings.fillna(0, inplace=True)
         sorted_mov = list(np.argsort(predicted_ratings))[::-1]
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
@@ -157,37 +159,35 @@ def task1():
 
 
 
-
-
-    color_grade = recommended + abs(rec.min())
-    if rec.max() + abs(rec.min()) > 0:
-        color_grade *= (rec.max() + abs(rec.min())) ** -1
-    else:
-        color_grade *= 1
-    color_grade.sort()
-    color_grade = np.flip(color_grade)
+#    color_grade = recommended + abs(rec.min())
+#    if rec.max() + abs(rec.min()) > 0:
+#        color_grade *= (rec.max() + abs(rec.min())) ** -1
+#    else:
+#        color_grade *= 1
+#    np.array(color_grade).sort()
+#    color_grade = np.flip(color_grade)
 
     # display results
-    out2 = recommended[sorted_mov[0:list_len]]
-    rec_header = list(output.columns)
-    rec_header.insert(0, 'predict')
-    colors = []
-    for percentage in color_grade:
-        colors.append('rgba(255,185,15,' + str(percentage ** 2) + ')')
+#    out2 = recommended[sorted_mov[0:list_len]]
+#    rec_header = list(output.columns)
+#    rec_header.insert(0, 'predict')
+#    colors = []
+#    for percentage in color_grade:
+#        colors.append('rgba(255,185,15,' + str(percentage ** 2) + ')')
 
     layout = go.Layout(
         margin=dict(r=1, l=1, b=20, t=20))
 
     fig = go.Figure(data=[go.Table(
         columnwidth=[100, 300, 300],
-        header=dict(values=rec_header,
+        header=dict(values=output.columns,
                     line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
-                    fill_color=['rgb(14, 17, 23)', 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
+                    #fill_color=['rgb(14, 17, 23)', 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
                     align='center', font=dict(color='white', size=20), height=50
                     ),
-        cells=dict(values=[np.round(out2, 2), output.title, output.genres],
+        cells=dict(values=[np.round(output, 2), output.title, output.genres],
                    line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
-                   fill_color=[np.array(colors), 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
+                   #fill_color=[np.array(colors), 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
                    align='center', font=dict(color='white', size=14), height=30
                    ))
     ], layout=layout)
