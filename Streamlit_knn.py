@@ -299,7 +299,7 @@ def task2():
                             user_number].mean()
                     elif normalization == 'centering':
                         recommended = w_sum_k * seen_sim_len + df_rating_raw[user_number].mean()
-                    err = np.sum(np.abs(recommended.T - test_mov.values))
+                    err = np.sum((recommended.T - test_mov.values)**2)
                     errors.append(err)
 
     st.write("average error of a random test set containing 5000 data points:")
