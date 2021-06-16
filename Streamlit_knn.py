@@ -160,7 +160,7 @@ def test():
             pass
     print(predicted[5])
     print(actuals[5])
-test()
+#test()
 
 def get_favorite_movies(ratings, user_number):
     # get movies seen by the user
