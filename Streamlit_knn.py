@@ -38,6 +38,51 @@ def movie_url(ids):
         info.append(m.title)
     return urls, info
 
+def cosine(df_rating, user_number, k_users, df_rating_raw):
+
+    user_std = (df_rating * df_rating).mean() ** 0.5
+
+    # calc cov matrix
+    user_corr = df_rating.cov() / (user_std.values.reshape((-1, 1)) @ user_std.values.reshape((1, -1)))
+    user_corr = user_corr.fillna(0)
+
+    # index of nearest users
+    sorted_index = list(np.argsort(user_corr[user_number]))[::-1]
+
+    # sum of their ratings weighted by the corr
+    corr_k = user_corr.iloc[sorted_index[1:k_users + 1]][[user_number]].values
+    ratings_k = df_rating.iloc[:, sorted_index[1:k_users + 1]].values
+    w_sum_k = ratings_k @ corr_k
+    mv_rated = df_rating_raw.iloc[:, sorted_index[1:k_users + 1]].notnull().values
+    seen_sim_len = mv_rated @ corr_k
+    seen_sim_len = 1 / (seen_sim_len + (seen_sim_len == 0))
+    recommended = w_sum_k * seen_sim_len
+    unseen = df_rating_raw[user_number].isnull().values
+    recommended = recommended.T[0] * unseen
+    return recommended
+
+def similarity_calculation(df_rating, distance_measure, user_number):
+    distances = []
+    similarities = []
+    for x in range(df_rating.shape[1]):
+        if distance_measure == "euclidean":
+            dist = euclidean(df_rating.loc[:, user_number], df_rating.iloc[:, x])
+            distances.append(dist)
+            similarities.append(1 / (1 + dist))
+        elif distance_measure == "manhattan (city block)":
+            dist = cityblock(df_rating.loc[:, user_number], df_rating.iloc[:, x])
+            distances.append(dist)
+            similarities.append(1 / (1 + dist))
+        elif distance_measure == "hamming":
+            dist = hamming(df_rating.loc[:, user_number], df_rating.iloc[:, x])
+            distances.append(dist)
+            similarities.append(1 - dist)
+        elif distance_measure == "chebyshev":
+            dist = chebyshev(df_rating.loc[:, user_number], df_rating.iloc[:, x])
+            distances.append(dist)
+            similarities.append(1 / (1 + dist))
+        return similarities
+
 
 def create_valid(dataset, test_len=5000):
     ind_exc = np.random.permutation(len(dataset))[0:test_len]
@@ -55,6 +100,25 @@ def create_valid(dataset, test_len=5000):
     test_set = test_set.loc[index_m][index_u]
     return dataset, test_set
 
+def test():
+    movies = pd.read_csv('movies.csv')
+    ratings = pd.read_csv('ratings.csv')
+    tags = pd.read_csv('tags.csv')
+    links = pd.read_csv('links.csv')
+
+    train, test = create_valid(ratings)
+    c = 0
+    for x in test:
+        # check if any value for a user is in test set
+        if test[x].notna().values.any():
+            # perform estimation of data points
+            print(test[x].dropna())
+
+            c += 1
+            if c ==5: break
+        else:
+            pass
+test()
 
 def task1():
     # read movie lens
@@ -65,13 +129,13 @@ def task1():
     st.write('K nearest neighbor centered cosine distance')
 
     # get settings from sidebar
-    user_number = st.sidebar.selectbox("User ID", (10, 12, 69, 52, 153))
+    user_number = st.sidebar.selectbox("User ID", (69,10, 12, 69, 52, 153))
     k_users = st.sidebar.selectbox("K nearest", (5, 15, 20))
     list_len = st.sidebar.selectbox("Recommendations", (10, 40))
     normalization = st.sidebar.selectbox("Normalization",
-                                         ('centering + division by variance', 'centering', "0-1 normalizatoin", "None"))
+                                         ('centering + division by variance', 'centering', "None"))
     distance_measure = st.sidebar.selectbox("distance_measure",
-                                            ("euclidean", 'cosine', "euclidean", "manhattan (city block)", "hamming",
+                                            ('cosine', "euclidean", "manhattan (city block)", "hamming",
                                              "chebyshev"))
     # split the genres per movie
     movies["genres"] = movies["genres"].str.split('|')
@@ -86,75 +150,32 @@ def task1():
     elif normalization == 'centering':
         df_rating = df_rating - df_rating.mean()
         df_rating = df_rating.fillna(0)
-    ## changes
-    elif normalization == "0-1 normalization":
-        df_rating = (df_rating - df_rating.min()) / (df_rating.max() - df_rating.min())
-        df_rating = df_rating.fillna(df_rating.mean())
-    ###
     elif normalization == "None":
         df_rating = df_rating.fillna(df_rating.mean())
         pass
 
+
     if distance_measure == "cosine":
-
-        df_rating = df_rating.fillna(0)
-        user_std = (df_rating * df_rating).mean() ** 0.5
-
-        # calc cov matrix
-        user_corr = df_rating.cov() / (user_std.values.reshape((-1, 1)) @ user_std.values.reshape((1, -1)))
-        user_corr = user_corr.fillna(0)
-
-        # index of nearest users
-        sorted_index = list(np.argsort(user_corr[user_number]))[::-1]
-
-        # sum of their ratings weighted by the corr
-        corr_k = user_corr.iloc[sorted_index[1:k_users + 1]][[user_number]].values
-        ratings_k = df_rating.iloc[:, sorted_index[1:k_users + 1]].values
-        w_sum_k = ratings_k @ corr_k
-        mv_rated = df_rating_raw.iloc[:, sorted_index[1:k_users + 1]].notnull().values
-        seen_sim_len = mv_rated @ corr_k
-        seen_sim_len = 1 / (seen_sim_len + (seen_sim_len == 0))
-        recommended = w_sum_k * seen_sim_len
-        print("recommended:", recommended.shape)
+        recommended = cosine(df_rating, user_number, k_users, df_rating_raw)
         rec = recommended.copy()
-        print("rec:", rec.shape)
-
         # recommended movies
-        unseen = df_rating_raw[user_number].isnull().values
-        recommended = recommended.T[0] * unseen
+
+        print("recommended",recommended)
         sorted_mov = list(np.argsort(recommended))[::-1]
+        print("sorted_mov:",sorted_mov)
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
         print(output)
         print("recommended:", recommended.shape)
         out2 = recommended[sorted_mov[0:list_len]]
+
     else:
-        distances = []
-        similarities = []
-        for x in range(df_rating.shape[1]):
-            if distance_measure == "euclidean":
-                dist = euclidean(df_rating.loc[:, user_number], df_rating.iloc[:, x])
-                distances.append(dist)
-                similarities.append(1 / (1 + dist))
-            elif distance_measure == "manhattan (city block)":
-                dist = cityblock(df_rating.loc[:, user_number], df_rating.iloc[:, x])
-                distances.append(dist)
-                similarities.append(1 / (1 + dist))
-            elif distance_measure == "hamming":
-                dist = hamming(df_rating.loc[:, user_number], df_rating.iloc[:, x])
-                distances.append(dist)
-                similarities.append(1 - dist)
-            elif distance_measure == "chebyshev":
-                dist = chebyshev(df_rating.loc[:, user_number], df_rating.iloc[:, x])
-                distances.append(dist)
-                similarities.append(1 / (1 + dist))
+        similarities = similarity_calculation(df_rating, distance_measure, user_number)
         # index of nearest users
         # replace nans with 0s, as nan != nan
         similarities = similarities = [0 if x != x else x for x in similarities]
         sorted_index = list(np.argsort(similarities))[::-1][1:k_users + 1]
         # get the k best similarities and distances
         sim_k = np.array(similarities)[sorted_index]
-        print("sims:", sim_k)
-        print("k_user:", sorted_index)
 
         # w_sum_k = rating_k * weighting vector (abhängig von sim!)
         mv_rated = df_rating_raw.iloc[:, sorted_index]
@@ -185,10 +206,8 @@ def task1():
         color_grade *= 1
     np.array(color_grade).sort()
     color_grade = np.flip(color_grade)
-    print(color_grade)
     # display results
 
-    print(out2)
     rec_header = list(output.columns)
     rec_header.insert(0, 'predict')
     colors = []
@@ -229,6 +248,7 @@ def task1():
 
     st.write('Alle Empfehlungen für dich:')
     st.write(fig)
+
 
 
 def task2():
@@ -337,4 +357,5 @@ def task2():
 
 
 if __name__ == "__main__":
+
     main()
