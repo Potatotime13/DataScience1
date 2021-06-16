@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 from tmdbv3api import TMDb
 from tmdbv3api import Movie
 from scipy.spatial.distance import hamming, euclidean, chebyshev, cityblock
+import urllib.request
 
 
 def main():
@@ -526,20 +527,16 @@ def task3():
     col1, col2, col3 = st.beta_columns(3)
     col4, col5, col6 = st.beta_columns(3)
 
-    import urllib.request
-
-    url = "http://images.amazon.com/images/P/3453212150.01.M.jpg"
-
-    r = urllib.request.urlopen(url)
-    # with open("wind_turbine.jpg", "wb") as f:
-    #    f.write(r.read())
+    r1 = urllib.request.urlopen(info[0][0])
+    r2 = urllib.request.urlopen(info[1][0])
+    r3 = urllib.request.urlopen(info[2][0])
 
     col1.header(info[0][0])
-    col4.image(r.read())
+    col4.image(r1.read())
     col2.header(info[1][0])
-    col5.image(url[1][0])
+    col5.image(r2.read())
     col3.header(info[2][0])
-    col6.image(url[2][0])
+    col6.image(r3.read())
 
     st.write('Alle Empfehlungen für dich:')
     st.write(fig)
