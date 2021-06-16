@@ -1,3 +1,6 @@
+import base64
+from pathlib import Path
+
 import streamlit as st
 # To make things easier later, we're also importing numpy and pandas for
 # working with sample data.
@@ -525,6 +528,18 @@ def task3():
 
     col1, col2, col3 = st.beta_columns(3)
     col4, col5, col6 = st.beta_columns(3)
+
+    def img_to_bytes(img_path):
+        img_bytes = Path('http://images.amazon.com/images/P/3453212150.01.MZZZZZZZ.jpg').read_bytes()
+        encoded = base64.b64encode(img_bytes).decode()
+        return encoded
+
+    header_html = "<img src='data:image/png;base64,{}' class='img-fluid'>".format(
+        img_to_bytes("header.png")
+    )
+    st.markdown(
+        header_html, unsafe_allow_html=True,
+    )
 
     col1.header(info[0][0])
     col4.image('http://images.amazon.com/images/P/3453212150.01.MZZZZZZZ.jpg')
