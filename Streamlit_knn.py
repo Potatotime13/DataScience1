@@ -527,7 +527,7 @@ def task3():
     col4, col5, col6 = st.beta_columns(3)
 
     col1.header(info[0][0])
-    col4.image('http://images.amazon.com/images/P/3453212150.01.MZZZZZZZ.jpg')
+    col4.image('http://images.amazon.com/images/P/3453212150.01.M.jpg')
     col2.header(info[1][0])
     col5.image(url[1][0])
     col3.header(info[2][0])
