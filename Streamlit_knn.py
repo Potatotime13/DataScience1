@@ -519,7 +519,7 @@ def task3():
     #    ], layout=layout)
 
     # get movie info / covers
-    url = books.iloc[sorted_bok[0:3]][['imageUrlM']].values  # TODO links aus books beziehen
+    url = books.iloc[sorted_bok[0:3]][['imageUrlM']].values
     info = books.iloc[sorted_bok[0:3]][['bookTitle']].values
     st.write('Deine Top auswahl')
 
@@ -527,11 +527,11 @@ def task3():
     col4, col5, col6 = st.beta_columns(3)
 
     col1.header(info[0][0])
-    col4.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[0][0])
+    col4.image(url[0][0])
     col2.header(info[1][0])
-    col5.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[1][0])
+    col5.image(url[1][0])
     col3.header(info[2][0])
-    col6.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[2][0])
+    col6.image(url[2][0])
 
     st.write('Alle Empfehlungen für dich:')
     st.write(fig)
