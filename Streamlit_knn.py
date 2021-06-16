@@ -22,6 +22,10 @@ def main():
         task1()
     if c_task == "MovieLens-Tech":
         task2()
+    if c_task == "Books":
+        task3()
+    if c_task == "Books-Tech":
+        task4()
 
 
 def movie_url(ids):
@@ -39,7 +43,7 @@ def movie_url(ids):
     return urls, info
 
 
-def cosine(df_rating, user_number, k_users, df_rating_raw):
+def cosine(df_rating, user_number, k_users, df_rating_raw, normalization):
     user_std = (df_rating * df_rating).mean() ** 0.5
 
     # calc cov matrix
@@ -57,6 +61,13 @@ def cosine(df_rating, user_number, k_users, df_rating_raw):
     seen_sim_len = mv_rated @ corr_k
     seen_sim_len = 1 / (seen_sim_len + (seen_sim_len == 0))
     recommended = w_sum_k * seen_sim_len
+    if normalization == 'centering + division by variance':
+        recommended = w_sum_k * seen_sim_len * df_rating_raw[user_number].var() ** 0.5 + df_rating_raw[
+            user_number].mean()
+    elif normalization == 'centering':
+        recommended = w_sum_k * seen_sim_len + df_rating_raw[user_number].mean()
+    elif normalization == 'None':
+        recommended = w_sum_k * seen_sim_len
     unseen = df_rating_raw[user_number].isnull().values
     recommended = recommended.T[0] * unseen
     return recommended
@@ -146,7 +157,8 @@ def test():
     actuals = []
     for x in test:
         # check if any value for a user is in test set
-        if c % 100 ==0: print(c)
+        if c % 100 ==0:
+            print(c)
         if test[x].notna().values.any():
             similarities = similarity_calculation_distances(df_rating, distance_measure, x)
             predicted_ratings = predicted_ratings_distances(df_rating_mean, similarities, user_number, k_users,
@@ -178,7 +190,7 @@ def task1():
     ratings = pd.read_csv('ratings.csv')
     tags = pd.read_csv('tags.csv')
     links = pd.read_csv('links.csv')
-    st.write('K nearest neighbor centered cosine distance')
+    st.write('K nearest neighbor')
 
     # get settings from sidebar
     user_number = st.sidebar.selectbox("User ID", (10, 12, 69, 52, 153))
@@ -207,7 +219,7 @@ def task1():
         pass
 
     if distance_measure == "cosine":
-        recommended = cosine(df_rating, user_number, k_users, df_rating_raw)
+        recommended = cosine(df_rating, user_number, k_users, df_rating_raw, normalization)
         print("max rating:", max(recommended))
         rec = recommended.copy()
         # recommended movies
@@ -296,7 +308,7 @@ def task2():
     ratings = pd.read_csv('ratings.csv')
     tags = pd.read_csv('tags.csv')
     links = pd.read_csv('links.csv')
-    st.write('K nearest neighbor centered cosine distance')
+    st.write('K nearest neighbor - performance measures')
 
     # get settings from sidebar
     k_users = st.sidebar.selectbox("K nearest", (15, 20))
@@ -397,6 +409,135 @@ def task2():
                       )
 
     st.write(fig)
+
+
+def get_book_data(filter_tr):
+    # load data from csv
+    books = pd.read_csv('BX-Books.csv', sep=';', error_bad_lines=False, encoding="latin-1")
+    books.columns = ['ISBN', 'bookTitle', 'bookAuthor', 'yearOfPublication', 'publisher', 'imageUrlS', 'imageUrlM',
+                     'imageUrlL']
+
+    users = pd.read_csv('BX-Users.csv', sep=';', error_bad_lines=False, encoding="latin-1")
+    users.columns = ["userId", "location", "age"]
+
+    ratings = pd.read_csv('BX-Book-Ratings.csv', sep=';', error_bad_lines=False, encoding="latin-1")
+    ratings.columns = ["userId", "ISBN", "rating"]
+
+    ratings = ratings.drop_duplicates(subset=["userId", "ISBN"])
+
+    # filter dataset for users / items with much interaction
+    u = ratings.userId.value_counts()
+    b = ratings.ISBN.value_counts()
+
+    ratings = ratings[ratings.userId.isin(u.index[u.gt(filter_tr)])]
+    ratings = ratings[ratings.ISBN.isin(b.index[b.gt(filter_tr)])]
+
+    # create table
+    df_ratings = ratings.pivot(index="ISBN", columns="userId", values="rating")
+
+    return df_ratings, ratings, books, users
+
+
+def task3():
+    st.write('K nearest neighbor')
+
+    # load data
+    df_rating, ratings, books, users = get_book_data(200)
+
+    # get settings from sidebar
+    user_number = st.sidebar.selectbox("User ID", (10, 12, 69, 52, 153))
+    k_users = st.sidebar.selectbox("K nearest", (5, 15, 20))
+    list_len = st.sidebar.selectbox("Recommendations", (10, 40))
+    normalization = st.sidebar.selectbox("Normalization",
+                                         ('centering + division by variance', 'centering', "None"))
+    distance_measure = st.sidebar.selectbox("distance_measure",
+                                            ("euclidean", 'cosine', "euclidean", "manhattan (city block)", "hamming",
+                                             "chebyshev"))
+
+    df_rating_raw = df_rating
+
+    # normalization procedure
+    if normalization == 'centering + division by variance':
+        df_rating = (df_rating - df_rating.mean()) / df_rating.var() ** 0.5
+        df_rating = df_rating.fillna(0)
+    elif normalization == 'centering':
+        df_rating = df_rating - df_rating.mean()
+        df_rating = df_rating.fillna(0)
+    elif normalization == "None":
+        df_rating = df_rating.fillna(df_rating.mean())
+
+    if distance_measure == "cosine":
+        recommended = cosine(df_rating, user_number, k_users, df_rating_raw)  # TODO method anpassen
+        rec = recommended.copy()  # recommended books
+
+        sorted_bok = list(np.argsort(recommended))[::-1]
+        output = books.iloc[sorted_bok[0:list_len]][['title', 'genres']]  # TODO title genre ?
+        print(output)
+        out2 = recommended[sorted_bok[0:list_len]]
+
+    else:
+        similarities = similarity_calculation_distances(df_rating, distance_measure, user_number)
+        df_rating_mean = df_rating_raw.fillna(df_rating_raw.mean())
+        predicted_ratings = predicted_ratings_distances(df_rating_mean, similarities, user_number, k_users,
+                                                        df_rating_raw)
+        recommended = predicted_ratings.copy()
+        rec = recommended.copy()
+        sorted_mov = list(np.argsort(predicted_ratings))[::-1]
+        output = books.iloc[sorted_mov[0:list_len]][['title', 'genres']]  # TODO title genre ?
+
+    # display results
+    rec_header = list(output.columns)
+    rec_header.insert(0, 'predict')
+    #    colors = []
+    #    for percentage in color_grade:
+    #        colors.append('rgba(255,185,15,' + str(percentage ** 2) + ')')
+
+    layout = go.Layout(
+        margin=dict(r=1, l=1, b=20, t=20))
+
+    fig = go.Figure(data=[go.Table(
+        columnwidth=[100, 300, 300],
+        header=dict(values=rec_header,
+                    line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
+                    fill_color=['rgb(14, 17, 23)', 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
+                    align='center', font=dict(color='white', size=20), height=50
+                    ),
+        cells=dict(values=[np.round(out2, 2), output.title, output.genres],
+                   line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
+                   fill_color=['rgb(14, 17, 23)', 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
+                   align='center', font=dict(color='white', size=14), height=30
+                   ))
+    ], layout=layout)
+
+    #        cells=dict(values=[np.round(out2, 2), output.title, output.genres],
+    #                   line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
+    #                   fill_color=[np.array(colors), 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
+    #                   align='center', font=dict(color='white', size=14), height=30
+    #                   ))
+    #    ], layout=layout)
+
+    # get movie info / covers
+    url, info = movie_url(links.iloc[sorted_mov[0:3]][['tmdbId']].values)
+
+    st.write('Deine Top auswahl')
+
+    col1, col2, col3 = st.beta_columns(3)
+    col4, col5, col6 = st.beta_columns(3)
+
+    col1.header(info[0])
+    col4.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[0])
+    col2.header(info[1])
+    col5.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[1])
+    col3.header(info[2])
+    col6.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[2])
+
+    st.write('Alle Empfehlungen für dich:')
+    st.write(fig)
+
+
+def task4():
+    st.write('K nearest neighbor - performance measures')
+    df_ratings, ratings, books, users = get_book_data(200)
 
 
 if __name__ == "__main__":

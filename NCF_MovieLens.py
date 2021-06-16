@@ -4,36 +4,6 @@ import numpy as np
 from lenskit.algorithms.tf import BiasedMF as bmf
 
 
-class ResnetIdentityBlock(tf.keras.Model):
-    def __init__(self, kernel_size, filters):
-        super(ResnetIdentityBlock, self).__init__(name='')
-        filters1, filters2, filters3 = filters
-
-        self.conv2a = tf.keras.layers.Conv2D(filters1, (1, 1))
-        self.bn2a = tf.keras.layers.BatchNormalization()
-
-        self.conv2b = tf.keras.layers.Conv2D(filters2, kernel_size, padding='same')
-        self.bn2b = tf.keras.layers.BatchNormalization()
-
-        self.conv2c = tf.keras.layers.Conv2D(filters3, (1, 1))
-        self.bn2c = tf.keras.layers.BatchNormalization()
-
-    def call(self, input_tensor, training=False):
-        x = self.conv2a(input_tensor)
-        x = self.bn2a(x, training=training)
-        x = tf.nn.relu(x)
-
-        x = self.conv2b(x)
-        x = self.bn2b(x, training=training)
-        x = tf.nn.relu(x)
-
-        x = self.conv2c(x)
-        x = self.bn2c(x, training=training)
-
-        x += input_tensor
-        return tf.nn.relu(x)
-
-
 class NeuMF(tf.keras.Model):
     def __init__(self, dims):
         super(NeuMF, self).__init__(name='')
@@ -47,15 +17,15 @@ class NeuMF(tf.keras.Model):
         # MLP path
         self.act_mlp = tf.keras.layers.ReLU()
         self.dens_mlp1 = tf.keras.layers.Dense(dims[0], activation=tf.nn.relu)
-        self.dens_mlp2 = tf.keras.layers.Dense(dims[0], activation=tf.nn.relu)
         self.dens_mlp2 = tf.keras.layers.Dense(dims[1], activation=tf.nn.relu)
+        self.dens_mlp2 = tf.keras.layers.Dense(dims[2], activation=tf.nn.relu)
 
         # GMF Path
-        self.dens_gmf1 = tf.keras.layers.Dense(dims[2], activation=tf.nn.tanh)
+        self.dens_gmf1 = tf.keras.layers.Dense(dims[3], activation=tf.nn.tanh)
 
         # output path
         self.con_out = tf.keras.layers.Concatenate(axis=1)
-        self.dens_out = tf.keras.layers.Dense(dims[3])
+        self.dens_out = tf.keras.layers.Dense(dims[4])
 
     def call(self, inputs, training=False):
         input_user = inputs[0]
@@ -142,9 +112,9 @@ def main():
     user_input_v = user_data[indices_v[:, 0]].T
     item_input_v = item_data[indices_v[:, 1]].T
 
-    neu = NeuMF([20, 20, 20, 1])
+    neu = NeuMF([20, 20, 20, 20, 1])  # MLP x 3 , GMF x 1, Out x 1
     neu.compile(loss='mse', metrics=['mse'])
-    neu.fit([user_input, item_input], values, batch_size=32, epochs=10)
+    neu.fit([user_input, item_input], values, batch_size=64, epochs=20)
 
     neu.evaluate([user_input_v, item_input_v], values_v, batch_size=1)
 
