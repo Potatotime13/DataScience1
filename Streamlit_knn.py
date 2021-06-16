@@ -527,9 +527,9 @@ def task3():
     col1, col2, col3 = st.beta_columns(3)
     col4, col5, col6 = st.beta_columns(3)
 
-    r1 = urllib.request.urlopen(info[0][0])
-    r2 = urllib.request.urlopen(info[1][0])
-    r3 = urllib.request.urlopen(info[2][0])
+    r1 = urllib.request.urlopen(url[0][0])
+    r2 = urllib.request.urlopen(url[1][0])
+    r3 = urllib.request.urlopen(url[2][0])
 
     col1.header(info[0][0])
     col4.image(r1.read())
