@@ -38,8 +38,8 @@ def movie_url(ids):
         info.append(m.title)
     return urls, info
 
-def cosine(df_rating, user_number, k_users, df_rating_raw):
 
+def cosine(df_rating, user_number, k_users, df_rating_raw):
     user_std = (df_rating * df_rating).mean() ** 0.5
 
     # calc cov matrix
@@ -60,6 +60,7 @@ def cosine(df_rating, user_number, k_users, df_rating_raw):
     unseen = df_rating_raw[user_number].isnull().values
     recommended = recommended.T[0] * unseen
     return recommended
+
 
 def similarity_calculation_distances(df_rating, distance_measure, user_number):
     distances = []
@@ -93,6 +94,7 @@ def predicted_ratings_distances(df_rating, similarities, user_number, k_users, d
     predicted_ratings.fillna(0, inplace=True)
     return predicted_ratings
 
+
 def create_valid(dataset, test_len=5000):
     ind_exc = np.random.permutation(len(dataset))[0:test_len]
     test_set = dataset.iloc[ind_exc]
@@ -109,6 +111,7 @@ def create_valid(dataset, test_len=5000):
     test_set = test_set.loc[index_m][index_u]
     return dataset, test_set
 
+
 def test():
     movies = pd.read_csv('movies.csv')
     ratings = pd.read_csv('ratings.csv')
@@ -124,19 +127,21 @@ def test():
             print(test[x].dropna())
 
             c += 1
-            if c ==5: break
+            if c == 5:
+                break
         else:
             pass
-#test()
 
 
 def get_favorite_movies(ratings, user_number):
-    ## get movies seen by the user ##
-    df_seen = df_rating_raw.loc[:, user_number].replace(0, np.nan)
+    # get movies seen by the user
+    df_seen = ratings.loc[:, user_number].replace(0, np.nan)
     df_seen = df_seen.dropna(how="all", axis=0)
     # prints a sorted list of the users movies
+    # TODO ausgabe wird später als streamlit list erfolgen
     # print("already seen:",df_seen.sort_values(ascending=True))
     return df_seen
+
 
 def task1():
     # read movie lens
@@ -172,7 +177,6 @@ def task1():
         df_rating = df_rating.fillna(df_rating.mean())
         pass
 
-
     if distance_measure == "cosine":
         recommended = cosine(df_rating, user_number, k_users, df_rating_raw)
         print("max rating:", max(recommended))
@@ -187,7 +191,8 @@ def task1():
     else:
         similarities = similarity_calculation_distances(df_rating, distance_measure, user_number)
         df_rating_mean = df_rating_raw.fillna(df_rating_raw.mean())
-        predicted_ratings = predicted_ratings_distances(df_rating_mean, similarities, user_number, k_users, df_rating_raw)
+        predicted_ratings = predicted_ratings_distances(df_rating_mean, similarities, user_number, k_users,
+                                                        df_rating_raw)
         recommended = predicted_ratings.copy()
         rec = recommended.copy()
         sorted_mov = list(np.argsort(predicted_ratings))[::-1]
@@ -197,20 +202,21 @@ def task1():
 
         out2 = predicted_ratings.sort_values(ascending=False)[0:list_len]
 
-#    color_grade = recommended + abs(rec.min())
-#    if rec.max() + abs(rec.min()) > 0:
-#        color_grade *= (rec.max() + abs(rec.min())) ** -1
-#    else:
-#        color_grade *= 1
-#    np.array(color_grade).sort()
-#    color_grade = np.flip(color_grade)
-    # display results
+    # TODO (lucas) farben für alle dist maße richtig anzeigen
+    #    color_grade = recommended + abs(rec.min())
+    #    if rec.max() + abs(rec.min()) > 0:
+    #        color_grade *= (rec.max() + abs(rec.min())) ** -1
+    #    else:
+    #        color_grade *= 1
+    #    np.array(color_grade).sort()
+    #    color_grade = np.flip(color_grade)
 
+    # display results
     rec_header = list(output.columns)
     rec_header.insert(0, 'predict')
-#    colors = []
-#    for percentage in color_grade:
-#        colors.append('rgba(255,185,15,' + str(percentage ** 2) + ')')
+    #    colors = []
+    #    for percentage in color_grade:
+    #        colors.append('rgba(255,185,15,' + str(percentage ** 2) + ')')
 
     layout = go.Layout(
         margin=dict(r=1, l=1, b=20, t=20))
@@ -229,12 +235,12 @@ def task1():
                    ))
     ], layout=layout)
 
-#        cells=dict(values=[np.round(out2, 2), output.title, output.genres],
-#                   line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
-#                   fill_color=[np.array(colors), 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
-#                   align='center', font=dict(color='white', size=14), height=30
-#                   ))
-#    ], layout=layout)
+    #        cells=dict(values=[np.round(out2, 2), output.title, output.genres],
+    #                   line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
+    #                   fill_color=[np.array(colors), 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
+    #                   align='center', font=dict(color='white', size=14), height=30
+    #                   ))
+    #    ], layout=layout)
 
     # get movie info / covers
     url, info = movie_url(links.iloc[sorted_mov[0:3]][['tmdbId']].values)
@@ -253,7 +259,6 @@ def task1():
 
     st.write('Alle Empfehlungen für dich:')
     st.write(fig)
-
 
 
 def task2():
@@ -297,6 +302,7 @@ def task2():
 
             # calc errors
             errors = []
+            y_pred = []
             num_err = 0
 
             for user_number, val in df_test_set.iteritems():
@@ -324,13 +330,16 @@ def task2():
                             user_number].mean()
                     elif normalization == 'centering':
                         recommended = w_sum_k * seen_sim_len + df_rating_raw[user_number].mean()
-                    err = np.sum((recommended.T - test_mov.values)**2)
+                    y_pred += list(recommended)
+                    # errror teil nur noch drin für die life page, fällt später weg
+                    err = np.sum((recommended.T - test_mov.values) ** 2)
                     errors.append(err)
 
     st.write("average error of a random test set containing 5000 data points:")
     error = (1 / num_err) * sum(errors)
     st.write(error)
 
+    # surface plot
     sorted_index = pd.DataFrame(np.argsort(user_corr.values))
     a = sorted_index.iloc[:, [608, 609]]
     num_cla = 25
@@ -362,5 +371,4 @@ def task2():
 
 
 if __name__ == "__main__":
-
     main()
