@@ -118,20 +118,49 @@ def test():
     tags = pd.read_csv('tags.csv')
     links = pd.read_csv('links.csv')
 
+    user_number = st.sidebar.selectbox("User ID", (10, 12, 69, 52, 153))
+    k_users = st.sidebar.selectbox("K nearest", (23, 15, 20))
+    list_len = st.sidebar.selectbox("Recommendations", (10, 40))
+    normalization = st.sidebar.selectbox("Normalization",
+                                         ('centering + division by variance', 'centering', "None"))
+    distance_measure = st.sidebar.selectbox("distance_measure",
+                                            ("euclidean", 'cosine', "euclidean", "manhattan (city block)", "hamming",
+                                             "chebyshev"))
     train, test = create_valid(ratings)
+
+    df_rating = ratings.pivot(index="movieId", columns="userId", values="rating")
+    df_rating_raw = df_rating
+    df_rating_mean = df_rating_raw.fillna(df_rating_raw.mean())
+    if normalization == 'centering + division by variance':
+        df_rating = (df_rating - df_rating.mean()) / df_rating.var() ** 0.5
+        df_rating = df_rating.fillna(0)
+    elif normalization == 'centering':
+        df_rating = df_rating - df_rating.mean()
+        df_rating = df_rating.fillna(0)
+    elif normalization == "None":
+        df_rating = df_rating.fillna(df_rating.mean())
+        pass
+
     c = 0
+    predicted = []
+    actuals = []
     for x in test:
         # check if any value for a user is in test set
+        if c % 100 ==0: print(c)
         if test[x].notna().values.any():
-            # perform estimation of data points
-            print(test[x].dropna())
-
+            similarities = similarity_calculation_distances(df_rating, distance_measure, x)
+            predicted_ratings = predicted_ratings_distances(df_rating_mean, similarities, user_number, k_users,
+                                                            df_rating_raw)
+            index = list(test[x].dropna().index)
+            actual = test[x].dropna()
+            predicted.append(predicted_ratings[predicted_ratings.index.isin(index)])
+            actuals.append(actual)
             c += 1
-            if c == 5:
-                break
         else:
             pass
-
+    print(predicted[5])
+    print(actuals[5])
+test()
 
 def get_favorite_movies(ratings, user_number):
     # get movies seen by the user
@@ -371,4 +400,5 @@ def task2():
 
 
 if __name__ == "__main__":
-    main()
+    #main()
+    pass
