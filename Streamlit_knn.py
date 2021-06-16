@@ -526,8 +526,16 @@ def task3():
     col1, col2, col3 = st.beta_columns(3)
     col4, col5, col6 = st.beta_columns(3)
 
+    import urllib.request
+
+    url = "http://images.amazon.com/images/P/3453212150.01.M.jpg"
+
+    r = urllib.request.urlopen(url)
+    # with open("wind_turbine.jpg", "wb") as f:
+    #    f.write(r.read())
+
     col1.header(info[0][0])
-    col4.image('http://images.amazon.com/images/P/3453212150.01.M.jpg')
+    col4.image(r.read())
     col2.header(info[1][0])
     col5.image(url[1][0])
     col3.header(info[2][0])
