@@ -411,6 +411,10 @@ def task2():
     st.write(fig)
 
 
+def cover_url(isbn):
+    pass
+
+
 def get_book_data(filter_tr):
     # load data from csv
     books = pd.read_csv('BX-Books.csv', sep=';', error_bad_lines=False, encoding="latin-1")
@@ -445,13 +449,13 @@ def task3():
     df_rating, ratings, books, users = get_book_data(200)
 
     # get settings from sidebar
-    user_number = st.sidebar.selectbox("User ID", (10, 12, 69, 52, 153))
+    user_number = st.sidebar.selectbox("User ID", (13082, 79186, 207782))
     k_users = st.sidebar.selectbox("K nearest", (5, 15, 20))
     list_len = st.sidebar.selectbox("Recommendations", (10, 40))
     normalization = st.sidebar.selectbox("Normalization",
                                          ('centering + division by variance', 'centering', "None"))
     distance_measure = st.sidebar.selectbox("distance_measure",
-                                            ("euclidean", 'cosine', "euclidean", "manhattan (city block)", "hamming",
+                                            ('cosine', "euclidean", "manhattan (city block)", "hamming",
                                              "chebyshev"))
 
     df_rating_raw = df_rating
@@ -467,12 +471,10 @@ def task3():
         df_rating = df_rating.fillna(df_rating.mean())
 
     if distance_measure == "cosine":
-        recommended = cosine(df_rating, user_number, k_users, df_rating_raw)  # TODO method anpassen
+        recommended = cosine(df_rating, user_number, k_users, df_rating_raw, normalization)
         rec = recommended.copy()  # recommended books
-
         sorted_bok = list(np.argsort(recommended))[::-1]
-        output = books.iloc[sorted_bok[0:list_len]][['title', 'genres']]  # TODO title genre ?
-        print(output)
+        output = books.iloc[sorted_bok[0:list_len]][['bookTitle', 'bookAuthor']]
         out2 = recommended[sorted_bok[0:list_len]]
 
     else:
@@ -482,8 +484,8 @@ def task3():
                                                         df_rating_raw)
         recommended = predicted_ratings.copy()
         rec = recommended.copy()
-        sorted_mov = list(np.argsort(predicted_ratings))[::-1]
-        output = books.iloc[sorted_mov[0:list_len]][['title', 'genres']]  # TODO title genre ?
+        sorted_bok = list(np.argsort(predicted_ratings))[::-1]
+        output = books.iloc[sorted_bok[0:list_len]][['bookTitle', 'bookAuthor']]
 
     # display results
     rec_header = list(output.columns)
@@ -502,7 +504,7 @@ def task3():
                     fill_color=['rgb(14, 17, 23)', 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
                     align='center', font=dict(color='white', size=20), height=50
                     ),
-        cells=dict(values=[np.round(out2, 2), output.title, output.genres],
+        cells=dict(values=[np.round(out2, 2), output.bookTitle, output.bookAuthor],
                    line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
                    fill_color=['rgb(14, 17, 23)', 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
                    align='center', font=dict(color='white', size=14), height=30
@@ -517,19 +519,19 @@ def task3():
     #    ], layout=layout)
 
     # get movie info / covers
-    url, info = movie_url(links.iloc[sorted_mov[0:3]][['tmdbId']].values)
-
+    url = books.iloc[sorted_bok[0:3]][['imageUrlM']].values  # TODO links aus books beziehen
+    info = books.iloc[sorted_bok[0:3]][['bookTitle']].values
     st.write('Deine Top auswahl')
 
     col1, col2, col3 = st.beta_columns(3)
     col4, col5, col6 = st.beta_columns(3)
 
-    col1.header(info[0])
-    col4.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[0])
-    col2.header(info[1])
-    col5.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[1])
-    col3.header(info[2])
-    col6.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[2])
+    col1.header(info[0][0])
+    col4.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[0][0])
+    col2.header(info[1][0])
+    col5.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[1][0])
+    col3.header(info[2][0])
+    col6.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[2][0])
 
     st.write('Alle Empfehlungen für dich:')
     st.write(fig)
@@ -541,4 +543,4 @@ def task4():
 
 
 if __name__ == "__main__":
-    main()
+    task3()
