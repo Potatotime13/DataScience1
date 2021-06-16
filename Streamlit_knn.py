@@ -81,7 +81,7 @@ def similarity_calculation(df_rating, distance_measure, user_number):
             dist = chebyshev(df_rating.loc[:, user_number], df_rating.iloc[:, x])
             distances.append(dist)
             similarities.append(1 / (1 + dist))
-        return similarities
+    return similarities
 
 
 def create_valid(dataset, test_len=5000):
@@ -118,7 +118,7 @@ def test():
             if c ==5: break
         else:
             pass
-test()
+#test()
 
 def task1():
     # read movie lens
@@ -129,13 +129,13 @@ def task1():
     st.write('K nearest neighbor centered cosine distance')
 
     # get settings from sidebar
-    user_number = st.sidebar.selectbox("User ID", (69,10, 12, 69, 52, 153))
+    user_number = st.sidebar.selectbox("User ID", (69, 10, 12, 69, 52, 153))
     k_users = st.sidebar.selectbox("K nearest", (5, 15, 20))
     list_len = st.sidebar.selectbox("Recommendations", (10, 40))
     normalization = st.sidebar.selectbox("Normalization",
                                          ('centering + division by variance', 'centering', "None"))
     distance_measure = st.sidebar.selectbox("distance_measure",
-                                            ('cosine', "euclidean", "manhattan (city block)", "hamming",
+                                            ("euclidean", 'cosine', "euclidean", "manhattan (city block)", "hamming",
                                              "chebyshev"))
     # split the genres per movie
     movies["genres"] = movies["genres"].str.split('|')
@@ -160,35 +160,33 @@ def task1():
         rec = recommended.copy()
         # recommended movies
 
-        print("recommended",recommended)
         sorted_mov = list(np.argsort(recommended))[::-1]
-        print("sorted_mov:",sorted_mov)
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
         print(output)
-        print("recommended:", recommended.shape)
         out2 = recommended[sorted_mov[0:list_len]]
 
     else:
         similarities = similarity_calculation(df_rating, distance_measure, user_number)
+        print("similarities:",similarities)
         # index of nearest users
         # replace nans with 0s, as nan != nan
         similarities = similarities = [0 if x != x else x for x in similarities]
         sorted_index = list(np.argsort(similarities))[::-1][1:k_users + 1]
-        # get the k best similarities and distances
+        print("sorted_index:", sorted_index)
+        # get the k best similarities
         sim_k = np.array(similarities)[sorted_index]
 
         # w_sum_k = rating_k * weighting vector (abhängig von sim!)
         mv_rated = df_rating_raw.iloc[:, sorted_index]
-
         mv_rated = mv_rated[df_rating_raw[user_number].isnull()]
         # weighting
         predicted_ratings = mv_rated.mean(axis=1)  # .sort_values()
         predicted_ratings.fillna(0, inplace=True)
+        print(predicted_ratings)
         recommended = predicted_ratings.copy()
         rec = recommended.copy()
         sorted_mov = list(np.argsort(predicted_ratings))[::-1]
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
-        print(output)
         # pd.set_option('display.max_columns', None)
         # pd.set_option('display.max_rows', None)
 
