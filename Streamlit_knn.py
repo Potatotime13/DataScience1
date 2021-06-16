@@ -61,7 +61,7 @@ def cosine(df_rating, user_number, k_users, df_rating_raw):
     recommended = recommended.T[0] * unseen
     return recommended
 
-def similarity_calculation(df_rating, distance_measure, user_number):
+def similarity_calculation_distances(df_rating, distance_measure, user_number):
     distances = []
     similarities = []
     for x in range(df_rating.shape[1]):
@@ -83,6 +83,15 @@ def similarity_calculation(df_rating, distance_measure, user_number):
             similarities.append(1 / (1 + dist))
     return similarities
 
+
+def predicted_ratings_distances(df_rating, similarities, user_number, k_users, df_rating_raw, weigthing=False):
+    sorted_index = list(np.argsort(similarities))[::-1][1:k_users + 1]
+    # w_sum_k = rating_k * weighting vector (abhängig von sim!)
+    mv_rated = df_rating.iloc[:, sorted_index]
+    mv_rated = mv_rated[df_rating_raw[user_number].isnull()]
+    predicted_ratings = mv_rated.mean(axis=1)
+    predicted_ratings.fillna(0, inplace=True)
+    return predicted_ratings
 
 def create_valid(dataset, test_len=5000):
     ind_exc = np.random.permutation(len(dataset))[0:test_len]
@@ -120,6 +129,15 @@ def test():
             pass
 #test()
 
+
+def get_favorite_movies(ratings, user_number):
+    ## get movies seen by the user ##
+    df_seen = df_rating_raw.loc[:, user_number].replace(0, np.nan)
+    df_seen = df_seen.dropna(how="all", axis=0)
+    # prints a sorted list of the users movies
+    # print("already seen:",df_seen.sort_values(ascending=True))
+    return df_seen
+
 def task1():
     # read movie lens
     movies = pd.read_csv('movies.csv')
@@ -129,7 +147,7 @@ def task1():
     st.write('K nearest neighbor centered cosine distance')
 
     # get settings from sidebar
-    user_number = st.sidebar.selectbox("User ID", (69, 10, 12, 69, 52, 153))
+    user_number = st.sidebar.selectbox("User ID", (10, 12, 69, 52, 153))
     k_users = st.sidebar.selectbox("K nearest", (5, 15, 20))
     list_len = st.sidebar.selectbox("Recommendations", (10, 40))
     normalization = st.sidebar.selectbox("Normalization",
@@ -157,6 +175,7 @@ def task1():
 
     if distance_measure == "cosine":
         recommended = cosine(df_rating, user_number, k_users, df_rating_raw)
+        print("max rating:", max(recommended))
         rec = recommended.copy()
         # recommended movies
 
@@ -166,51 +185,32 @@ def task1():
         out2 = recommended[sorted_mov[0:list_len]]
 
     else:
-        similarities = similarity_calculation(df_rating, distance_measure, user_number)
-        print("similarities:",similarities)
-        # index of nearest users
-        # replace nans with 0s, as nan != nan
-        similarities = similarities = [0 if x != x else x for x in similarities]
-        sorted_index = list(np.argsort(similarities))[::-1][1:k_users + 1]
-        print("sorted_index:", sorted_index)
-        # get the k best similarities
-        sim_k = np.array(similarities)[sorted_index]
-
-        # w_sum_k = rating_k * weighting vector (abhängig von sim!)
-        mv_rated = df_rating_raw.iloc[:, sorted_index]
-        mv_rated = mv_rated[df_rating_raw[user_number].isnull()]
-        # weighting
-        predicted_ratings = mv_rated.mean(axis=1)  # .sort_values()
-        predicted_ratings.fillna(0, inplace=True)
-        print(predicted_ratings)
+        similarities = similarity_calculation_distances(df_rating, distance_measure, user_number)
+        df_rating_mean = df_rating_raw.fillna(df_rating_raw.mean())
+        predicted_ratings = predicted_ratings_distances(df_rating_mean, similarities, user_number, k_users, df_rating_raw)
         recommended = predicted_ratings.copy()
         rec = recommended.copy()
         sorted_mov = list(np.argsort(predicted_ratings))[::-1]
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
-        # pd.set_option('display.max_columns', None)
-        # pd.set_option('display.max_rows', None)
+        print(predicted_ratings)
+        print(output)
 
-        ## get movies seen by the user ##############################################################################
-        df_seen = df_rating_raw.loc[:, user_number].replace(0, np.nan)
-        df_seen = df_seen.dropna(how="all", axis=0)
-        # prints a sorted list of the users movies
-        # print("already seen:",df_seen.sort_values(ascending=True))
         out2 = predicted_ratings.sort_values(ascending=False)[0:list_len]
 
-    color_grade = recommended + abs(rec.min())
-    if rec.max() + abs(rec.min()) > 0:
-        color_grade *= (rec.max() + abs(rec.min())) ** -1
-    else:
-        color_grade *= 1
-    np.array(color_grade).sort()
-    color_grade = np.flip(color_grade)
+#    color_grade = recommended + abs(rec.min())
+#    if rec.max() + abs(rec.min()) > 0:
+#        color_grade *= (rec.max() + abs(rec.min())) ** -1
+#    else:
+#        color_grade *= 1
+#    np.array(color_grade).sort()
+#    color_grade = np.flip(color_grade)
     # display results
 
     rec_header = list(output.columns)
     rec_header.insert(0, 'predict')
-    colors = []
-    for percentage in color_grade:
-        colors.append('rgba(255,185,15,' + str(percentage ** 2) + ')')
+#    colors = []
+#    for percentage in color_grade:
+#        colors.append('rgba(255,185,15,' + str(percentage ** 2) + ')')
 
     layout = go.Layout(
         margin=dict(r=1, l=1, b=20, t=20))
@@ -224,10 +224,17 @@ def task1():
                     ),
         cells=dict(values=[np.round(out2, 2), output.title, output.genres],
                    line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
-                   fill_color=[np.array(colors), 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
+                   fill_color=['rgb(14, 17, 23)', 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
                    align='center', font=dict(color='white', size=14), height=30
                    ))
     ], layout=layout)
+
+#        cells=dict(values=[np.round(out2, 2), output.title, output.genres],
+#                   line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
+#                   fill_color=[np.array(colors), 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
+#                   align='center', font=dict(color='white', size=14), height=30
+#                   ))
+#    ], layout=layout)
 
     # get movie info / covers
     url, info = movie_url(links.iloc[sorted_mov[0:3]][['tmdbId']].values)
