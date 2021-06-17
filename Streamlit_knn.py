@@ -221,13 +221,10 @@ def task1():
 
     if distance_measure == "cosine":
         recommended = cosine(df_rating, user_number, k_users, df_rating_raw, normalization)
-        print("max rating:", max(recommended))
         rec = recommended.copy()
         # recommended movies
-
         sorted_mov = list(np.argsort(recommended))[::-1]
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
-        print(output)
         out2 = recommended[sorted_mov[0:list_len]]
 
     else:
@@ -239,26 +236,23 @@ def task1():
         rec = recommended.copy()
         sorted_mov = list(np.argsort(predicted_ratings))[::-1]
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
-        print(predicted_ratings)
-        print(output)
 
         out2 = predicted_ratings.sort_values(ascending=False)[0:list_len]
 
-    # TODO (lucas) farben für alle dist maße richtig anzeigen
-    #    color_grade = recommended + abs(rec.min())
-    #    if rec.max() + abs(rec.min()) > 0:
-    #        color_grade *= (rec.max() + abs(rec.min())) ** -1
-    #    else:
-    #        color_grade *= 1
-    #    np.array(color_grade).sort()
-    #    color_grade = np.flip(color_grade)
+    color_grade = recommended + abs(rec.min())
+    if rec.max() + abs(rec.min()) > 0:
+        color_grade *= (rec.max() + abs(rec.min())) ** -1
+    else:
+        color_grade *= 1
+    np.array(color_grade).sort()
+    color_grade = np.flip(color_grade)
 
     # display results
     rec_header = list(output.columns)
     rec_header.insert(0, 'predict')
-    #    colors = []
-    #    for percentage in color_grade:
-    #        colors.append('rgba(255,185,15,' + str(percentage ** 2) + ')')
+    colors = []
+    for percentage in color_grade:
+        colors.append('rgba(255,185,15,' + str(percentage ** 2) + ')')
 
     layout = go.Layout(
         margin=dict(r=1, l=1, b=20, t=20))
@@ -272,17 +266,10 @@ def task1():
                     ),
         cells=dict(values=[np.round(out2, 2), output.title, output.genres],
                    line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
-                   fill_color=['rgb(14, 17, 23)', 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
+                   fill_color=[np.array(colors), 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
                    align='center', font=dict(color='white', size=14), height=30
                    ))
     ], layout=layout)
-
-    #        cells=dict(values=[np.round(out2, 2), output.title, output.genres],
-    #                   line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
-    #                   fill_color=[np.array(colors), 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
-    #                   align='center', font=dict(color='white', size=14), height=30
-    #                   ))
-    #    ], layout=layout)
 
     # get movie info / covers
     url, info = movie_url(links.iloc[sorted_mov[0:3]][['tmdbId']].values)
