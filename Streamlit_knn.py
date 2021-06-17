@@ -135,7 +135,7 @@ def color_descends(rec):
 
     colors = []
     for percentage in color_grade:
-        colors.append('rgba(255,185,15,' + str(percentage ** 2) + ')')
+        colors.append('rgba(255,185,15,' + str(round(percentage ** 2, 3)) + ')')
     return colors
 
 
@@ -518,4 +518,4 @@ def task4():
 
 
 if __name__ == "__main__":
-    main()
+    task3()
