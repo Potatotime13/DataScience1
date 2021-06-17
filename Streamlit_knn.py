@@ -200,7 +200,7 @@ def task1():
     normalization = st.sidebar.selectbox("Normalization",
                                          ('centering + division by variance', 'centering', "None"))
     distance_measure = st.sidebar.selectbox("distance_measure",
-                                            ("euclidean", 'cosine', "euclidean", "manhattan (city block)", "hamming",
+                                            ('cosine', "euclidean", "manhattan (city block)", "hamming",
                                              "chebyshev"))
     # split the genres per movie
     movies["genres"] = movies["genres"].str.split('|')
