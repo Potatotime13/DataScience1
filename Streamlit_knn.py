@@ -518,4 +518,4 @@ def task4():
 
 
 if __name__ == "__main__":
-    task3()
+    main()
