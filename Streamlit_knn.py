@@ -316,9 +316,7 @@ def task2():
     normalization = st.sidebar.selectbox("Normalization", ('centering', 'centering + division by variance'))
 
     # exclude test set
-    ind_exc = np.random.permutation(len(ratings))[0:5000]
-    test_set = ratings.iloc[ind_exc]
-    ratings.drop(index=ind_exc, inplace=True)
+    df_rating, df_test_set = create_valid(ratings)
 
     with st.beta_expander("display code"):
         with st.echo('below'):
@@ -326,8 +324,6 @@ def task2():
             movies["genres"] = movies["genres"].str.split('|')
 
             # rating table
-            df_rating = ratings.pivot(index="movieId", columns="userId", values="rating")
-            df_test_set = test_set.pivot(index="movieId", columns="userId", values="rating")
             df_rating_raw = df_rating
 
             # normalization procedure
@@ -343,9 +339,7 @@ def task2():
             user_corr = user_corr.fillna(0)
 
             # calc errors
-            errors = []
             y_pred = []
-            num_err = 0
 
             for user_number, val in df_test_set.iteritems():
                 # index of nearest users
@@ -357,7 +351,6 @@ def task2():
                 train_mov_id = list(df_rating.index)
                 test_mov_id = list(set(test_mov_id) & set(train_mov_id))
                 test_mov = test_mov[test_mov_id]
-                num_err += len(test_mov)
 
                 # sum of their ratings weighted by the corr
                 if len(test_mov) > 0:
@@ -373,14 +366,12 @@ def task2():
                     elif normalization == 'centering':
                         recommended = w_sum_k * seen_sim_len + df_rating_raw[user_number].mean()
                     y_pred += list(recommended)
-                    # errror teil nur noch drin für die life page, fällt später weg
-                    err = np.sum((recommended.T - test_mov.values) ** 2)
-                    errors.append(err)
 
     st.write("average error of a random test set containing 5000 data points:")
-    error = (1 / num_err) * sum(errors)
+    y_pred = np.array(y_pred)
+    y_act = df_test_set.stack().values
+    error = np.mean((y_pred-y_act)**2)
     st.write(error)
-
     # surface plot
     sorted_index = pd.DataFrame(np.argsort(user_corr.values))
     a = sorted_index.iloc[:, [608, 609]]
@@ -548,4 +539,4 @@ def task4():
 
 
 if __name__ == "__main__":
-    main()
+    task2()
