@@ -372,6 +372,8 @@ def task2():
     y_act = df_test_set.stack().values
     error = np.mean((y_pred-y_act)**2)
     st.write(error)
+
+    ''' spielerei später
     # surface plot
     sorted_index = pd.DataFrame(np.argsort(user_corr.values))
     a = sorted_index.iloc[:, [608, 609]]
@@ -401,7 +403,7 @@ def task2():
                       )
 
     st.write(fig)
-
+    '''
 
 def cover_url(isbn):
     pass
@@ -539,4 +541,4 @@ def task4():
 
 
 if __name__ == "__main__":
-    main()
+    task2()
