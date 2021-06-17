@@ -373,37 +373,37 @@ def task2():
     error = np.mean((y_pred-y_act)**2)
     st.write(error)
 
-    ''' spielerei später
-    # surface plot
-    sorted_index = pd.DataFrame(np.argsort(user_corr.values))
-    a = sorted_index.iloc[:, [608, 609]]
-    num_cla = 25
-    largest = []
-    for i in range(a.shape[0]):
-        largest.append(user_corr.iloc[a.iloc[i, 0], a.iloc[i, 1]])
-    top = a.iloc[(list(np.argsort(largest))[::-1])[0:num_cla]].index
+    if False:
+        # surface plot
+        sorted_index = pd.DataFrame(np.argsort(user_corr.values))
+        a = sorted_index.iloc[:, [608, 609]]
+        num_cla = 25
+        largest = []
+        for i in range(a.shape[0]):
+            largest.append(user_corr.iloc[a.iloc[i, 0], a.iloc[i, 1]])
+        top = a.iloc[(list(np.argsort(largest))[::-1])[0:num_cla]].index
 
-    classes = [[] for i_1 in range(num_cla)]
+        classes = [[] for i_1 in range(num_cla)]
 
-    for i_2 in range(user_corr.shape[0]):
-        sims = user_corr.iloc[[i_2], top].values
-        j = list(np.argsort(sims))[::-1]
-        classes[j[0][0]].append(int(i_2))
-    final_index = []
-    for cl in classes:
-        final_index += cl
-    plot_surf = user_corr.iloc[final_index, final_index]
+        for i_2 in range(user_corr.shape[0]):
+            sims = user_corr.iloc[[i_2], top].values
+            j = list(np.argsort(sims))[::-1]
+            classes[j[0][0]].append(int(i_2))
+        final_index = []
+        for cl in classes:
+            final_index += cl
+        plot_surf = user_corr.iloc[final_index, final_index]
 
-    fig = go.Figure(data=[go.Surface(z=plot_surf)])
-    fig.update_traces(contours_z=dict(show=True, usecolormap=True,
-                                      highlightcolor="limegreen", project_z=True))
-    fig.update_layout(title='Correlation surface', autosize=True,
-                      width=800, height=700,
-                      margin=dict(l=1, r=1, b=40, t=40)
-                      )
+        fig = go.Figure(data=[go.Surface(z=plot_surf)])
+        fig.update_traces(contours_z=dict(show=True, usecolormap=True,
+                                          highlightcolor="limegreen", project_z=True))
+        fig.update_layout(title='Correlation surface', autosize=True,
+                          width=800, height=700,
+                          margin=dict(l=1, r=1, b=40, t=40)
+                          )
 
-    st.write(fig)
-    '''
+        st.write(fig)
+
 
 def cover_url(isbn):
     pass
