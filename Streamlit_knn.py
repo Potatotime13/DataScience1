@@ -396,10 +396,6 @@ def task2():
         st.write(fig)
 
 
-def cover_url(isbn):
-    pass
-
-
 def get_book_data(filter_tr):
     # load data from csv
     books = pd.read_csv('BX-Books.csv', sep=';', error_bad_lines=False, encoding="latin-1")
@@ -475,9 +471,6 @@ def task3():
     # display results
     rec_header = list(output.columns)
     rec_header.insert(0, 'predict')
-    #    colors = []
-    #    for percentage in color_grade:
-    #        colors.append('rgba(255,185,15,' + str(percentage ** 2) + ')')
 
     layout = go.Layout(
         margin=dict(r=1, l=1, b=20, t=20))
@@ -491,19 +484,12 @@ def task3():
                     ),
         cells=dict(values=[np.round(out2, 2), output.bookTitle, output.bookAuthor],
                    line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
-                   fill_color=['rgb(14, 17, 23)', 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
+                   fill_color=[color_descends(rec), 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
                    align='center', font=dict(color='white', size=14), height=30
                    ))
     ], layout=layout)
 
-    #        cells=dict(values=[np.round(out2, 2), output.title, output.genres],
-    #                   line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
-    #                   fill_color=[np.array(colors), 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
-    #                   align='center', font=dict(color='white', size=14), height=30
-    #                   ))
-    #    ], layout=layout)
-
-    # get movie info / covers
+    # get book info / covers
     url = books.iloc[sorted_bok[0:3]][['imageUrlL']].values
     info = books.iloc[sorted_bok[0:3]][['bookTitle']].values
     st.write('Deine Top auswahl')
