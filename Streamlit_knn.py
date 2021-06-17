@@ -204,6 +204,7 @@ def task1():
                                              "chebyshev"))
     # split the genres per movie
     movies["genres"] = movies["genres"].str.split('|')
+
     # rating table
     df_rating = ratings.pivot(index="movieId", columns="userId", values="rating")
     df_rating_raw = df_rating
@@ -217,12 +218,11 @@ def task1():
         df_rating = df_rating.fillna(0)
     elif normalization == "None":
         df_rating = df_rating.fillna(df_rating.mean())
-        pass
 
+    # distance calculation and prediction
     if distance_measure == "cosine":
         recommended = cosine(df_rating, user_number, k_users, df_rating_raw, normalization)
         rec = recommended.copy()
-        # recommended movies
         sorted_mov = list(np.argsort(recommended))[::-1]
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
         out2 = recommended[sorted_mov[0:list_len]]
@@ -236,12 +236,11 @@ def task1():
         rec = recommended.copy()
         sorted_mov = list(np.argsort(predicted_ratings))[::-1]
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
-
         out2 = predicted_ratings.sort_values(ascending=False)[0:list_len]
 
-    color_grade = recommended + abs(rec.min())
+    color_grade = rec + abs(rec.min())
     if rec.max() + abs(rec.min()) > 0:
-        color_grade *= (rec.max() + abs(rec.min())) ** -1
+        color_grade = color_grade / (rec.max() + abs(rec.min()))
     else:
         color_grade *= 1
     np.array(color_grade).sort()
