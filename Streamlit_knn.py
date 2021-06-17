@@ -173,7 +173,8 @@ def test():
             pass
     print(predicted[5])
     print(actuals[5])
-#test()
+    # test()
+
 
 def get_favorite_movies(ratings, user_number):
     # get movies seen by the user
@@ -243,7 +244,7 @@ def task1():
         color_grade = color_grade / (rec.max() + abs(rec.min()))
     else:
         color_grade *= 1
-    np.array(color_grade).sort()
+    color_grade = np.sort(np.array(color_grade))
     color_grade = np.flip(color_grade)
 
     # display results
