@@ -484,7 +484,7 @@ def task3():
                     ),
         cells=dict(values=[np.round(out2, 2), output.bookTitle, output.bookAuthor],
                    line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
-                   fill_color=[color_descends(rec), 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
+                   fill_color=[np.array(color_descends(rec)), 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
                    align='center', font=dict(color='white', size=14), height=30
                    ))
     ], layout=layout)
