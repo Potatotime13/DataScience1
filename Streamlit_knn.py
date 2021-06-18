@@ -469,7 +469,7 @@ def task1():
     st.write('K nearest neighbor')
 
     # get settings from sidebar
-    user_number = st.sidebar.selectbox("User ID", (10, 12, 69, 52, 153))
+    user_number = st.sidebar.selectbox("User ID", (1, 10, 12, 69, 153))
     k_users = st.sidebar.selectbox("K nearest", (5, 15, 20))
     list_len = st.sidebar.selectbox("Recommendations", (10, 40))
     normalization = st.sidebar.selectbox("Normalization",
@@ -696,7 +696,7 @@ def task3():
     normalization = st.sidebar.selectbox("Normalization",
                                          ('centering + division by variance', 'centering', "None"))
     distance_measure = st.sidebar.selectbox("distance_measure",
-                                            ('cosine', "euclidean", "manhattan (city block)", "hamming",
+                                            ("euclidean",'cosine', "euclidean", "manhattan (city block)", "hamming",
                                              "chebyshev"))
 
     df_rating_raw = df_rating
@@ -727,7 +727,8 @@ def task3():
         rec = recommended.copy()
         sorted_bok = list(np.argsort(predicted_ratings))[::-1]
         output = books.iloc[sorted_bok[0:list_len]][['bookTitle', 'bookAuthor']]
-
+        out2 = predicted_ratings.sort_values(ascending=False)[0:list_len]
+        print(output)
     # display results
     rec_header = list(output.columns)
     rec_header.insert(0, 'predict')
