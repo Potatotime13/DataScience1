@@ -1,9 +1,8 @@
 import streamlit as st
-# To make things easier later, we're also importing numpy and pandas for
-# working with sample data.
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+import copy
 from tmdbv3api import TMDb
 from tmdbv3api import Movie
 from scipy.spatial.distance import hamming, euclidean, chebyshev, cityblock
@@ -97,14 +96,126 @@ def similarity_calculation_distances(df_rating, distance_measure, user_number):
     return similarities
 
 
-def predicted_ratings_distances(df_rating, similarities, user_number, k_users, df_rating_raw, weigthing=False):
+def predicted_ratings_distances(df_rating, similarities, user_number, k_users, df_rating_raw
+                                ,replacenan=False,replacement = 0, weigthing=False, testing=False):
     sorted_index = list(np.argsort(similarities))[::-1][1:k_users + 1]
     # w_sum_k = rating_k * weighting vector (abhängig von sim!)
     mv_rated = df_rating.iloc[:, sorted_index]
-    mv_rated = mv_rated[df_rating_raw[user_number].isnull()]
+    if testing is False: mv_rated = mv_rated[df_rating_raw[user_number].isnull()]
+
     predicted_ratings = mv_rated.mean(axis=1)
-    predicted_ratings.fillna(0, inplace=True)
+    if replacenan == True: predicted_ratings.fillna(replacement, inplace=True)
     return predicted_ratings
+
+def create_corr_matrix(df_rating):
+    df_rating = df_rating.transpose()
+    ### andere anpassung erlauben
+    df_rating = df_rating.fillna(df_rating.mean())
+    df_rating = df_rating.transpose()
+
+    corr_movies = np.corrcoef(df_rating)
+    corr_movies = pd.DataFrame(corr_movies)
+    corr_movies = corr_movies.set_index(df_rating.index)
+    corr_movies.columns = df_rating.index
+    return corr_movies
+
+def item_item_cf(df_rating, corr_matrix,user_number, k_items=10):
+    """returns predictions based on item item cf"""
+    k_items_original = k_items
+    #    corr_matrix = pd.read_csv("corr_movies.csv")
+    corr_matrix_raw = corr_matrix.copy()
+    corr_matrix = corr_matrix.fillna(-20)
+
+    # rating table
+    df_rating_raw = df_rating
+    df_rating_average = df_rating.fillna(df_rating.mean(axis=1))
+    df_rating = df_rating.fillna(df_rating.mean(axis=1))
+    df_rating = df_rating.transpose()
+    user_movies = df_rating_raw[user_number]
+    user_average = np.nanmean(user_movies)
+    movie_indices = list(user_movies.index)
+
+    counter = 0
+    predictions = []
+    for x in user_movies:
+        k_items = k_items_original
+        k_items += 1
+        if x != x:
+            # find the index of the k most similar movies within the correlation matrix
+            current_movie_id = movie_indices[counter]
+            if corr_matrix_raw[current_movie_id].isnull().all():
+                counter += 1
+                predictions.append(np.nan)
+                #predictions.append("Dummer Film")
+            else:
+                k_most_similar = np.argpartition(corr_matrix[current_movie_id], -k_items)
+                if -20 in np.partition(corr_matrix[current_movie_id], -k_items)[-k_items:]:
+                    k_items_reduced = len([x for x in k_items if x != -20])
+                    k_most_similar = k_most_similar[-k_items_reduced:]
+                else:
+                    k_most_similar = k_most_similar[-k_items:]
+
+                # predict based on the average of the user for the k movies
+                #  print(df_rating_raw[user_number].iloc[k_most_similar])
+                # isnull().all()
+                # if all movies were not seen by the user append nan
+                if np.mean(df_rating_raw[user_number].iloc[k_most_similar]) != np.mean(
+                        df_rating_raw[user_number].iloc[k_most_similar]):
+                    predictions.append(np.nan)
+                # else append the average
+                else:
+                    predictions.append(np.nanmean(df_rating_raw[user_number].iloc[k_most_similar]))
+                counter += 1
+
+        # nan is not equal to itself, so if movie is not seen
+        # the entry is nan
+        else:
+            predictions.append(-50)
+            counter += 1
+    predictions = pd.Series(predictions, index=movie_indices)
+    return predictions
+
+def basic_measures(df, onlypred=False, onlyactual=False):
+    pred = df["predicted"]
+    actual = df["actual"]
+    if (onlypred is False) and (onlyactual is False):
+        std_actual = np.nanstd(actual)
+        average_actual = np.nanmean(actual)
+        average_pred = np.nanmean(pred)
+        std_pred = np.nanstd(pred)
+        return average_actual, average_pred, std_actual, std_pred
+    elif onlyactual is True:
+        average_actual = np.nanmean(actual)
+        std_actual= np.nanstd(actual)
+        return average_actual, std_actual
+    elif onlypred is True:
+        average_pred = np.nanmean(pred)
+        std_pred = np.nanstd(pred)
+        return average_pred, std_pred
+
+
+def mse(df):
+    """mean squared error"""
+    df = df.dropna()
+    actual = df["actual"]
+    pred = df["predicted"]
+    return sum((actual - pred) ** 2) * 1 / len(pred)
+
+
+def rmse(df):
+    """root mean squared error"""
+    df = df.dropna()
+    actual = df["actual"]
+    pred = df["predicted"]
+    return np.sqrt(sum((actual - pred) ** 2) * 1 / len(pred))
+
+
+def mae(df):
+    """mean absolute error"""
+    df = df.dropna()
+    actual = df["actual"]
+    pred = df["predicted"]
+    return sum(np.abs(actual - pred)) * 1 / len(pred)
 
 
 def create_valid(dataset, test_len=5000):
@@ -139,11 +250,10 @@ def color_descends(rec):
     return colors
 
 
-def test():
-    movies = pd.read_csv('movies.csv')
+def test_generation_distances():
+    ##### this part possibly in own function
     ratings = pd.read_csv('ratings.csv')
-    tags = pd.read_csv('tags.csv')
-    links = pd.read_csv('links.csv')
+
 
     user_number = st.sidebar.selectbox("User ID", (10, 12, 69, 52, 153))
     k_users = st.sidebar.selectbox("K nearest", (23, 15, 20))
@@ -154,10 +264,8 @@ def test():
                                             ("euclidean", 'cosine', "euclidean", "manhattan (city block)", "hamming",
                                              "chebyshev"))
     train, test = create_valid(ratings)
-
-    df_rating = ratings.pivot(index="movieId", columns="userId", values="rating")
-    df_rating_raw = df_rating
-    df_rating_mean = df_rating_raw.fillna(df_rating_raw.mean())
+    df_rating = train
+    df_rating_raw = df_rating.copy()
     if normalization == 'centering + division by variance':
         df_rating = (df_rating - df_rating.mean()) / df_rating.var() ** 0.5
         df_rating = df_rating.fillna(0)
@@ -166,19 +274,20 @@ def test():
         df_rating = df_rating.fillna(0)
     elif normalization == "None":
         df_rating = df_rating.fillna(df_rating.mean())
-        pass
-
+    ###### the part ends here
     c = 0
     predicted = []
     actuals = []
     for x in test:
         # check if any value for a user is in test set
-        if c % 100 ==0:
-            print(c)
+
+        print(c)
         if test[x].notna().values.any():
             similarities = similarity_calculation_distances(df_rating, distance_measure, x)
-            predicted_ratings = predicted_ratings_distances(df_rating_mean, similarities, user_number, k_users,
-                                                            df_rating_raw)
+            user_average = df_rating_raw[user_number].mean()
+            # change replacenan to true to replace nans with user average
+            predicted_ratings = predicted_ratings_distances(df_rating_raw, similarities, user_number, k_users,
+                                                            df_rating_raw, replacenan=False, replacement=user_average, testing=True)
             index = list(test[x].dropna().index)
             actual = test[x].dropna()
             predicted.append(predicted_ratings[predicted_ratings.index.isin(index)])
@@ -186,9 +295,139 @@ def test():
             c += 1
         else:
             pass
-    print(predicted[5])
-    print(actuals[5])
-    # test()
+    return predicted, actuals
+
+
+def test_generation_item_cf():
+    """generates predictions for a test set with item item cf"""
+    ratings = pd.read_csv('ratings.csv')
+    train, test = create_valid(ratings)
+    df_rating = train
+    df_rating_raw = df_rating.copy()
+    c = 0
+    user_number = 1
+    predicted = []
+    actuals = []
+    for x in test:
+        #if c % 10 ==0:
+        print(c)
+        # check if any value for a user is in test set
+        if test[x].notna().values.any():
+            corr_matrix = create_corr_matrix(df_rating_raw)
+            predicted_ratings = item_item_cf(df_rating, corr_matrix, x, 15)
+            index = list(test[x].dropna().index)
+            actual = test[x].dropna()
+            predicted.append(predicted_ratings[predicted_ratings.index.isin(index)])
+            actuals.append(actual)
+            c += 1
+            ###
+            if c >=20:break
+        else:
+            pass
+    return predicted, actuals
+
+
+def group_test_results(predicted, actuals):
+    """groups preditions and actual values"""
+    pred_vector = np.hstack(predicted)
+    actual_vector = np.hstack(actuals)
+    sorted_values = np.argsort(actual_vector)
+    df_actual_pred = pd.DataFrame({'actual': actual_vector , 'predicted': pred_vector}, columns=['actual', 'predicted'])
+    groups_by_actual = []
+    group_header_actual = []
+    groups_by_pred = []
+    group_header_pred = []
+
+    for x in np.sort(df_actual_pred.actual.unique()):
+        group = df_actual_pred[df_actual_pred["actual"]==x]
+        groups_by_actual.append(group)
+        group_header_actual.append(x)
+
+### Dummer Film Problem -.-
+    for x in np.sort(df_actual_pred.predicted.unique()):
+        group = df_actual_pred[df_actual_pred["predicted"]==x]
+        groups_by_pred.append(group)
+        group_header_pred.append(x)
+    return df_actual_pred, groups_by_actual, group_header_actual, groups_by_pred,  group_header_pred
+
+
+def all_performance_measures(df_actual_pred, groups_by_actual, group_header_actual, groups_by_pred, group_header_pred):
+    """calcualtes all performance measures for a given predict|test dataframe"""
+    average_actual1, average_pred1, std_actual1, std_pred1 = basic_measures(df_actual_pred)
+    mse1, rmse1, mae1 = mse(df_actual_pred), rmse(df_actual_pred), mae(df_actual_pred)
+    df_basic_measures_for_all_testpoints = pd.DataFrame(np.array([average_actual1, average_pred1, std_actual1, std_pred1]),
+                            index= ["average_actual", "average_pred", "std_actual", "std_pred"])
+    df_performance_for_all_testpoints = pd.DataFrame(np.array([mse1, rmse1, mae1]),
+                            index= ["MSE","RMSE","MAE"])
+    # iterates through the groups within the actual ratings and
+    # calcs performance measures
+    c = 0
+    plot_groups_actual = []
+    for x in groups_by_actual:
+        plot_parameters = []
+        plot_parameters.append(group_header_actual[c])
+        if len(x["predicted"].dropna()) == 0:
+            c += 1
+            continue
+#            print("One group doesnt have predictions: ENDING PROGRAM",x)
+#            quit()
+        plot_parameters.append(len(x["predicted"].dropna()))
+        average_pred, std_pred = basic_measures(x, onlypred=True)
+        plot_parameters.append(average_pred)
+        plot_parameters.append(std_pred)
+        plot_parameters.append(mse(x))
+        plot_parameters.append(rmse(x))
+        plot_parameters.append(mae(x))
+        if c == 0:
+            df_groups_actual = pd.DataFrame(np.array(plot_parameters), index=["actual rating","no of predictions","average", "std", "mse", "rmse", "mae"],
+                                     columns=[group_header_actual[c]])
+        else:
+            df_groups_actual[group_header_actual[c]] = np.array(plot_parameters)
+        c += 1
+        plot_groups_actual.append(copy.deepcopy(plot_parameters))
+
+    # optional not to have too many groups
+    #groups_by_pred = list(groups_by_pred[:], groups_by_pred[-3:])
+    c = 0
+    plot_groups_pred = []
+    for x in groups_by_pred:
+        plot_parameters = []
+        plot_parameters.append(group_header_pred[c])
+        if len(x["predicted"].dropna()) == 0:
+            c += 1
+            continue
+        plot_parameters.append(len(x["predicted"].dropna()))
+        average_actual, std_actual = basic_measures(x, onlyactual=True)
+        plot_parameters.append(average_actual)
+        plot_parameters.append(std_actual)
+        plot_parameters.append(mse(x))
+        plot_parameters.append(rmse(x))
+        plot_parameters.append(mae(x))
+        if c == 0:
+            df_groups_pred = pd.DataFrame(np.array(plot_parameters), index=["predicted rating group","no of predictions in group",
+                                                                            "average", "std", "mse", "rmse", "mae"],
+                                                                        columns=[group_header_pred[c]])
+        else:
+            df_groups_pred[group_header_pred[c]] = np.array(plot_parameters)
+        c += 1
+        plot_groups_pred.append(copy.deepcopy(plot_parameters))
+    return df_basic_measures_for_all_testpoints, df_performance_for_all_testpoints, df_groups_actual, df_groups_pred
+
+
+def performance_item_item_cf():
+    """performance for item-item cf"""
+    pred, actuals = test_generation_item_cf()
+    g = group_test_results(pred, actuals)
+    results = all_performance_measures(*g)
+    return results
+
+
+def performance_user_user_cf_distances():
+    """performance for user user cf with distance != cosine"""
+    pred, actuals = test_generation_distances()
+    g = group_test_results(pred, actuals)
+    results = all_performance_measures(*g)
+    return results
 
 
 def get_favorite_movies(ratings, user_number):
@@ -199,6 +438,26 @@ def get_favorite_movies(ratings, user_number):
     # TODO ausgabe wird später als streamlit list erfolgen
     # print("already seen:",df_seen.sort_values(ascending=True))
     return df_seen
+
+def get_movies_item_item_cf(predicted_ratings, list_len, na_filler = 0):
+    movies = pd.read_csv('movies.csv')
+    predicted_ratings.fillna(na_filler, inplace=True)
+    sorted_mov = np.argsort(predicted_ratings)#[::-1]
+    output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
+    return output
+
+# test for performance measures
+#ratings = pd.read_csv('ratings.csv')
+#df_rating = ratings.pivot(index="movieId", columns="userId", values="rating")
+#df_rating_raw = df_rating.copy()
+#corr_matrix = create_corr_matrix(df_rating_raw)
+#predicted_ratings = item_item_cf(df_rating, corr_matrix, 1, 15)
+#print(get_movies_item_item_cf(item_item_cf(df_rating, corr_matrix,1, 10),20))
+#print()
+
+#result = performance_item_item_cf()
+#result2 = performance_user_user_cf_distances()
+#print()
 
 
 def task1():
@@ -245,15 +504,16 @@ def task1():
 
     else:
         similarities = similarity_calculation_distances(df_rating, distance_measure, user_number)
-        df_rating_mean = df_rating_raw.fillna(df_rating_raw.mean())
-        predicted_ratings = predicted_ratings_distances(df_rating_mean, similarities, user_number, k_users,
-                                                        df_rating_raw)
+        user_average = df_rating_raw[user_number].mean()
+        predicted_ratings = predicted_ratings_distances(df_rating_raw, similarities, user_number, k_users,
+                                                        df_rating_raw, replacenan=True, replacement=user_average)
         recommended = predicted_ratings.copy()
         rec = recommended.copy()
         sorted_mov = list(np.argsort(predicted_ratings))[::-1]
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
         out2 = predicted_ratings.sort_values(ascending=False)[0:list_len]
-
+        print(output)
+        print()
     # display results
     rec_header = list(output.columns)
     rec_header.insert(0, 'predict')
