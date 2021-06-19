@@ -97,15 +97,24 @@ def similarity_calculation_distances(df_rating, distance_measure, user_number):
 
 
 def predicted_ratings_distances(df_rating, similarities, user_number, k_users, df_rating_raw
-                                ,replacenan=False,replacement = 0, weigthing=False, testing=False):
+                                ,replacenan=False,replacement = 0, weigthing=False, testing=False, weighting= True):
     sorted_index = list(np.argsort(similarities))[::-1][1:k_users + 1]
-    # w_sum_k = rating_k * weighting vector (abhängig von sim!)
     rated = df_rating.iloc[:, sorted_index]
     if testing is False: rated = rated[df_rating_raw[user_number].isnull()]
-
-    predicted_ratings = rated.mean(axis=1)
+    if weighting is False:
+        predicted_ratings = rated.mean(axis=1)
+    else:
+        sim_array = np.array(similarities[1:k_users + 1])
+        sim_array = np.tile(sim_array,(rated.shape[0],1))
+        sim_array = sim_array * rated.notna()
+        predicted_ratings = np.nansum(rated*sim_array, axis=1)
+        a = np.nansum(sim_array, axis=1)
+        predicted_ratings = predicted_ratings /np.nansum(sim_array, axis = 1)
+        predicted_ratings = pd.Series(predicted_ratings, index=rated.index)
     if replacenan is True: predicted_ratings.fillna(replacement, inplace=True)
     return predicted_ratings
+
+
 
 def create_corr_matrix(df_rating, normalization='centering' ):
     """creates a correlation matrix over the items"""
@@ -127,7 +136,7 @@ def create_corr_matrix(df_rating, normalization='centering' ):
     return corr_movies
 
 
-def item_item_cf(df_rating, corr_matrix,user_number, k_items=10, test_labels = [], weighting=True):
+def item_item_cf(df_rating, corr_matrix,user_number, k_items=15, test_labels = [], weighting=True):
     """returns predictions based on item item cf"""
     if len(test_labels) == 0:
         testing = False
@@ -140,8 +149,7 @@ def item_item_cf(df_rating, corr_matrix,user_number, k_items=10, test_labels = [
 
     # rating table
     df_rating_raw = df_rating
-    df_rating = df_rating.fillna(df_rating.mean(axis=1))
-    df_rating = df_rating.transpose()
+
     if testing is False:
         user_items = df_rating_raw[user_number]
     else:
@@ -150,7 +158,6 @@ def item_item_cf(df_rating, corr_matrix,user_number, k_items=10, test_labels = [
     counter = 0
     predictions = []
     for x in user_items:
-        if counter % 100 == 0: print(counter)
         k_items = k_items_original
         k_items += 1
         if x != x:
@@ -336,8 +343,7 @@ def test_generation_distances(ratings, movie=True):
     actuals = []
     for x in test:
         # check if any value for a user is in test set
-
-        print(c)
+        if c % 100 == 0: print(c)
         if test[x].notna().values.any():
             similarities = similarity_calculation_distances(df_rating, distance_measure, x)
             user_average = df_rating_raw[user_number].mean()
@@ -388,7 +394,6 @@ def group_test_results(predicted, actuals):
     """groups preditions and actual values"""
     pred_vector = np.hstack(predicted)
     actual_vector = np.hstack(actuals)
-    sorted_values = np.argsort(actual_vector)
     df_actual_pred = pd.DataFrame({'actual': actual_vector , 'predicted': pred_vector}, columns=['actual', 'predicted'])
     groups_by_actual = []
     group_header_actual = []
@@ -558,6 +563,7 @@ def get_favorite_movies(ratings, user_number):
     # TODO ausgabe wird später als streamlit list erfolgen
     # print("already seen:",df_seen.sort_values(ascending=True))
     return df_seen
+
 
 def get_items_item_item_cf(item_list,predicted_ratings, list_len, movies = True, na_filler = 0):
     predicted_ratings.fillna(na_filler, inplace=True)
@@ -909,12 +915,12 @@ def bookprediction_item_item_cf():
     print(get_items_item_item_cf(books, item_item_cf( df_rating, corr_matrix,79186, 10),20, movies=False))# books
 #bookprediction_item_item_cf()
 
+
 def all_performances(movie= True, filter_tr = 20):
     if movie is True:
         rating = pd.read_csv('ratings.csv')
         result_item = performance_item_item_cf(rating.copy())
         result_distance = performance_user_user_cf_distances(rating.copy())
-        print()
     else:
         rating = pd.read_csv('BX-Book-Ratings.csv', sep=';', error_bad_lines=False, encoding="latin-1")
         rating.columns = ["userId", "ISBN", "rating"]
@@ -927,7 +933,12 @@ def all_performances(movie= True, filter_tr = 20):
         result_distance = performance_user_user_cf_distances(rating.copy(), movie = False)
         print()
 
-#print(all_performances(False))
+print(all_performances(False))
+movie= True
+rating = pd.read_csv('ratings.csv')
+df_rating = rating.pivot(index="movieId", columns="userId", values="rating")
+movies = pd.read_csv('movies.csv')
+pred, actuals = test_generation_distances(rating, movie)
 
 if __name__ == "__main__":
     main()
