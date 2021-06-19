@@ -75,7 +75,6 @@ def get_book_data(filter_tr, like_to_value=True):
         df_zeros = df_ratings == 0
         df_ratings = df_ratings + df_zeros * np.mean(percentiles[percentiles != 0])
 
-
     return df_ratings, ratings, books, users
 
 
@@ -795,9 +794,15 @@ def task2():
     fig2 = go.Figure(data=[
         go.Bar(name='item / item', x=categories, y=list(result_item[2].iloc[3][categories])),
         go.Bar(name='user / user', x=categories, y=list(result_distance[2].iloc[3][categories]))
-    ], title='test')
+    ])
     # Change the bar mode
-    fig1.update_layout(barmode='group')
+    fig1.update_layout(barmode='group',
+                       title=go.layout.Title(
+                           text="Plot Title",
+                           xref="paper",
+                           x=0
+                       ),
+                       )
     fig2.update_layout(barmode='group')
     # display results
     st.table(result_item[0])
