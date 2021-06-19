@@ -708,12 +708,69 @@ def task1():
     st.write(fig)
 
 
+def knn_uu_cosine(ratings, k_users, normalization):
+    # exclude test set
+    df_rating, df_test_set = create_valid(ratings)
+
+    # rating table
+    df_rating_raw = df_rating
+
+    # normalization procedure
+    if normalization == 'centering + division by variance':
+        df_rating = (df_rating - df_rating.mean()) / df_rating.var() ** 0.5
+    elif normalization == 'centering':
+        df_rating = df_rating - df_rating.mean()
+    df_rating = df_rating.fillna(0)
+    user_std = (df_rating * df_rating).mean() ** 0.5
+
+    # calc cov matrix
+    user_corr = df_rating.cov() / (user_std.values.reshape((-1, 1)) @ user_std.values.reshape((1, -1)))
+    user_corr = user_corr.fillna(0)
+
+    # calc errors
+    y_pred = []
+
+    for user_number, val in df_test_set.iteritems():
+        # index of nearest users
+        sorted_index = list(np.argsort(user_corr[user_number]))[::-1]
+
+        # test set movies
+        test_mov = val.dropna()
+        test_mov_id = list(test_mov.index)
+        train_mov_id = list(df_rating.index)
+        test_mov_id = list(set(test_mov_id) & set(train_mov_id))
+        test_mov = test_mov[test_mov_id]
+
+        # sum of their ratings weighted by the corr
+        if len(test_mov) > 0:
+            corr_k = user_corr.iloc[sorted_index[1:k_users + 1]][[user_number]].values
+            ratings_k = df_rating.loc[test_mov_id].iloc[:, sorted_index[1:k_users + 1]].values
+            w_sum_k = ratings_k @ corr_k
+            mv_rated = df_rating_raw.loc[test_mov_id].iloc[:, sorted_index[1:k_users + 1]].notnull().values
+            seen_sim_len = mv_rated @ corr_k
+            seen_sim_len = 1 / (seen_sim_len + (seen_sim_len == 0))
+            if normalization == 'centering + division by variance':
+                recommended = w_sum_k * seen_sim_len * df_rating_raw[user_number].var() ** 0.5 + df_rating_raw[
+                    user_number].mean()
+            elif normalization == 'centering':
+                recommended = w_sum_k * seen_sim_len + df_rating_raw[user_number].mean()
+            y_pred += list(recommended)
+
+    return y_pred, df_test_set
+
+
+def load_results():
+    result_item = []
+    result_distances = []
+    for i in range(4):
+        result_item.append(pd.read_csv('result_item_' + str(i)))
+        result_distances.append(pd.read_csv('result_distances_' + str(i)))
+    return result_item, result_distances
+
+
 def task2():
     # read movie lens
-    movies = pd.read_csv('movies.csv')
     ratings = pd.read_csv('ratings.csv')
-    tags = pd.read_csv('tags.csv')
-    links = pd.read_csv('links.csv')
 
     # header
     st.write('K nearest neighbor - performance measures')
@@ -722,62 +779,27 @@ def task2():
     k_users = st.sidebar.selectbox("K nearest", (15, 20))
     normalization = st.sidebar.selectbox("Normalization", ('centering', 'centering + division by variance'))
 
-    # exclude test set
-    df_rating, df_test_set = create_valid(ratings)
-
-    with st.beta_expander("display code"):
-        with st.echo('below'):
-            # split the genres per movie
-            movies["genres"] = movies["genres"].str.split('|')
-
-            # rating table
-            df_rating_raw = df_rating
-
-            # normalization procedure
-            if normalization == 'centering + division by variance':
-                df_rating = (df_rating - df_rating.mean()) / df_rating.var() ** 0.5
-            elif normalization == 'centering':
-                df_rating = df_rating - df_rating.mean()
-            df_rating = df_rating.fillna(0)
-            user_std = (df_rating * df_rating).mean() ** 0.5
-
-            # calc cov matrix
-            user_corr = df_rating.cov() / (user_std.values.reshape((-1, 1)) @ user_std.values.reshape((1, -1)))
-            user_corr = user_corr.fillna(0)
-
-            # calc errors
-            y_pred = []
-
-            for user_number, val in df_test_set.iteritems():
-                # index of nearest users
-                sorted_index = list(np.argsort(user_corr[user_number]))[::-1]
-
-                # test set movies
-                test_mov = val.dropna()
-                test_mov_id = list(test_mov.index)
-                train_mov_id = list(df_rating.index)
-                test_mov_id = list(set(test_mov_id) & set(train_mov_id))
-                test_mov = test_mov[test_mov_id]
-
-                # sum of their ratings weighted by the corr
-                if len(test_mov) > 0:
-                    corr_k = user_corr.iloc[sorted_index[1:k_users + 1]][[user_number]].values
-                    ratings_k = df_rating.loc[test_mov_id].iloc[:, sorted_index[1:k_users + 1]].values
-                    w_sum_k = ratings_k @ corr_k
-                    mv_rated = df_rating_raw.loc[test_mov_id].iloc[:, sorted_index[1:k_users + 1]].notnull().values
-                    seen_sim_len = mv_rated @ corr_k
-                    seen_sim_len = 1 / (seen_sim_len + (seen_sim_len == 0))
-                    if normalization == 'centering + division by variance':
-                        recommended = w_sum_k * seen_sim_len * df_rating_raw[user_number].var() ** 0.5 + df_rating_raw[
-                            user_number].mean()
-                    elif normalization == 'centering':
-                        recommended = w_sum_k * seen_sim_len + df_rating_raw[user_number].mean()
-                    y_pred += list(recommended)
-
-    st.write("average error of a random test set containing 5000 data points:")
+    # calculations
+    y_pred, df_test_set = knn_uu_cosine(ratings, k_users, normalization)
     y_pred = np.array(y_pred)
     y_act = df_test_set.stack().values
     error = np.mean((y_pred - y_act) ** 2)
+
+    # result_item, result_distance = all_performances()
+    result_item, result_distance = load_results()
+    categories = list(result_item[2].columns[1:])
+    fig1 = go.Figure(data=[
+        go.Bar(name='item / item', x=categories, y=list(result_item[2].iloc[4][categories])),
+        go.Bar(name='user / user', x=categories, y=list(result_distance[2].iloc[4][categories]))
+    ])
+    # Change the bar mode
+    fig1.update_layout(barmode='group')
+
+    # display results
+    st.table(result_item[0])
+    st.table(result_distance[0])
+    st.write(fig1)
+    st.write("average error of a random test set containing 5000 data points:")
     st.write(error)
 
     if False:
@@ -947,6 +969,7 @@ def all_performances(movie=True, filter_tr=20):
         result_item = performance_item_item_cf(rating.copy(), movie=False)
         result_distance = performance_user_user_cf_distances(rating.copy(), movie=False)
         print()
+    return result_item, result_distance
 
 
 # print(all_performances(False))
@@ -957,4 +980,4 @@ def all_performances(movie=True, filter_tr=20):
 # pred, actuals = test_generation_distances(rating, movie)
 
 if __name__ == "__main__":
-    task3()
+    task2()
