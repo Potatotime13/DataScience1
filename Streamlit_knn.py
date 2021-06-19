@@ -108,7 +108,6 @@ def predicted_ratings_distances(df_rating, similarities, user_number, k_users, d
         sim_array = np.tile(sim_array,(rated.shape[0],1))
         sim_array = sim_array * rated.notna()
         predicted_ratings = np.nansum(rated*sim_array, axis=1)
-        a = np.nansum(sim_array, axis=1)
         predicted_ratings = predicted_ratings /np.nansum(sim_array, axis = 1)
         predicted_ratings = pd.Series(predicted_ratings, index=rated.index)
     if replacenan is True: predicted_ratings.fillna(replacement, inplace=True)
@@ -267,6 +266,7 @@ def mae(df):
 
 
 def create_valid(dataset, test_len=5000, movie=True):
+    dataset = dataset.reset_index()
     ind_exc = np.random.permutation(len(dataset))[0:test_len]
     test_set = dataset.iloc[ind_exc]
     if movie is True:
@@ -294,8 +294,6 @@ def create_valid(dataset, test_len=5000, movie=True):
         dataset = dataset[index_u]
         test_set = test_set.loc[index_m][index_u]
 
-
-
     return dataset, test_set
 
 
@@ -317,8 +315,11 @@ def color_descends(rec):
 def test_generation_distances(ratings, movie=True):
     ##### this part possibly in own function
 
+    if movie:
+        user_number = st.sidebar.selectbox("User ID", (10, 12, 69, 52, 153))
+    else:
+        user_number = st.sidebar.selectbox("User ID", (79186, 12, 69, 52, 153))
 
-    user_number = st.sidebar.selectbox("User ID", (10, 12, 69, 52, 153))
     k_users = st.sidebar.selectbox("K nearest", (23, 15, 20))
     list_len = st.sidebar.selectbox("Recommendations", (10, 40))
     normalization = st.sidebar.selectbox("Normalization",
@@ -343,7 +344,7 @@ def test_generation_distances(ratings, movie=True):
     actuals = []
     for x in test:
         # check if any value for a user is in test set
-        if c % 100 == 0: print(c)
+        if c % 10 == 0: print(c)
         if test[x].notna().values.any():
             similarities = similarity_calculation_distances(df_rating, distance_measure, x)
             user_average = df_rating_raw[user_number].mean()
