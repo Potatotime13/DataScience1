@@ -798,7 +798,7 @@ def task2():
     # Change the bar mode
     fig1.update_layout(barmode='group',
                        title=go.layout.Title(
-                           text="Plot Title",
+                           text=result_item[2].iloc[4][0],
                            xref="paper",
                            x=0
                        ),
