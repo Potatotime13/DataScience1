@@ -107,10 +107,17 @@ def predicted_ratings_distances(df_rating, similarities, user_number, k_users, d
     if replacenan is True: predicted_ratings.fillna(replacement, inplace=True)
     return predicted_ratings
 
-def create_corr_matrix(df_rating):
+def create_corr_matrix(df_rating, normalization='centering' ):
+    """creates a correlation matrix over the items"""
     df_rating = df_rating.transpose()
-    ### andere anpassung erlauben
-    df_rating = df_rating.fillna(df_rating.mean())
+    if normalization == 'centering':
+        df_rating = df_rating - df_rating.mean()
+        df_rating = df_rating.fillna(0)
+    elif normalization == 'centering + division by variance':
+        'centering + division by variance'
+    elif normalization == "None":
+        df_rating = df_rating.fillna(df_rating.mean())
+
     df_rating = df_rating.transpose()
 
     corr_movies = np.corrcoef(df_rating)
@@ -119,7 +126,8 @@ def create_corr_matrix(df_rating):
     corr_movies.columns = df_rating.index
     return corr_movies
 
-def item_item_cf(df_rating, corr_matrix,user_number, k_items=10, test_labels = []):
+
+def item_item_cf(df_rating, corr_matrix,user_number, k_items=10, test_labels = [], weighting=True):
     """returns predictions based on item item cf"""
     if len(test_labels) == 0:
         testing = False
@@ -127,7 +135,6 @@ def item_item_cf(df_rating, corr_matrix,user_number, k_items=10, test_labels = [
         testing = True
 
     k_items_original = k_items
-    #    corr_matrix = pd.read_csv("corr_movies.csv")
     corr_matrix_raw = corr_matrix.copy()
     corr_matrix = corr_matrix.fillna(-20)
 
@@ -143,6 +150,7 @@ def item_item_cf(df_rating, corr_matrix,user_number, k_items=10, test_labels = [
     counter = 0
     predictions = []
     for x in user_items:
+        if counter % 100 == 0: print(counter)
         k_items = k_items_original
         k_items += 1
         if x != x:
@@ -168,7 +176,20 @@ def item_item_cf(df_rating, corr_matrix,user_number, k_items=10, test_labels = [
                     predictions.append(np.nan)
                 # else append the average
                 else:
-                    predictions.append(np.nanmean(df_rating_raw[user_number].iloc[k_most_similar]))
+
+                    corrs = np.partition(corr_matrix[current_movie_id], -k_items)[-k_items:]
+                    df_rating_corr = df_rating_raw[user_number]
+                    if weighting is False:
+                        predictions.append(np.nanmean(df_rating_raw[user_number].iloc[k_most_similar]))
+
+                    else:
+                        predictions.append(np.nansum(df_rating_corr.iloc[k_most_similar] * corrs)/(np.sum(corrs[df_rating_corr.iloc[k_most_similar].notnull()])))
+                        a = df_rating_corr
+                        b = df_rating_corr.iloc[k_most_similar]
+                        c = np.sum(corrs[df_rating_corr.iloc[k_most_similar].notnull()])
+                        d = df_rating_corr.iloc[k_most_similar] * corrs
+                        pass
+
                 counter += 1
 
         # nan is not equal to itself, so if movie is not seen
@@ -178,6 +199,21 @@ def item_item_cf(df_rating, corr_matrix,user_number, k_items=10, test_labels = [
             counter += 1
     predictions = pd.Series(predictions, index=item_indices)
     return predictions
+
+
+
+
+#rating = pd.read_csv('ratings.csv')
+#df_rating = rating.pivot(index="movieId", columns="userId", values="rating")
+#movies = pd.read_csv('movies.csv')
+#df_rating_raw = df_rating.copy()
+#corr_matrix = create_corr_matrix(df_rating_raw)
+#predicted_ratings = item_item_cf(df_rating, corr_matrix, 15, 20) ##for movies replace 79186 with i e [1:610]
+#print()
+
+
+
+
 
 
 def basic_measures(df, onlypred=False, onlyactual=False):
@@ -531,8 +567,6 @@ def get_items_item_item_cf(item_list,predicted_ratings, list_len, movies = True,
     else:
         output = item_list.iloc[sorted[0:list_len]][['bookTitle', 'bookAuthor']]
     return output
-
-
 
 
 def task1():
