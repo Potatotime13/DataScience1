@@ -44,7 +44,7 @@ def movie_url(ids):
     return urls, info
 
 
-def get_book_data(filter_tr):
+def get_book_data(filter_tr, like_to_value=True):
     # load data from csv
     books = pd.read_csv('BX-Books.csv', sep=';', error_bad_lines=False, encoding="latin-1")
     books.columns = ['ISBN', 'bookTitle', 'bookAuthor', 'yearOfPublication', 'publisher', 'imageUrlS', 'imageUrlM',
@@ -67,6 +67,14 @@ def get_book_data(filter_tr):
 
     # create table
     df_ratings = ratings.pivot(index="ISBN", columns="userId", values="rating")
+
+    if like_to_value:
+        percentiles = df_ratings.describe(include='all').iloc[6].values
+        df_zeros = df_ratings.values == 0
+        df_ratings = df_ratings + df_zeros * percentiles
+        df_zeros = df_ratings == 0
+        df_ratings = df_ratings + df_zeros * np.mean(percentiles[percentiles != 0])
+
 
     return df_ratings, ratings, books, users
 
@@ -949,4 +957,4 @@ def all_performances(movie=True, filter_tr=20):
 # pred, actuals = test_generation_distances(rating, movie)
 
 if __name__ == "__main__":
-    main()
+    task3()
