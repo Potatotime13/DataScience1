@@ -893,7 +893,7 @@ def all_performances(movie= True, filter_tr = 20):
         result_distance = performance_user_user_cf_distances(rating.copy(), movie = False)
         print()
 
-print(all_performances(False))
+#print(all_performances(False))
 
 if __name__ == "__main__":
     main()
