@@ -803,7 +803,13 @@ def task2():
                            x=0
                        ),
                        )
-    fig2.update_layout(barmode='group')
+    fig2.update_layout(barmode='group',
+                       title=go.layout.Title(
+                           text=result_item[2].iloc[3][0],
+                           xref="paper",
+                           x=0
+                       ),
+                       )
     # display results
     st.table(result_item[0])
     st.table(result_distance[0])
