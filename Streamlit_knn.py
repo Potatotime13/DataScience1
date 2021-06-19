@@ -792,13 +792,18 @@ def task2():
         go.Bar(name='item / item', x=categories, y=list(result_item[2].iloc[4][categories])),
         go.Bar(name='user / user', x=categories, y=list(result_distance[2].iloc[4][categories]))
     ])
+    fig2 = go.Figure(data=[
+        go.Bar(name='item / item', x=categories, y=list(result_item[2].iloc[1][categories])),
+        go.Bar(name='user / user', x=categories, y=list(result_distance[2].iloc[1][categories]))
+    ])
     # Change the bar mode
     fig1.update_layout(barmode='group')
-
+    fig2.update_layout(barmode='group')
     # display results
     st.table(result_item[0])
     st.table(result_distance[0])
     st.write(fig1)
+    st.write(fig2)
     st.write("average error of a random test set containing 5000 data points:")
     st.write(error)
 
