@@ -795,7 +795,7 @@ def task2():
     fig2 = go.Figure(data=[
         go.Bar(name='item / item', x=categories, y=list(result_item[2].iloc[3][categories])),
         go.Bar(name='user / user', x=categories, y=list(result_distance[2].iloc[3][categories]))
-    ])
+    ], title='test')
     # Change the bar mode
     fig1.update_layout(barmode='group')
     fig2.update_layout(barmode='group')
