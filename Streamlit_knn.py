@@ -16,7 +16,7 @@ def main():
 
     c_task = st.sidebar.selectbox(
         "",
-        ("MovieLens", "MovieLens-Tech", "Books")
+        ("MovieLens", "MovieLens-Tech", "Books", "Books-Tech")
     )
     if c_task == "MovieLens":
         task1()
