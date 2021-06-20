@@ -614,8 +614,8 @@ def get_items_heuristik(movie=True):
             print(books[["bookTitle","bookAuthor"]][books["ISBN"]==recommended_movies[x]])
 
 
-get_items_heuristik(movie=False)
-print()
+#get_items_heuristik(movie=False)
+#print()
 
 def performance_item_item_cf(ratings, movie=True):
     """performance for item-item cf"""
