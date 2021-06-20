@@ -9,11 +9,49 @@ import urllib.request
 
 
 def main():
-    ratings = pd.read_csv('ratings.csv')
+    #ratings = pd.read_csv('ratings.csv')
+    df_ratings, ratings, df_rating_nonzero, books, users = get_book_data(200)
     for i in range(10):
-        y_pred, df_test_set = knn_uu_cosine(ratings, 15)
+        y_pred, df_test_set = knn_uu_cosine(ratings, 15, movie=False)
         saving = all_performance_measures(*group_test_results(y_pred, df_test_set))
-        print(saving)
+        print()
+
+
+def get_book_data(filter_tr, like_to_value=True):
+    # load data from csv
+    books = pd.read_csv('BX-Books.csv', sep=';', error_bad_lines=False, encoding="latin-1")
+    books.columns = ['ISBN', 'bookTitle', 'bookAuthor', 'yearOfPublication', 'publisher', 'imageUrlS', 'imageUrlM',
+                     'imageUrlL']
+
+    users = pd.read_csv('BX-Users.csv', sep=';', error_bad_lines=False, encoding="latin-1")
+    users.columns = ["userId", "location", "age"]
+
+    ratings = pd.read_csv('BX-Book-Ratings.csv', sep=';', error_bad_lines=False, encoding="latin-1")
+    ratings.columns = ["userId", "ISBN", "rating"]
+
+    ratings = ratings.drop_duplicates(subset=["userId", "ISBN"])
+
+    # filter dataset for users / items with much interaction
+    u = ratings.userId.value_counts()
+    b = ratings.ISBN.value_counts()
+
+    ratings = ratings[ratings.userId.isin(u.index[u.gt(filter_tr)])]
+    ratings = ratings[ratings.ISBN.isin(b.index[b.gt(filter_tr)])]
+
+    # create table
+    df_ratings = ratings.pivot(index="ISBN", columns="userId", values="rating")
+
+    if like_to_value:
+        percentiles = df_ratings.describe(include='all').iloc[6].values
+        df_zeros = df_ratings.values == 0
+        df_ratings = df_ratings + df_zeros * percentiles
+        df_zeros = df_ratings == 0
+        df_ratings = df_ratings + df_zeros * np.mean(percentiles[percentiles != 0])
+        ratings["rating"] = df_ratings.stack().values
+
+    df_rating_nonzero = ratings.loc[ratings["rating"].values != 0]
+
+    return df_ratings, ratings, df_rating_nonzero, books, users
 
 
 def group_test_results(predicted, actuals):
@@ -76,7 +114,7 @@ def rmse(df):
     if len(pred)== 0 or len(actual) == 0:
         return 0
     else:
-        return sum((actual - pred) ** 2) * 1 / len(pred)
+        return (sum((actual - pred) ** 2) * 1 / len(pred)) ** 0.5
 
 
 def mae(df):
@@ -87,7 +125,7 @@ def mae(df):
     if len(pred)== 0 or len(actual) == 0:
         return 0
     else:
-        return sum((actual - pred) ** 2) * 1 / len(pred)
+        return sum(np.abs(actual - pred)) * 1 / len(pred)
 
 
 def all_performance_measures(df_actual_pred, groups_by_actual, group_header_actual, groups_by_pred, group_header_pred):
@@ -191,9 +229,9 @@ def create_valid(dataset, test_len=5000, movie=True):
     return dataset, test_set
 
 
-def knn_uu_cosine(ratings, k_users):
+def knn_uu_cosine(ratings, k_users, movie=True):
     # exclude test set
-    df_rating, df_test_set = create_valid(ratings)
+    df_rating, df_test_set = create_valid(ratings, movie=movie)
 
     # rating table
     df_rating_raw = df_rating
