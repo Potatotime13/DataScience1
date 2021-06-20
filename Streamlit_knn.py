@@ -278,15 +278,6 @@ def item_item_cf(df_rating, corr_matrix, user_number, k_items=15, test_labels=[]
     return predictions
 
 
-# rating = pd.read_csv('ratings.csv')
-# df_rating = rating.pivot(index="movieId", columns="userId", values="rating")
-# movies = pd.read_csv('movies.csv')
-# df_rating_raw = df_rating.copy()
-# corr_matrix = create_corr_matrix(df_rating_raw)
-# predicted_ratings = item_item_cf(df_rating, corr_matrix, 15, 20) ##for movies replace 79186 with i e [1:610]
-# print()
-
-
 # performance measures
 def basic_measures(df, onlypred=False, onlyactual=False):
     pred = df["predicted"]
@@ -614,9 +605,6 @@ def get_items_heuristik(movie=True):
             print(books[["bookTitle","bookAuthor"]][books["ISBN"]==recommended_movies[x]])
 
 
-#get_items_heuristik(movie=False)
-#print()
-
 def performance_item_item_cf(ratings, movie=True):
     """performance for item-item cf"""
     pred, actuals = test_generation_item_cf(ratings, movie)
@@ -667,25 +655,6 @@ def performance_heuristik(ratings, movie=True):
     g = group_test_results(pred, actuals)
     results = all_performance_measures(*g)
     return results
-
-### Hier kann die heuristik ausgewertet werden
-#ratings = pd.read_csv('ratings.csv') #movie
-
-resul_list = []
-#for x in range(1):
-#    result = performance_heuristik(ratings, movie=True)
-#    resul_list.append(result)
-#print()
-
-#rating = pd.read_csv('BX-Book-Ratings.csv', sep=';', error_bad_lines=False, encoding="latin-1")
-#rating.columns = ["userId", "ISBN", "rating"]
-
-#u = rating.userId.value_counts()
-#b = rating.ISBN.value_counts()
-#rating = rating[rating.userId.isin(u.index[u.gt(20)])]
-#rating = rating[rating.ISBN.isin(b.index[b.gt(20)])]
-#result = performance_heuristik(rating, movie=False)
-#print()
 
 
 def performance_user_user_cf_distances(ratings, movie=True):
@@ -1100,9 +1069,6 @@ def bookprediction_item_item_cf():
     print(get_items_item_item_cf(books, item_item_cf(df_rating, corr_matrix, 79186, 10), 20, movies=False))  # books
 
 
-# bookprediction_item_item_cf()
-
-
 def all_performances(movie= True, filter_tr = 200):
     if movie is True:
         rating = pd.read_csv('ratings.csv')
@@ -1122,12 +1088,5 @@ def all_performances(movie= True, filter_tr = 200):
     return result_item, result_distance
 
 
-#print(all_performances(False))
-#movie= True
-#rating = pd.read_csv('ratings.csv')
-#df_rating = rating.pivot(index="movieId", columns="userId", values="rating")
-#movies = pd.read_csv('movies.csv')
-#pred, actuals = test_generation_distances(rating, movie)
-#
 if __name__ == "__main__":
     main()
