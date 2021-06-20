@@ -114,10 +114,10 @@ def create_valid(dataset, test_len=5000, movie=True):
 
 
 # recommendation methods
-def cosine(df_rating, user_number, k_users, df_rating_raw, normalization):
+def pearson(df_rating, user_number, k_users, df_rating_raw, normalization):
     user_std = (df_rating * df_rating).mean() ** 0.5
 
-    # calc cov matrix
+    # calc correlation matrix
     user_corr = df_rating.cov() / (user_std.values.reshape((-1, 1)) @ user_std.values.reshape((1, -1)))
     user_corr = user_corr.fillna(0)
 
@@ -724,7 +724,7 @@ def task1():
     normalization = st.sidebar.selectbox("Normalization",
                                          ('centering + division by variance', 'centering', "None"))
     distance_measure = st.sidebar.selectbox("distance_measure",
-                                            ('cosine', "euclidean", "manhattan (city block)", "hamming",
+                                            ('pearson', "euclidean", "manhattan (city block)", "hamming",
                                              "chebyshev"))
     # split the genres per movie
     movies["genres"] = movies["genres"].str.split('|')
@@ -744,8 +744,8 @@ def task1():
         df_rating = df_rating.fillna(df_rating.mean())
 
     # distance calculation and prediction
-    if distance_measure == "cosine":
-        recommended = cosine(df_rating, user_number, k_users, df_rating_raw, normalization)
+    if distance_measure == "pearson":
+        recommended = pearson(df_rating, user_number, k_users, df_rating_raw, normalization)
         rec = recommended.copy()
         sorted_mov = list(np.argsort(recommended))[::-1]
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
@@ -864,6 +864,11 @@ def task2():
             go.Bar(name='item / item', x=categories, y=list(result_item[1].iloc[:, 1])),
             go.Bar(name='user / user', x=categories, y=list(result_distance[1].iloc[:, 1]))
         ])
+        categories2 = list(result_item[0].iloc[:, 0])
+        fig2 = go.Figure(data=[
+            go.Bar(name='item / item', x=categories2, y=list(result_item[0].iloc[:, 1])),
+            go.Bar(name='user / user', x=categories2, y=list(result_distance[0].iloc[:, 1]))
+        ])
 
         # Change display settings
         fig1.update_layout(barmode='group',
@@ -873,10 +878,16 @@ def task2():
                                x=0
                            ),
                            )
+        fig2.update_layout(barmode='group',
+                           title=go.layout.Title(
+                               text='prediction summary',
+                               xref="paper",
+                               x=0
+                           ),
+                           )
         # display results
         st.write(fig1)
-        st.table(result_item[0].values)
-        st.table(result_distance[0].values)
+        st.write(fig2)
 
 
 def task3():
@@ -892,7 +903,7 @@ def task3():
     normalization = st.sidebar.selectbox("Normalization",
                                          ('centering + division by variance', 'centering', "None"))
     distance_measure = st.sidebar.selectbox("distance_measure",
-                                            ("euclidean", 'cosine', "euclidean", "manhattan (city block)", "hamming",
+                                            ('pearson', "euclidean", "manhattan (city block)", "hamming",
                                              "chebyshev"))
 
     df_rating_raw = df_rating
@@ -907,8 +918,8 @@ def task3():
     elif normalization == "None":
         df_rating = df_rating.fillna(df_rating.mean())
 
-    if distance_measure == "cosine":
-        recommended = cosine(df_rating, user_number, k_users, df_rating_raw, normalization)
+    if distance_measure == "pearson":
+        recommended = pearson(df_rating, user_number, k_users, df_rating_raw, normalization)
         rec = recommended.copy()  # recommended books
         sorted_bok = list(np.argsort(recommended))[::-1]
         output = books.iloc[sorted_bok[0:list_len]][['bookTitle', 'bookAuthor']]
@@ -1066,4 +1077,4 @@ def all_performances(movie= True, filter_tr = 200):
 
 
 if __name__ == "__main__":
-    task2()
+    main()
