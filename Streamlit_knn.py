@@ -317,7 +317,7 @@ def rmse(df):
     if len(pred)== 0 or len(actual) == 0:
         return 0
     else:
-        return sum((actual - pred) ** 2) ** 0.5 * 1 / len(pred)
+        return (sum((actual - pred) ** 2) * 1 / len(pred)) ** 0.5
 
 
 def mae(df):
