@@ -547,7 +547,7 @@ def item_item_cf_heuristik(df_rating, user_number=69, neighbours = 15, no_simila
     df_similar_to_favorites_rated = pd.DataFrame(np.array(similar_to_favorites_rated).T, columns = favorites)
     idx = np.random.permutation(df_similar_to_favorites_rated.index)
     df_names = pd.DataFrame(np.array(most_correlated).T, columns = favorites)
-    df_similar_to_favorites_rated =  df_similar_to_favorites_rated.reindex(idx)
+    df_similar_to_favorites_rated = df_similar_to_favorites_rated.reindex(idx)
     df_names = df_names.reindex(idx)
     ratings = df_similar_to_favorites_rated.fillna(-10).stack().nlargest(3)
     index = list(ratings.index)#df_similar_to_favorites_rated.max().fillna(-10).nlargest(no_of_recommendations).index
@@ -564,7 +564,6 @@ def item_item_cf_heuristik(df_rating, user_number=69, neighbours = 15, no_simila
             best_movies.append(np.nan)
             c += 1
     ratings.index = best_movies
-
 
     ratings = ratings[~ratings.index.duplicated(keep='first')]
     return ratings, index, best_movies
@@ -1049,8 +1048,6 @@ def task4():
 
 
 # test for performance measures
-
-
 def moviePrediction_item_item_cf():
     rating = pd.read_csv('ratings.csv')
     df_rating = rating.pivot(index="movieId", columns="userId", values="rating")
