@@ -331,57 +331,6 @@ def mae(df):
         return sum((actual - pred) ** 2) * 1 / len(pred)
 
 
-def knn_uu_cosine(ratings, k_users, normalization):
-    # exclude test set
-    df_rating, df_test_set = create_valid(ratings)
-
-    # rating table
-    df_rating_raw = df_rating
-
-    # normalization procedure
-    if normalization == 'centering + division by variance':
-        df_rating = (df_rating - df_rating.mean()) / df_rating.var() ** 0.5
-    elif normalization == 'centering':
-        df_rating = df_rating - df_rating.mean()
-    df_rating = df_rating.fillna(0)
-    user_std = (df_rating * df_rating).mean() ** 0.5
-
-    # calc cov matrix
-    user_corr = df_rating.cov() / (user_std.values.reshape((-1, 1)) @ user_std.values.reshape((1, -1)))
-    user_corr = user_corr.fillna(0)
-
-    # calc errors
-    y_pred = []
-
-    for user_number, val in df_test_set.iteritems():
-        # index of nearest users
-        sorted_index = list(np.argsort(user_corr[user_number]))[::-1]
-
-        # test set movies
-        test_mov = val.dropna()
-        test_mov_id = list(test_mov.index)
-        train_mov_id = list(df_rating.index)
-        test_mov_id = list(set(test_mov_id) & set(train_mov_id))
-        test_mov = test_mov[test_mov_id]
-
-        # sum of their ratings weighted by the corr
-        if len(test_mov) > 0:
-            corr_k = user_corr.iloc[sorted_index[1:k_users + 1]][[user_number]].values
-            ratings_k = df_rating.loc[test_mov_id].iloc[:, sorted_index[1:k_users + 1]].values
-            w_sum_k = ratings_k @ corr_k
-            mv_rated = df_rating_raw.loc[test_mov_id].iloc[:, sorted_index[1:k_users + 1]].notnull().values
-            seen_sim_len = mv_rated @ corr_k
-            seen_sim_len = 1 / (seen_sim_len + (seen_sim_len == 0))
-            if normalization == 'centering + division by variance':
-                recommended = w_sum_k * seen_sim_len * df_rating_raw[user_number].var() ** 0.5 + df_rating_raw[
-                    user_number].mean()
-            elif normalization == 'centering':
-                recommended = w_sum_k * seen_sim_len + df_rating_raw[user_number].mean()
-            y_pred += list(recommended)
-
-    return y_pred, df_test_set
-
-
 def load_results():
     result_item = []
     result_distances = []
