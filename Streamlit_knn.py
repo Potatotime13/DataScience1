@@ -866,8 +866,8 @@ def task2():
         ])
         categories2 = list(result_item[0].iloc[:, 0])
         fig2 = go.Figure(data=[
-            go.Bar(name='item / item', x=categories, y=list(result_item[0].iloc[:, 1])),
-            go.Bar(name='user / user', x=categories, y=list(result_distance[0].iloc[:, 1]))
+            go.Bar(name='item / item', x=categories2, y=list(result_item[0].iloc[:, 1])),
+            go.Bar(name='user / user', x=categories2, y=list(result_distance[0].iloc[:, 1]))
         ])
 
         # Change display settings
