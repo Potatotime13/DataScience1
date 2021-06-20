@@ -114,10 +114,10 @@ def create_valid(dataset, test_len=5000, movie=True):
 
 
 # recommendation methods
-def cosine(df_rating, user_number, k_users, df_rating_raw, normalization):
+def pearson(df_rating, user_number, k_users, df_rating_raw, normalization):
     user_std = (df_rating * df_rating).mean() ** 0.5
 
-    # calc cov matrix
+    # calc correlation matrix
     user_corr = df_rating.cov() / (user_std.values.reshape((-1, 1)) @ user_std.values.reshape((1, -1)))
     user_corr = user_corr.fillna(0)
 
@@ -724,7 +724,7 @@ def task1():
     normalization = st.sidebar.selectbox("Normalization",
                                          ('centering + division by variance', 'centering', "None"))
     distance_measure = st.sidebar.selectbox("distance_measure",
-                                            ('cosine', "euclidean", "manhattan (city block)", "hamming",
+                                            ('pearson', "euclidean", "manhattan (city block)", "hamming",
                                              "chebyshev"))
     # split the genres per movie
     movies["genres"] = movies["genres"].str.split('|')
@@ -744,8 +744,8 @@ def task1():
         df_rating = df_rating.fillna(df_rating.mean())
 
     # distance calculation and prediction
-    if distance_measure == "cosine":
-        recommended = cosine(df_rating, user_number, k_users, df_rating_raw, normalization)
+    if distance_measure == "pearson":
+        recommended = pearson(df_rating, user_number, k_users, df_rating_raw, normalization)
         rec = recommended.copy()
         sorted_mov = list(np.argsort(recommended))[::-1]
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
@@ -903,7 +903,7 @@ def task3():
     normalization = st.sidebar.selectbox("Normalization",
                                          ('centering + division by variance', 'centering', "None"))
     distance_measure = st.sidebar.selectbox("distance_measure",
-                                            ("euclidean", 'cosine', "euclidean", "manhattan (city block)", "hamming",
+                                            ("euclidean", 'pearson', "euclidean", "manhattan (city block)", "hamming",
                                              "chebyshev"))
 
     df_rating_raw = df_rating
@@ -918,8 +918,8 @@ def task3():
     elif normalization == "None":
         df_rating = df_rating.fillna(df_rating.mean())
 
-    if distance_measure == "cosine":
-        recommended = cosine(df_rating, user_number, k_users, df_rating_raw, normalization)
+    if distance_measure == "pearson":
+        recommended = pearson(df_rating, user_number, k_users, df_rating_raw, normalization)
         rec = recommended.copy()  # recommended books
         sorted_bok = list(np.argsort(recommended))[::-1]
         output = books.iloc[sorted_bok[0:list_len]][['bookTitle', 'bookAuthor']]
