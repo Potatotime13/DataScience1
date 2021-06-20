@@ -953,7 +953,6 @@ def task3():
 
 
 def task4():
-    st.write('K nearest neighbor - performance measures')
     df_ratings, ratings, df_rating_nonzero, books, users = get_book_data(200)
 
     # header
