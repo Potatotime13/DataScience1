@@ -963,12 +963,6 @@ def task4():
     k_users = st.sidebar.selectbox("K nearest", (15, 20))
     normalization = st.sidebar.selectbox("Normalization", ('centering', 'centering + division by variance'))
 
-    # calculations
-    y_pred, df_test_set = knn_uu_cosine(ratings, k_users, normalization)
-    y_pred = np.array(y_pred)
-    y_act = df_test_set.stack().values
-    error = np.mean((y_pred - y_act) ** 2)
-
     # result_item, result_distance = all_performances()
     result_item, result_distance = load_results()
     categories = list(result_item[2].columns[1:])
@@ -1013,7 +1007,6 @@ def task4():
     st.write(fig2)
     st.write(fig3)
     st.write("average error of a random test set containing 5000 data points:")
-    st.write(error)
     st.table(result_item[0])
     st.table(result_distance[0])
 
