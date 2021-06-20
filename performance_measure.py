@@ -4,6 +4,41 @@ import copy
 from scipy.spatial.distance import hamming, euclidean, chebyshev, cityblock
 
 
+def get_book_data(filter_tr, like_to_value=True):
+    # load data from csv
+    books = pd.read_csv('BX-Books.csv', sep=';', error_bad_lines=False, encoding="latin-1")
+    books.columns = ['ISBN', 'bookTitle', 'bookAuthor', 'yearOfPublication', 'publisher', 'imageUrlS', 'imageUrlM',
+                     'imageUrlL']
+
+    users = pd.read_csv('BX-Users.csv', sep=';', error_bad_lines=False, encoding="latin-1")
+    users.columns = ["userId", "location", "age"]
+
+    ratings = pd.read_csv('BX-Book-Ratings.csv', sep=';', error_bad_lines=False, encoding="latin-1")
+    ratings.columns = ["userId", "ISBN", "rating"]
+
+    ratings = ratings.drop_duplicates(subset=["userId", "ISBN"])
+
+    # filter dataset for users / items with much interaction
+    u = ratings.userId.value_counts()
+    b = ratings.ISBN.value_counts()
+
+    ratings = ratings[ratings.userId.isin(u.index[u.gt(filter_tr)])]
+    ratings = ratings[ratings.ISBN.isin(b.index[b.gt(filter_tr)])]
+
+    # create table
+    df_ratings = ratings.pivot(index="ISBN", columns="userId", values="rating")
+    df_rating_nonzero = ratings.loc[ratings["rating"].values != 0]
+    if like_to_value:
+        percentiles = df_ratings.describe(include='all').iloc[6].values
+        df_zeros = df_ratings.values == 0
+        df_ratings = df_ratings + df_zeros * percentiles
+        df_zeros = df_ratings == 0
+        df_ratings = df_ratings + df_zeros * np.mean(percentiles[percentiles != 0])
+        ratings["rating"] = df_ratings.stack().values
+
+    return df_ratings, ratings, df_rating_nonzero, books, users
+
+
 def create_valid(dataset, test_len=5000, movie=True):
     dataset = dataset.reset_index()
     ind_exc = np.random.permutation(len(dataset))[0:test_len]
