@@ -386,8 +386,8 @@ def load_results():
     result_item = []
     result_distances = []
     for i in range(4):
-        result_item.append(pd.read_csv('result_item_' + str(i)))
-        result_distances.append(pd.read_csv('result_distances_' + str(i)))
+        result_item.append(pd.read_csv('perf/result_item_' + str(i)))
+        result_distances.append(pd.read_csv('perf/result_distances_' + str(i)))
     return result_item, result_distances
 
 
