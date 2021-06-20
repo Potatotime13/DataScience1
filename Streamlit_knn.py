@@ -1077,4 +1077,4 @@ def all_performances(movie= True, filter_tr = 200):
 
 
 if __name__ == "__main__":
-    task2()
+    main()
