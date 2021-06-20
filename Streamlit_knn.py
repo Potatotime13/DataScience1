@@ -804,62 +804,79 @@ def task1():
 
 
 def task2():
-    # read movie lens
-    ratings = pd.read_csv('ratings.csv')
+    # load data
+    result_item, result_distance = load_results()
 
     # header
     st.write('K nearest neighbor - performance measures')
 
     # get settings from sidebar
-    k_users = st.sidebar.selectbox("K nearest", (15, 20))
-    normalization = st.sidebar.selectbox("Normalization", ('centering', 'centering + division by variance'))
+    info_shown = st.sidebar.selectbox("Measures", ("basic measures", "distribution measures"))
 
     # result_item, result_distance = all_performances()
-    result_item, result_distance = load_results()
-    categories = list(result_item[2].columns[1:])
-    fig1 = go.Figure(data=[
-        go.Bar(name='item / item', x=categories, y=list(result_item[2].iloc[4][categories])),
-        go.Bar(name='user / user', x=categories, y=list(result_distance[2].iloc[4][categories]))
-    ])
-    fig2 = go.Figure(data=[
-        go.Bar(name='item / item', x=categories, y=list(result_item[2].iloc[3][categories])),
-        go.Bar(name='user / user', x=categories, y=list(result_distance[2].iloc[3][categories]))
-    ])
-    fig3 = go.Figure(data=[
-        go.Bar(name='item / item', x=categories, y=list(result_item[2].iloc[1][categories])),
-        go.Bar(name='user / user', x=categories, y=list(result_distance[2].iloc[1][categories]))
-    ])
+    if info_shown == "distribution measures":
 
-    # Change display settings
-    fig1.update_layout(barmode='group',
-                       title=go.layout.Title(
-                           text=result_item[2].iloc[4][0],
-                           xref="paper",
-                           x=0
-                       ),
-                       )
-    fig2.update_layout(barmode='group',
-                       title=go.layout.Title(
-                           text=result_item[2].iloc[3][0],
-                           xref="paper",
-                           x=0
-                       ),
-                       )
-    fig3.update_layout(barmode='group',
-                       title=go.layout.Title(
-                           text=result_item[2].iloc[1][0],
-                           xref="paper",
-                           x=0
-                       ),
-                       )
+        categories = list(result_item[2].columns[1:])
+        fig1 = go.Figure(data=[
+            go.Bar(name='item / item', x=categories, y=list(result_item[2].iloc[4][categories])),
+            go.Bar(name='user / user', x=categories, y=list(result_distance[2].iloc[4][categories]))
+        ])
+        fig2 = go.Figure(data=[
+            go.Bar(name='item / item', x=categories, y=list(result_item[2].iloc[3][categories])),
+            go.Bar(name='user / user', x=categories, y=list(result_distance[2].iloc[3][categories]))
+        ])
+        fig3 = go.Figure(data=[
+            go.Bar(name='item / item', x=categories, y=list(result_item[2].iloc[1][categories])),
+            go.Bar(name='user / user', x=categories, y=list(result_distance[2].iloc[1][categories]))
+        ])
 
-    # display results
-    st.write(fig1)
-    st.write(fig2)
-    st.write(fig3)
-    st.write("average error of a random test set containing 5000 data points:")
-    st.table(result_item[0])
-    st.table(result_distance[0])
+        # Change display settings
+        fig1.update_layout(barmode='group',
+                           title=go.layout.Title(
+                               text=result_item[2].iloc[4][0],
+                               xref="paper",
+                               x=0
+                           ),
+                           )
+        fig2.update_layout(barmode='group',
+                           title=go.layout.Title(
+                               text=result_item[2].iloc[3][0],
+                               xref="paper",
+                               x=0
+                           ),
+                           )
+        fig3.update_layout(barmode='group',
+                           title=go.layout.Title(
+                               text=result_item[2].iloc[1][0],
+                               xref="paper",
+                               x=0
+                           ),
+                           )
+        # display results
+        st.write(fig1)
+        st.write(fig2)
+        st.write(fig3)
+
+    elif info_shown == "basic measures":
+
+        categories = list(result_item[1].columns[1:])
+        fig1 = go.Figure(data=[
+            go.Bar(name='item / item', x=categories, y=list(result_item[1][categories])),
+            go.Bar(name='user / user', x=categories, y=list(result_distance[1][categories]))
+        ])
+
+        # Change display settings
+        fig1.update_layout(barmode='group',
+                           title=go.layout.Title(
+                               text='basic measures of predictions',
+                               xref="paper",
+                               x=0
+                           ),
+                           )
+        # display results
+        st.write(fig1)
+        st.table(result_item[0].values)
+        st.table(result_distance[0].values)
 
 
 def task3():
@@ -1049,4 +1066,4 @@ def all_performances(movie= True, filter_tr = 200):
 
 
 if __name__ == "__main__":
-    main()
+    task2()
