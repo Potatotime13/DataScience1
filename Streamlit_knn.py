@@ -859,10 +859,10 @@ def task2():
 
     elif info_shown == "basic measures":
 
-        categories = list(result_item[1].columns[1:])
+        categories = list(result_item[1].iloc[:, 0])
         fig1 = go.Figure(data=[
-            go.Bar(name='item / item', x=categories, y=list(result_item[1][categories])),
-            go.Bar(name='user / user', x=categories, y=list(result_distance[1][categories]))
+            go.Bar(name='item / item', x=categories, y=list(result_item[1].iloc[:, 1])),
+            go.Bar(name='user / user', x=categories, y=list(result_distance[1].iloc[:, 1]))
         ])
 
         # Change display settings
