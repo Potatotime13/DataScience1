@@ -209,7 +209,7 @@ def rmse(df):
     if len(pred)== 0 or len(actual) == 0:
         return 0
     else:
-        return sum((actual - pred) ** 2) * 1 / len(pred)
+        return np.sqrt(sum((actual - pred) ** 2) * 1 / len(pred))
 
 
 def mae(df):
@@ -220,7 +220,7 @@ def mae(df):
     if len(pred)== 0 or len(actual) == 0:
         return 0
     else:
-        return sum((actual - pred) ** 2) * 1 / len(pred)
+        return sum(np.abs(actual - pred)) * 1 / len(pred)
 
 
 def test_generation_distances(ratings, movie=True):
