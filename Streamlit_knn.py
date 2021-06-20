@@ -118,7 +118,7 @@ def pearson(df_rating, user_number, k_users, df_rating_raw, normalization):
     user_std = (df_rating * df_rating).mean() ** 0.5
 
     # calc correlation matrix
-    user_corr = df_rating.corr()
+    user_corr = df_rating.cov() / (user_std.values.reshape((-1, 1)) @ user_std.values.reshape((1, -1)))
     user_corr = user_corr.fillna(0)
 
     # index of nearest users
