@@ -312,7 +312,10 @@ def mse(df):
     df = df.dropna()
     actual = df["actual"]
     pred = df["predicted"]
-    return sum((actual - pred) ** 2) * 1 / len(pred)
+    if len(pred)== 0 or len(actual) == 0:
+        return 0
+    else:
+        return sum((actual - pred) ** 2) * 1 / len(pred)
 
 
 def rmse(df):
@@ -320,7 +323,10 @@ def rmse(df):
     df = df.dropna()
     actual = df["actual"]
     pred = df["predicted"]
-    return np.sqrt(sum((actual - pred) ** 2) * 1 / len(pred))
+    if len(pred)== 0 or len(actual) == 0:
+        return 0
+    else:
+        return sum((actual - pred) ** 2) * 1 / len(pred)
 
 
 def mae(df):
@@ -328,7 +334,10 @@ def mae(df):
     df = df.dropna()
     actual = df["actual"]
     pred = df["predicted"]
-    return sum(np.abs(actual - pred)) * 1 / len(pred)
+    if len(pred)== 0 or len(actual) == 0:
+        return 0
+    else:
+        return sum((actual - pred) ** 2) * 1 / len(pred)
 
 
 def test_generation_distances(ratings, movie=True):
@@ -346,7 +355,7 @@ def test_generation_distances(ratings, movie=True):
     distance_measure = st.sidebar.selectbox("distance_measure",
                                             ("euclidean", 'cosine', "euclidean", "manhattan (city block)", "hamming",
                                              "chebyshev"))
-    train, test = create_valid(ratings, 5000, movie)
+    train, test = create_valid(ratings,5000 ,movie)
     df_rating = train
     df_rating_raw = df_rating.copy()
     if normalization == 'centering + division by variance':
@@ -446,6 +455,7 @@ def all_performance_measures(df_actual_pred, groups_by_actual, group_header_actu
     # iterates through the groups within the actual ratings and
     # calcs performance measures
     c = 0
+    df_groups_actual = [] # for testing of heuristik
     plot_groups_actual = []
     for x in groups_by_actual:
 
@@ -502,11 +512,15 @@ def all_performance_measures(df_actual_pred, groups_by_actual, group_header_actu
     return df_basic_measures_for_all_testpoints, df_performance_for_all_testpoints, df_groups_actual, df_groups_pred
 
 
-def item_item_cf_heuristik(df_rating, user_number=69, neighbours=15, no_similar_to_favorite=5, no_of_recommendations=3):
+def item_item_cf_heuristik(df_rating, user_number=69, neighbours = 15, no_similar_to_favorite = 5, no_of_recommendations= 3, corr_matrix = False):
     favorites = df_rating[user_number][df_rating[user_number] == df_rating[user_number].max()].index
-    ### replace problematic values in corr matrix
+    favorites = np.random.permutation(favorites)
 
-    corr_matrix = create_corr_matrix(df_rating)
+    ### replace problematic values in corr matrix
+    if corr_matrix is False:
+        corr_matrix = create_corr_matrix(df_rating)
+    else:
+        corr_matrix = corr_matrix
     corr_matrix = corr_matrix.fillna(-20)
 
     corr_matrix_reduced = corr_matrix.copy()
@@ -539,11 +553,16 @@ def item_item_cf_heuristik(df_rating, user_number=69, neighbours=15, no_similar_
             # calc mean among them in df_rating weighted by correlation
             # save results
         similar_to_favorites_rated.append(l)
-    df_similar_to_favorites_rated = pd.DataFrame(np.array(similar_to_favorites_rated).T, columns=favorites)
-    df_names = pd.DataFrame(np.array(most_correlated).T, columns=favorites)
-    ratings = df_similar_to_favorites_rated.max().fillna(-10).nlargest(no_of_recommendations)
-    index = df_similar_to_favorites_rated.max().fillna(-10).nlargest(no_of_recommendations).index
-    max_index = df_similar_to_favorites_rated.loc[:, index].idxmax()
+    df_similar_to_favorites_rated = pd.DataFrame(np.array(similar_to_favorites_rated).T, columns = favorites)
+    idx = np.random.permutation(df_similar_to_favorites_rated.index)
+    df_names = pd.DataFrame(np.array(most_correlated).T, columns = favorites)
+    df_similar_to_favorites_rated =  df_similar_to_favorites_rated.reindex(idx)
+    df_names = df_names.reindex(idx)
+    ratings = df_similar_to_favorites_rated.fillna(-10).stack().nlargest(3)
+    index = list(ratings.index)#df_similar_to_favorites_rated.max().fillna(-10).nlargest(no_of_recommendations).index
+    for x in range(len(index)):
+        index[x] = index[x][1]
+    max_index = df_similar_to_favorites_rated.loc[:,index].idxmax()
     best_movies = []
     c = 0
     for x in index:
@@ -553,15 +572,50 @@ def item_item_cf_heuristik(df_rating, user_number=69, neighbours=15, no_similar_
         except:
             best_movies.append(np.nan)
             c += 1
-    ratings.reindex(best_movies)
-
-    return best_movies, index, ratings
+    ratings.index = best_movies
 
 
-# ratings = pd.read_csv('ratings.csv')
-# df_rating = ratings.pivot(index="movieId", columns="userId", values="rating")
-# print(item_item_cf_heuristik(df_rating))
+    ratings = ratings[~ratings.index.duplicated(keep='first')]
+    return ratings, index, best_movies
 
+
+def get_items_heuristik(movie=True):
+    if movie:
+        ### user_number muss flexibel
+        user_number = 1
+        ratings = pd.read_csv('ratings.csv')
+        movies = pd.read_csv('movies.csv')
+        df_rating = ratings.pivot(index="movieId", columns="userId", values="rating")
+        result = item_item_cf_heuristik(df_rating, user_number)
+        liked_movie, recommended_movies = result[1], result[2]
+        for x in range(len(liked_movie)):
+            print("Because you liked",movies[["title","genres"]][movies["movieId"]==liked_movie[x]]," \n you might like:")
+            print(movies[["title","genres"]][movies["movieId"]==recommended_movies[x]])
+    else:
+        rating = pd.read_csv('BX-Book-Ratings.csv', sep=';', error_bad_lines=False, encoding="latin-1")
+        rating.columns = ["userId", "ISBN", "rating"]
+
+        rating = rating.drop_duplicates(subset=["userId", "ISBN"])
+        u = rating.userId.value_counts()
+        b = rating.ISBN.value_counts()
+        rating = rating[rating.userId.isin(u.index[u.gt(20)])]
+        rating = rating[rating.ISBN.isin(b.index[b.gt(20)])]
+        df_rating = rating.pivot(index="ISBN", columns="userId", values="rating")
+
+        user_number = 79186
+        result = item_item_cf_heuristik(df_rating, user_number)
+        liked_books, recommended_movies = result[1], result[2]
+        books = pd.read_csv('BX-Books.csv', sep=';', error_bad_lines=False, encoding="latin-1")
+        books.columns = ['ISBN', 'bookTitle', 'bookAuthor', 'yearOfPublication', 'publisher', 'imageUrlS', 'imageUrlM',
+                         'imageUrlL']
+
+        for x in range(len(liked_books)):
+            print("Because you liked",books[["bookTitle","bookAuthor"]][books["ISBN"]==liked_books[x]]," \n you might like:")
+            print(books[["bookTitle","bookAuthor"]][books["ISBN"]==recommended_movies[x]])
+
+
+get_items_heuristik(movie=False)
+print()
 
 def performance_item_item_cf(ratings, movie=True):
     """performance for item-item cf"""
@@ -569,6 +623,69 @@ def performance_item_item_cf(ratings, movie=True):
     g = group_test_results(pred, actuals)
     results = all_performance_measures(*g)
     return results
+
+
+def test_generation_heuristik(ratings, movie= True):
+    """generates predictions for a test set with item-item cf"""
+
+    train, test = create_valid(ratings, 5000, movie)
+    df_rating = train
+    df_rating_raw = df_rating.copy()
+    c = 0
+    user_number = 1
+    predicted = []
+    actuals = []
+    corr_matrix = create_corr_matrix(df_rating_raw)
+
+    for x in test:
+        if c % 10 ==0:
+            print(c)
+        # check if any value for a user is in test set
+        if test[x].notna().values.any():
+            predicted_ratings = item_item_cf_heuristik(df_rating, x, corr_matrix=corr_matrix)[0]
+            if movie:
+                predicted_ratings = pd.Series(np.full(shape=len(predicted_ratings), fill_value=5),
+                                          index=predicted_ratings.index)
+            else:
+                predicted_ratings = pd.Series(np.full(shape=len(predicted_ratings), fill_value=10),
+                                          index=predicted_ratings.index)
+            in_common_movies = list(set(predicted_ratings.index).intersection(test.index))
+            predicted.append(list(predicted_ratings[in_common_movies]))
+            actuals.append(list(test[x][in_common_movies]))
+
+            c += 1
+            ###
+
+        else:
+            pass
+
+    return predicted, actuals
+
+
+def performance_heuristik(ratings, movie=True):
+    pred, actuals = test_generation_heuristik(ratings, movie)
+    g = group_test_results(pred, actuals)
+    results = all_performance_measures(*g)
+    return results
+
+### Hier kann die heuristik ausgewertet werden
+ratings = pd.read_csv('ratings.csv') #movie
+
+resul_list = []
+for x in range(1):
+    result = performance_heuristik(ratings, movie=True)
+    resul_list.append(result)
+print()
+
+rating = pd.read_csv('BX-Book-Ratings.csv', sep=';', error_bad_lines=False, encoding="latin-1")
+rating.columns = ["userId", "ISBN", "rating"]
+
+u = rating.userId.value_counts()
+b = rating.ISBN.value_counts()
+rating = rating[rating.userId.isin(u.index[u.gt(20)])]
+rating = rating[rating.ISBN.isin(b.index[b.gt(20)])]
+result = performance_heuristik(rating, movie=False)
+print()
 
 
 def performance_user_user_cf_distances(ratings, movie=True):
@@ -986,7 +1103,7 @@ def bookprediction_item_item_cf():
 # bookprediction_item_item_cf()
 
 
-def all_performances(movie=True, filter_tr=20):
+def all_performances(movie= True, filter_tr = 200):
     if movie is True:
         rating = pd.read_csv('ratings.csv')
         result_item = performance_item_item_cf(rating.copy())
@@ -1005,12 +1122,12 @@ def all_performances(movie=True, filter_tr=20):
     return result_item, result_distance
 
 
-# print(all_performances(False))
-# movie= True
-# rating = pd.read_csv('ratings.csv')
-# df_rating = rating.pivot(index="movieId", columns="userId", values="rating")
-# movies = pd.read_csv('movies.csv')
-# pred, actuals = test_generation_distances(rating, movie)
+#print(all_performances(False))
+#movie= True
+#rating = pd.read_csv('ratings.csv')
+#df_rating = rating.pivot(index="movieId", columns="userId", values="rating")
+#movies = pd.read_csv('movies.csv')
+#pred, actuals = test_generation_distances(rating, movie)
 
 if __name__ == "__main__":
     task3()
