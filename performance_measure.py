@@ -224,20 +224,13 @@ def mae(df):
 
 
 def test_generation_distances(ratings, movie=True):
-    ##### this part possibly in own function
 
-    if movie:
-        user_number = st.sidebar.selectbox("User ID", (10, 12, 69, 52, 153))
-    else:
-        user_number = st.sidebar.selectbox("User ID", (79186, 12, 69, 52, 153))
+    #### hyperparameters
+    k_users = 23
+    normalization = 'centering + division by variance'
+    distance_measure = "euclidean"
+    ####
 
-    k_users = st.sidebar.selectbox("K nearest", (23, 15, 20))
-    list_len = st.sidebar.selectbox("Recommendations", (10, 40))
-    normalization = st.sidebar.selectbox("Normalization",
-                                         ('centering + division by variance', 'centering', "None"))
-    distance_measure = st.sidebar.selectbox("distance_measure",
-                                            ("euclidean", 'cosine', "euclidean", "manhattan (city block)", "hamming",
-                                             "chebyshev"))
     train, test = create_valid(ratings,5000 ,movie)
     df_rating = train
     df_rating_raw = df_rating.copy()
@@ -258,9 +251,10 @@ def test_generation_distances(ratings, movie=True):
         if c % 10 == 0: print(c)
         if test[x].notna().values.any():
             similarities = similarity_calculation_distances(df_rating, distance_measure, x)
-            user_average = df_rating_raw[user_number].mean()
+            user_average = df_rating_raw[x].mean()
+
             # change replacenan to true to replace nans with user average
-            predicted_ratings = predicted_ratings_distances(df_rating_raw, similarities, user_number, k_users,
+            predicted_ratings = predicted_ratings_distances(df_rating_raw, similarities, x, k_users,
                                                             df_rating_raw, replacenan=False, replacement=user_average,
                                                             testing=True)
             index = list(test[x].dropna().index)
@@ -287,8 +281,6 @@ def test_generation_item_cf(ratings, movie=True):
     for x in test:
         if c % 10 == 0:
             print(c)
-        if c == 100:
-            break
         # check if any value for a user is in test set
         if test[x].notna().values.any():
             predicted_ratings = item_item_cf(df_rating, corr_matrix, x, 15, test[x].dropna().index)
@@ -394,7 +386,7 @@ def all_performance_measures(df_actual_pred, groups_by_actual, group_header_actu
         plot_parameters.append(mae(x))
         if c == 0:
             df_groups_actual = pd.DataFrame(np.array(plot_parameters),
-                                            index=["actual rating", "no of predictions", "average", "std", "mse",
+                                            index=["actual rating", "no of actual ratings", "average", "std", "mse",
                                                    "rmse", "mae"],
                                             columns=[group_header_actual[c]])
         else:
@@ -525,8 +517,8 @@ def all_performances(movie= True, filter_tr = 200):
         rating = pd.read_csv('ratings.csv')
         result_item = performance_item_item_cf(rating.copy())
         result_distance = performance_user_user_cf_distances(rating.copy())
-        result_heuristik = performance_heuristik(ratings.copy())
-        return result_item, result_distance, result_heuristik
+        result_heuristik = performance_heuristik(rating.copy())
+        return  result_item, result_distance, result_heuristik #
 
     else:
         rating = pd.read_csv('BX-Book-Ratings.csv', sep=';', error_bad_lines=False, encoding="latin-1")
@@ -538,8 +530,5 @@ def all_performances(movie= True, filter_tr = 200):
         rating = rating[rating.ISBN.isin(b.index[b.gt(filter_tr)])]
         result_item = performance_item_item_cf(rating.copy(), movie=False)
         result_distance = performance_user_user_cf_distances(rating.copy(), movie=False)
-        result_heuristik = performance_heuristik(ratings.copy(), False)
+        result_heuristik = performance_heuristik(rating.copy(), False)
     return result_item, result_distance, result_heuristik
-
-a,b,c = all_performances()
-d,e,f = all_performances(False)
