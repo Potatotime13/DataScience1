@@ -1013,4 +1013,4 @@ def all_performances(movie=True, filter_tr=20):
 # pred, actuals = test_generation_distances(rating, movie)
 
 if __name__ == "__main__":
-    task3()
+    main()
