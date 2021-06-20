@@ -669,23 +669,23 @@ def performance_heuristik(ratings, movie=True):
     return results
 
 ### Hier kann die heuristik ausgewertet werden
-ratings = pd.read_csv('ratings.csv') #movie
+#ratings = pd.read_csv('ratings.csv') #movie
 
 resul_list = []
-for x in range(1):
-    result = performance_heuristik(ratings, movie=True)
-    resul_list.append(result)
-print()
+#for x in range(1):
+#    result = performance_heuristik(ratings, movie=True)
+#    resul_list.append(result)
+#print()
 
-rating = pd.read_csv('BX-Book-Ratings.csv', sep=';', error_bad_lines=False, encoding="latin-1")
-rating.columns = ["userId", "ISBN", "rating"]
+#rating = pd.read_csv('BX-Book-Ratings.csv', sep=';', error_bad_lines=False, encoding="latin-1")
+#rating.columns = ["userId", "ISBN", "rating"]
 
-u = rating.userId.value_counts()
-b = rating.ISBN.value_counts()
-rating = rating[rating.userId.isin(u.index[u.gt(20)])]
-rating = rating[rating.ISBN.isin(b.index[b.gt(20)])]
-result = performance_heuristik(rating, movie=False)
-print()
+#u = rating.userId.value_counts()
+#b = rating.ISBN.value_counts()
+#rating = rating[rating.userId.isin(u.index[u.gt(20)])]
+#rating = rating[rating.ISBN.isin(b.index[b.gt(20)])]
+#result = performance_heuristik(rating, movie=False)
+#print()
 
 
 def performance_user_user_cf_distances(ratings, movie=True):
