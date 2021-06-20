@@ -74,8 +74,11 @@ def get_book_data(filter_tr, like_to_value=True):
         df_ratings = df_ratings + df_zeros * percentiles
         df_zeros = df_ratings == 0
         df_ratings = df_ratings + df_zeros * np.mean(percentiles[percentiles != 0])
+        ratings["rating"] = df_ratings.stack().values
 
-    return df_ratings, ratings, books, users
+    df_rating_nonzero = ratings.loc[ratings["rating"].values != 0]
+
+    return df_ratings, ratings, df_rating_nonzero, books, users
 
 
 def create_valid(dataset, test_len=5000, movie=True):
@@ -868,7 +871,7 @@ def task3():
     st.write('K nearest neighbor')
 
     # load data
-    df_rating, ratings, books, users = get_book_data(200)
+    df_rating, ratings, df_rating_nonzero, books, users = get_book_data(200)
 
     # get settings from sidebar
     user_number = st.sidebar.selectbox("User ID", (79186, 207782))
@@ -956,7 +959,7 @@ def task3():
 
 def task4():
     st.write('K nearest neighbor - performance measures')
-    df_ratings, ratings, books, users = get_book_data(200)
+    df_ratings, ratings, df_rating_nonzero, books, users = get_book_data(200)
 
 
 # test for performance measures
@@ -973,7 +976,7 @@ def moviePrediction_item_item_cf():
 
 
 def bookprediction_item_item_cf():
-    df_rating, ratings, books, users = get_book_data(200)
+    df_rating, ratings, df_rating_nonzero, books, users = get_book_data(200)
     df_rating_raw = df_rating.copy()
     corr_matrix = create_corr_matrix(df_rating_raw)
     predicted_ratings = item_item_cf(df_rating, corr_matrix, 79186, 15)
@@ -1010,4 +1013,4 @@ def all_performances(movie=True, filter_tr=20):
 # pred, actuals = test_generation_distances(rating, movie)
 
 if __name__ == "__main__":
-    task2()
+    task3()
