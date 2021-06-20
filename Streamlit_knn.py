@@ -824,13 +824,13 @@ def task2():
                        )
 
     # display results
-    st.table(result_item[0])
-    st.table(result_distance[0])
     st.write(fig1)
     st.write(fig2)
     st.write(fig3)
     st.write("average error of a random test set containing 5000 data points:")
     st.write(error)
+    st.table(result_item[0])
+    st.table(result_distance[0])
 
     if False:
         # surface plot
