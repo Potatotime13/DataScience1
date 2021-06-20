@@ -35,7 +35,7 @@ def get_book_data(filter_tr, like_to_value=True):
         df_zeros = df_ratings == 0
         df_ratings = df_ratings + df_zeros * np.mean(percentiles[percentiles != 0])
         ratings["rating"] = df_ratings.stack().values
-
+    # second output has th raw data format
     return df_ratings, ratings, df_rating_nonzero, books, users
 
 
