@@ -300,7 +300,7 @@ def item_item_cf_heuristik(df_rating, user_number=69, neighbours = 15, no_simila
 
     corr_matrix_reduced = corr_matrix.copy()
     corr_matrix = corr_matrix.drop(list(df_rating[user_number].dropna().index), axis=0)
-    corr_matrix_reduced = corr_matrix_reduced.drop(favorites, axis=0)
+    #corr_matrix_reduced = corr_matrix_reduced.drop(favorites, axis=0)
     corr_matrix_reduced = corr_matrix_reduced.drop(favorites, axis=1)
     most_correlated = []
     correlation_of_most_correlated = []
@@ -315,19 +315,25 @@ def item_item_cf_heuristik(df_rating, user_number=69, neighbours = 15, no_simila
                 pass
             else:
                 corr_matrix_reduced = corr_matrix_reduced.drop(y, axis=0)
-
+    corr_matrix_local = corr_matrix_reduced
     similar_to_favorites_rated = []
+    c = 0
     for x in most_correlated:
         l = []
         for y in x:
-            h = np.argpartition(corr_matrix_reduced[y], -neighbours)[-neighbours:]
-            correlations_to_neighbours = np.partition(corr_matrix_reduced[y], -neighbours)[-neighbours:]
-            index_neighbours = corr_matrix_reduced[y].iloc[h].index
+            #corr_matrix_local = corr_matrix_reduced.drop(favorites[c], axis=0)
+            h = np.argpartition(corr_matrix_local[y], -neighbours)[-neighbours:]
+            correlations_to_neighbours = np.partition(corr_matrix_local[y], -neighbours)[-neighbours:]
+            index_neighbours = corr_matrix_local[y].iloc[h].index
+            if favorites[c] in index_neighbours:
+                index_neighbours = index_neighbours.drop(favorites[c])
+            rating = np.nanmean(df_rating[user_number][index_neighbours])
             l.append(np.nanmean(df_rating[user_number][index_neighbours]))
             # get neighbours most correlated keep correlation
             # calc mean among them in df_rating weighted by correlation
             # save results
         similar_to_favorites_rated.append(l)
+        c +=1
     df_similar_to_favorites_rated = pd.DataFrame(np.array(similar_to_favorites_rated).T, columns = favorites)
     idx = np.random.permutation(df_similar_to_favorites_rated.index)
     df_names = pd.DataFrame(np.array(most_correlated).T, columns = favorites)
@@ -353,11 +359,7 @@ def item_item_cf_heuristik(df_rating, user_number=69, neighbours = 15, no_simila
     return ratings, index, best_movies
 
 
-
-
-#### example to get predictions
-
-def get_items_heuristik(movie=True):
+def get_items_heuristik(user_number=1, movie=True):
     if movie:
         ### user_number muss flexibel
         user_number = 1
@@ -365,10 +367,14 @@ def get_items_heuristik(movie=True):
         movies = pd.read_csv('movies.csv')
         df_rating = ratings.pivot(index="movieId", columns="userId", values="rating")
         result = item_item_cf_heuristik(df_rating, user_number)
-        liked_movie, recommended_movies = result[1], result[2]
-        for x in range(len(liked_movie)):
-            print("Because you liked",movies[["title","genres"]][movies["movieId"]==liked_movie[x]]," \n you might like:")
-            print(movies[["title","genres"]][movies["movieId"]==recommended_movies[x]])
+        rated_movies, liked_movie, recommended_movies = result[0],result[1], result[2]
+        df_rows = []
+        df = []
+        if x in range(len(rated_movies)):
+            df_rows.append([rated_movies[x], liked_movie[x], recommended_movies[x]])
+        df_heuristik = pd.DataFrame(df_rows, columns = ["predicted rating", "Because you liked", "you might like"])
+        return df_heuristik
+
     else:
         rating = pd.read_csv('BX-Book-Ratings.csv', sep=';', error_bad_lines=False, encoding="latin-1")
         rating.columns = ["userId", "ISBN", "rating"]
@@ -390,7 +396,6 @@ def get_items_heuristik(movie=True):
         for x in range(len(liked_books)):
             print("Because you liked",books[["bookTitle","bookAuthor"]][books["ISBN"]==liked_books[x]]," \n you might like:")
             print(books[["bookTitle","bookAuthor"]][books["ISBN"]==recommended_movies[x]])
-
 
 def moviePrediction_item_item_cf():
     rating = pd.read_csv('ratings.csv')
