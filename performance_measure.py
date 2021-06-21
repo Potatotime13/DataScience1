@@ -520,14 +520,99 @@ def all_performances(movie= True, filter_tr = 20):
         rating = pd.read_csv('BX-Book-Ratings.csv', sep=';', error_bad_lines=False, encoding="latin-1")
         rating.columns = ["userId", "ISBN", "rating"]
 
-        u = rating.userId.value_counts()
-        b = rating.ISBN.value_counts()
-        rating = rating[rating.userId.isin(u.index[u.gt(filter_tr)])]
-        rating = rating[rating.ISBN.isin(b.index[b.gt(filter_tr)])]
+        rating = get_book_data(filter_tr)[1]
         result_item = performance_item_item_cf(rating.copy(), movie=False)
         result_distance = performance_user_user_cf_distances(rating.copy(), movie=False)
     return result_item, result_distance
 
-item_movie, distance_movie  = all_performances()
-item_book, distance_book = all_performances(False)
-print()
+
+def many_predictions(no_predictions=1):
+
+    item_movie, distance_movie  = all_performances()
+    item_book, distance_book = all_performances(False)
+
+    item_movie_basic = item_movie[0]
+    item_movie_errors_total = item_movie[1]
+    item_movie_group_actual = item_movie[2]
+    item_movie_group_predicted = item_movie[3]
+
+    distance_movie_basic = distance_movie[0]
+    distance_movie_errors_total = distance_movie[1]
+    distance_movie_group_actual = distance_movie[2]
+    distance_movie_group_predicted = distance_movie[3]
+
+    item_book_basic = item_book[0]
+    item_book_errors_total = item_book[1]
+    item_book_group_actual = item_book[2]
+    item_book_group_predicted = item_book[3]
+
+    distance_book_basic = distance_book[0]
+    distance_book_errors_total = distance_book[1]
+    distance_book_group_actual = distance_book[2]
+    distance_book_group_predicted = distance_book[3]
+    for x in range(no_predictions-1):
+        item_movie, distance_movie = all_performances()
+        item_book, distance_book = all_performances(False)
+
+        item_movie_basic += item_movie[0]
+        item_movie_errors_total += item_movie[1]
+        item_movie_group_actual += item_movie[2]
+        item_movie_group_predicted += item_movie[3]
+
+        distance_movie_basic += distance_movie[0]
+        distance_movie_errors_total += distance_movie[1]
+        distance_movie_group_actual += distance_movie[2]
+        distance_movie_group_predicted += distance_movie[3]
+
+        item_book_basic += item_book[0]
+        item_book_errors_total += item_book[1]
+        item_book_group_actual += item_book[2]
+        item_book_group_predicted += item_book[3]
+
+        distance_book_basic += distance_book[0]
+        distance_book_errors_total += distance_book[1]
+        distance_book_group_actual += distance_book[2]
+        distance_book_group_predicted += distance_book[3]
+
+
+        item_movie_basic = item_movie_basic / no_predictions
+        item_movie_errors_total = item_movie_errors_total / no_predictions
+        item_movie_group_actual = item_movie_group_actual / no_predictions
+        item_movie_group_predicted = item_movie_group_predicted / no_predictions
+
+        distance_movie_basic = distance_movie_basic / no_predictions
+        distance_movie_errors_total = distance_movie_errors_total / no_predictions
+        distance_movie_group_actual = distance_movie_group_actual / no_predictions
+        distance_movie_group_predicted = distance_movie_group_predicted / no_predictions
+
+        item_book_basic = item_book_basic / no_predictions
+        item_book_errors_total = item_book_errors_total / no_predictions
+        item_book_group_actual = item_book_group_actual / no_predictions
+        item_book_group_predicted = item_book_group_predicted / no_predictions
+
+        distance_book_basic = distance_book_basic / no_predictions
+        distance_book_errors_total = distance_book_errors_total / no_predictions
+        distance_book_group_actual = distance_book_group_actual / no_predictions
+        distance_book_group_predicted = distance_book_group_predicted / no_predictions
+    x = 0
+    item_movie_basic.to_csv("perf/" + str(x) + "item_movie"+"_basic" + ".csv")
+    item_movie_errors_total.to_csv("perf/" + str(x) + "item_movie"+"_errors_total" + ".csv")
+    item_movie_group_actual.to_csv("perf/" + str(x) + "item_movie"+"_group_actual" + ".csv")
+    item_movie_group_predicted.to_csv("perf/" + str(x) + "item_movie"+"_group_predicted" + ".csv")
+
+    distance_movie_basic.to_csv("perf/" + str(x) + "distance_movie"+"_basic" + "csv")
+    distance_movie_errors_total.to_csv("perf/" + str(x) + "distance_movie"+"_errors_total" + ".csv")
+    distance_movie_group_actual.to_csv("perf/" + str(x) + "distance_movie"+"_group_actual" + ".csv")
+    distance_movie_group_predicted.to_csv("perf/" + str(x) + "distance_movie"+"_group_predicted" + ".csv")
+
+    item_book_basic.to_csv("perf/" + str(x) + "item_book"+"_basic" + "csv")
+    item_book_errors_total.to_csv("perf/" + str(x) + "item_book"+"_errors_total" + ".csv")
+    item_book_group_actual.to_csv("perf/" + str(x) + "item_book"+"_group_actual" + ".csv")
+    item_book_group_predicted.to_csv("perf/" + str(x) + "item_book"+"_group_predicted" + ".csv")
+
+    distance_book_basic.to_csv("perf/" + str(x) + "distance_book"+"_basic" + ".csv")
+    distance_book_errors_total.to_csv("perf/" + str(x) + "distance_book"+"_errors_total" + ".csv")
+    distance_book_group_actual.to_csv("perf/" + str(x) + "distance_book"+"_group_actual" + ".csv")
+    distance_book_group_predicted.to_csv("perf/" + str(x) + "distance_book"+"_group_predicted" + ".csv")
+
+many_predictions()
