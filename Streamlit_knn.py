@@ -460,7 +460,7 @@ def task1():
     list_len = st.sidebar.selectbox("Recommendations", (10, 40))
     normalization = st.sidebar.selectbox("Normalization",
                                          ('centering + division by variance', 'centering', "None"))
-    distance_measure = st.sidebar.selectbox("distance_measure",
+    distance_measure = st.sidebar.selectbox("Distance measure",
                                             ('pearson', "euclidean", "manhattan (city block)", "hamming",
                                              "chebyshev"))
     # split the genres per movie
