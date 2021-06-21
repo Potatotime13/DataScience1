@@ -20,11 +20,11 @@ def main():
     )
     if c_task == "MovieLens":
         task1()
-    if c_task == "MovieLens-Tech":
+    if c_task == "MovieLens Performance":
         task2()
     if c_task == "Books":
         task3()
-    if c_task == "Books-Tech":
+    if c_task == "Books Performance":
         task4()
 
 
