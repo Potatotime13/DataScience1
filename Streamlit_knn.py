@@ -682,7 +682,8 @@ def task3():
         output = books.iloc[sorted_bok[0:list_len]][['bookTitle', 'bookAuthor']]
         out2 = recommended[sorted_bok[0:list_len]]
 
-    else:
+    elif False:
+
         similarities = similarity_calculation_distances(df_rating, distance_measure, user_number)
         df_rating_mean = df_rating_raw.fillna(df_rating_raw.mean())
         predicted_ratings = predicted_ratings_distances(df_rating_mean, similarities, user_number, k_users,
@@ -693,6 +694,21 @@ def task3():
         output = books.iloc[sorted_bok[0:list_len]][['bookTitle', 'bookAuthor']]
         out2 = predicted_ratings.sort_values(ascending=False)[0:list_len]
         print(output)
+
+    else:
+        k_items = k_users
+        corr_matrix = create_corr_matrix(df_rating_raw)
+        predicted_ratings = item_item_cf(df_rating_raw, corr_matrix, user_number, k_items)  ##for movies replace 79186 with i e [1:610]
+        predicted_ratings.fillna(0, inplace=True)
+        recommended = predicted_ratings.copy()
+        rec = recommended.copy()
+        sorted_bok = list(np.argsort(predicted_ratings))[::-1]
+        output = books.iloc[sorted_bok[0:list_len]][['bookTitle', 'bookAuthor']]
+        out2 = predicted_ratings.sort_values(ascending=False)[0:list_len]
+        print(output)
+        print()
+
+
     # display results
     rec_header = list(output.columns)
     rec_header.insert(0, 'predict')
@@ -795,5 +811,7 @@ def task4():
     st.table(result_distance[0])
 
 
+
 if __name__ == "__main__":
-    main()
+    task3()
+    #main()
