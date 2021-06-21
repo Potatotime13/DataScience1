@@ -26,6 +26,10 @@ def main():
         task3()
     if c_task == "Books Performance":
         task4()
+    if c_task == "MovieLens (item/item)":
+        task5()
+    if c_task == "Books (item/item)":
+        task6()
 
 
 # Data set methods
@@ -383,8 +387,7 @@ def task1():
         sorted_mov = list(np.argsort(recommended))[::-1]
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
         out2 = recommended[sorted_mov[0:list_len]]
-
-    elif False:
+    else:
         similarities = similarity_calculation_distances(df_rating, distance_measure, user_number)
         user_average = df_rating_raw[user_number].mean()
         predicted_ratings = predicted_ratings_distances(df_rating_raw, similarities, user_number, k_users,
@@ -394,20 +397,6 @@ def task1():
         sorted_mov = list(np.argsort(predicted_ratings))[::-1]
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
         out2 = predicted_ratings.sort_values(ascending=False)[0:list_len]
-
-    else:
-        k_items = k_users
-        corr_matrix = create_corr_matrix(df_rating_raw)
-        predicted_ratings = item_item_cf(df_rating_raw, corr_matrix, user_number, k_items)  ##for movies replace 79186 with i e [1:610]
-        predicted_ratings.fillna(0, inplace=True)
-        recommended = predicted_ratings.copy()
-        rec = recommended.copy()
-        sorted_mov = list(np.argsort(predicted_ratings))[::-1]
-        output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
-        out2 = predicted_ratings.sort_values(ascending=False)[0:list_len]
-
-
-
 
     # display results
     rec_header = list(output.columns)
@@ -433,7 +422,7 @@ def task1():
     # get movie info / covers
     url, info = movie_url(links.iloc[sorted_mov[0:3]][['tmdbId']].values)
 
-    st.write('your top recommendations - calculated with knn')
+    st.write('your top recommendations - calculated with user/user knn')
 
     col1, col2, col3 = st.beta_columns(3)
     col4, col5, col6 = st.beta_columns(3)
@@ -568,25 +557,11 @@ def task3():
         sorted_bok = list(np.argsort(recommended))[::-1]
         output = books.iloc[sorted_bok[0:list_len]][['bookTitle', 'bookAuthor']]
         out2 = recommended[sorted_bok[0:list_len]]
-
-    elif False:
-
+    else:
         similarities = similarity_calculation_distances(df_rating, distance_measure, user_number)
         df_rating_mean = df_rating_raw.fillna(df_rating_raw.mean())
         predicted_ratings = predicted_ratings_distances(df_rating_mean, similarities, user_number, k_users,
                                                         df_rating_raw)
-        recommended = predicted_ratings.copy()
-        rec = recommended.copy()
-        sorted_bok = list(np.argsort(predicted_ratings))[::-1]
-        output = books.iloc[sorted_bok[0:list_len]][['bookTitle', 'bookAuthor']]
-        out2 = predicted_ratings.sort_values(ascending=False)[0:list_len]
-
-
-    else:
-        k_items = k_users
-        corr_matrix = create_corr_matrix(df_rating_raw)
-        predicted_ratings = item_item_cf(df_rating_raw, corr_matrix, user_number, k_items)  ##for movies replace 79186 with i e [1:610]
-        predicted_ratings.fillna(0, inplace=True)
         recommended = predicted_ratings.copy()
         rec = recommended.copy()
         sorted_bok = list(np.argsort(predicted_ratings))[::-1]
@@ -617,7 +592,7 @@ def task3():
     # get book info / covers
     url = books.iloc[sorted_bok[0:3]][['imageUrlL']].values
     info = books.iloc[sorted_bok[0:3]][['bookTitle']].values
-    st.write('your top recommendations - calculated with knn')
+    st.write('your top recommendations - calculated with user/user knn')
 
     col1, col2, col3 = st.beta_columns(3)
     col4, col5, col6 = st.beta_columns(3)
@@ -693,6 +668,140 @@ def task4():
     st.write("average error of a random test set containing 5000 data points:")
     st.table(result_item[0])
     st.table(result_distance[0])
+
+
+def task5():
+    # read movie lens
+    movies = pd.read_csv('movies.csv')
+    ratings = pd.read_csv('ratings.csv')
+    tags = pd.read_csv('tags.csv')
+    links = pd.read_csv('links.csv')
+
+    # get settings from sidebar
+    user_number = st.sidebar.selectbox("User ID", (10, 12, 69, 52, 153))
+    k_users = st.sidebar.selectbox("K nearest", (5, 15, 20))
+    list_len = st.sidebar.selectbox("Recommendations", (10, 40))
+
+    # split the genres per movie
+    movies["genres"] = movies["genres"].str.split('|')
+
+    # rating table
+    df_rating = ratings.pivot(index="movieId", columns="userId", values="rating")
+    df_rating_raw = df_rating
+
+    k_items = k_users
+    corr_matrix = create_corr_matrix(df_rating_raw)
+    predicted_ratings = item_item_cf(df_rating_raw, corr_matrix, user_number, k_items)  ##for movies replace 79186 with i e [1:610]
+    predicted_ratings.fillna(0, inplace=True)
+    recommended = predicted_ratings.copy()
+    rec = recommended.copy()
+    sorted_mov = list(np.argsort(predicted_ratings))[::-1]
+    output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
+    out2 = predicted_ratings.sort_values(ascending=False)[0:list_len]
+
+    # display results
+    rec_header = list(output.columns)
+    rec_header.insert(0, 'predict')
+
+    layout = go.Layout(
+        margin=dict(r=1, l=1, b=20, t=20))
+
+    fig = go.Figure(data=[go.Table(
+        columnwidth=[100, 300, 300],
+        header=dict(values=rec_header,
+                    line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
+                    fill_color=['rgb(14, 17, 23)', 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
+                    align='center', font=dict(color='white', size=20), height=50
+                    ),
+        cells=dict(values=[np.round(out2, 2), output.title, output.genres],
+                   line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
+                   fill_color=[np.array(color_descends(rec)), 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
+                   align='center', font=dict(color='white', size=14), height=30
+                   ))
+    ], layout=layout)
+
+    # get movie info / covers
+    url, info = movie_url(links.iloc[sorted_mov[0:3]][['tmdbId']].values)
+
+    st.write('your top recommendations - calculated with item/item knn')
+
+    col1, col2, col3 = st.beta_columns(3)
+    col4, col5, col6 = st.beta_columns(3)
+
+    col1.header(info[0])
+    col4.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[0])
+    col2.header(info[1])
+    col5.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[1])
+    col3.header(info[2])
+    col6.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[2])
+
+    st.write('All recommendations for you:')
+    st.write(fig)
+
+
+def task6():
+    #load data
+    df_rating, ratings, df_rating_nonzero, books, users = get_book_data(200)
+
+    # get settings from sidebar
+    user_number = st.sidebar.selectbox("User ID", (79186, 207782))
+    k_users = st.sidebar.selectbox("K nearest", (5, 15, 20))
+    list_len = st.sidebar.selectbox("Recommendations", (10, 40))
+
+    df_rating_raw = df_rating
+
+    k_items = k_users
+    corr_matrix = create_corr_matrix(df_rating_raw)
+    predicted_ratings = item_item_cf(df_rating_raw, corr_matrix, user_number, k_items)  ##for movies replace 79186 with i e [1:610]
+    predicted_ratings.fillna(0, inplace=True)
+    recommended = predicted_ratings.copy()
+    rec = recommended.copy()
+    sorted_bok = list(np.argsort(predicted_ratings))[::-1]
+    output = books.iloc[sorted_bok[0:list_len]][['bookTitle', 'bookAuthor']]
+    out2 = predicted_ratings.sort_values(ascending=False)[0:list_len]
+
+    # display results
+    rec_header = list(output.columns)
+    rec_header.insert(0, 'predict')
+
+    layout = go.Layout(
+        margin=dict(r=1, l=1, b=20, t=20))
+
+    fig = go.Figure(data=[go.Table(
+        columnwidth=[100, 300, 300],
+        header=dict(values=rec_header,
+                    line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
+                    fill_color=['rgb(14, 17, 23)', 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
+                    align='center', font=dict(color='white', size=20), height=50
+                    ),
+        cells=dict(values=[np.round(out2, 2), output.bookTitle, output.bookAuthor],
+                   line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
+                   fill_color=[np.array(color_descends(rec)), 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
+                   align='center', font=dict(color='white', size=14), height=30
+                   ))
+    ], layout=layout)
+
+    # get book info / covers
+    url = books.iloc[sorted_bok[0:3]][['imageUrlL']].values
+    info = books.iloc[sorted_bok[0:3]][['bookTitle']].values
+    st.write('your top recommendations - calculated with item/item knn')
+
+    col1, col2, col3 = st.beta_columns(3)
+    col4, col5, col6 = st.beta_columns(3)
+
+    r1 = urllib.request.urlopen(url[0][0])
+    r2 = urllib.request.urlopen(url[1][0])
+    r3 = urllib.request.urlopen(url[2][0])
+
+    col1.header(info[0][0])
+    col4.image(r1.read())
+    col2.header(info[1][0])
+    col5.image(r2.read())
+    col3.header(info[2][0])
+    col6.image(r3.read())
+
+    st.write('All recommendations for you:')
+    st.write(fig)
 
 
 if __name__ == "__main__":

@@ -9,6 +9,28 @@ import urllib.request
 
 
 def main():
+    sum_temp = np.load('perf/NCF_summaries/sum_0.npy')
+    y_pred = sum_temp[0]
+    df_test_set = sum_temp[1]
+    saving = all_performance_measures(*group_test_results(y_pred, df_test_set))
+    saving = list(saving)
+    print(np.mean((y_pred-df_test_set)**2))
+    for i in range(1, 5):
+        sum_temp = np.load('perf/NCF_summaries/sum_'+str(i)+'.npy')
+        y_pred = sum_temp[0]
+        df_test_set = sum_temp[1]
+        print(np.mean((y_pred - df_test_set) ** 2))
+        saving_tmp = all_performance_measures(*group_test_results(y_pred, df_test_set))
+        for j in range(4):
+            saving[j] += saving_tmp[j]
+        print('step ', i)
+    for k in range(4):
+        saving[k] *= 1/5
+        saving[k].to_csv('perf/ncf_mov_'+str(k)+'.csv')
+    print()
+
+
+def main_old():
     ratings = pd.read_csv('ratings.csv')
     #df_ratings, ratings, df_rating_nonzero, books, users = get_book_data(20)
     y_pred, df_test_set = knn_uu_cosine(ratings, 15, movie=True)
