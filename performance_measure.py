@@ -595,24 +595,24 @@ def many_predictions(no_predictions=1):
         distance_book_group_actual = distance_book_group_actual / no_predictions
         distance_book_group_predicted = distance_book_group_predicted / no_predictions
     x = 0
-    item_movie_basic.to_csv("perf/" + str(x) + "item_movie"+"_basic" + "csv")
-    item_movie_errors_total.to_csv("perf/" + str(x) + "item_movie"+"_errors_total" + "csv")
-    item_movie_group_actual.to_csv("perf/" + str(x) + "item_movie"+"_group_actual" + "csv")
-    item_movie_group_predicted.to_csv("perf/" + str(x) + "item_movie"+"_group_predicted" + "csv")
+    item_movie_basic.to_csv("perf/" + str(x) + "item_movie"+"_basic" + ".csv")
+    item_movie_errors_total.to_csv("perf/" + str(x) + "item_movie"+"_errors_total" + ".csv")
+    item_movie_group_actual.to_csv("perf/" + str(x) + "item_movie"+"_group_actual" + ".csv")
+    item_movie_group_predicted.to_csv("perf/" + str(x) + "item_movie"+"_group_predicted" + ".csv")
 
     distance_movie_basic.to_csv("perf/" + str(x) + "distance_movie"+"_basic" + "csv")
-    distance_movie_errors_total.to_csv("perf/" + str(x) + "distance_movie"+"_errors_total" + "csv")
-    distance_movie_group_actual.to_csv("perf/" + str(x) + "distance_movie"+"_group_actual" + "csv")
-    distance_movie_group_predicted.to_csv("perf/" + str(x) + "distance_movie"+"_group_predicted" + "csv")
+    distance_movie_errors_total.to_csv("perf/" + str(x) + "distance_movie"+"_errors_total" + ".csv")
+    distance_movie_group_actual.to_csv("perf/" + str(x) + "distance_movie"+"_group_actual" + ".csv")
+    distance_movie_group_predicted.to_csv("perf/" + str(x) + "distance_movie"+"_group_predicted" + ".csv")
 
     item_book_basic.to_csv("perf/" + str(x) + "item_book"+"_basic" + "csv")
-    item_book_errors_total.to_csv("perf/" + str(x) + "item_book"+"_errors_total" + "csv")
-    item_book_group_actual.to_csv("perf/" + str(x) + "item_book"+"_group_actual" + "csv")
-    item_book_group_predicted.to_csv("perf/" + str(x) + "item_book"+"_group_predicted" + "csv")
+    item_book_errors_total.to_csv("perf/" + str(x) + "item_book"+"_errors_total" + ".csv")
+    item_book_group_actual.to_csv("perf/" + str(x) + "item_book"+"_group_actual" + ".csv")
+    item_book_group_predicted.to_csv("perf/" + str(x) + "item_book"+"_group_predicted" + ".csv")
 
-    distance_book_basic.to_csv("perf/" + str(x) + "distance_book"+"_basic" + "csv")
-    distance_book_errors_total.to_csv("perf/" + str(x) + "distance_book"+"_errors_total" + "csv")
-    distance_book_group_actual.to_csv("perf/" + str(x) + "distance_book"+"_group_actual" + "csv")
-    distance_book_group_predicted.to_csv("perf/" + str(x) + "distance_book"+"_group_predicted" + "csv")
+    distance_book_basic.to_csv("perf/" + str(x) + "distance_book"+"_basic" + ".csv")
+    distance_book_errors_total.to_csv("perf/" + str(x) + "distance_book"+"_errors_total" + ".csv")
+    distance_book_group_actual.to_csv("perf/" + str(x) + "distance_book"+"_group_actual" + ".csv")
+    distance_book_group_predicted.to_csv("perf/" + str(x) + "distance_book"+"_group_predicted" + ".csv")
 
 many_predictions()
