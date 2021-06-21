@@ -866,7 +866,7 @@ def task7():
                     fill_color=['rgb(14, 17, 23)', 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
                     align='center', font=dict(color='white', size=20), height=50
                     ),
-        cells=dict(values=[np.round(out2, 2), output.title, output.genres],
+        cells=dict(values=[np.round(out2.T[0], 2), output.title, output.genres],
                    line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
                    fill_color=[np.array(color_descends(rec)), 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
                    align='center', font=dict(color='white', size=14), height=30
