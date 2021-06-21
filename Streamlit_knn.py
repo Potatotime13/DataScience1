@@ -850,7 +850,7 @@ def task7():
     mov_ids = i_ind['item'].iloc[sorted_mov[0:list_len]].values
     movies.set_index(movies['movieId'], inplace=True)
     output = movies.loc[mov_ids][['title', 'genres']]
-    out2 = np.round(y_pred[sorted_mov[0:list_len]].T[0], 2)
+    out2 = np.round(y_pred[sorted_mov[0:list_len]].T[0], 2).copy()
 
     # display results
     rec_header = list(output.columns)
@@ -894,4 +894,4 @@ def task7():
 
 
 if __name__ == "__main__":
-    task7()
+    main()
