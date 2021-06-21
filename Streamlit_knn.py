@@ -398,6 +398,7 @@ def get_items_heuristik(user_number=1, movie=True):
             print("Because you liked",books[["bookTitle","bookAuthor"]][books["ISBN"]==liked_books[x]]," \n you might like:")
             print(books[["bookTitle","bookAuthor"]][books["ISBN"]==recommended_movies[x]])
 
+
 def moviePrediction_item_item_cf():
     rating = pd.read_csv('ratings.csv')
     df_rating = rating.pivot(index="movieId", columns="userId", values="rating")
@@ -809,7 +810,6 @@ def task4():
     st.write("average error of a random test set containing 5000 data points:")
     st.table(result_item[0])
     st.table(result_distance[0])
-
 
 
 if __name__ == "__main__":
