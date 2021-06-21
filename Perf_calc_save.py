@@ -9,20 +9,20 @@ import urllib.request
 
 
 def main():
-    # ratings = pd.read_csv('ratings.csv')
-    df_ratings, ratings, df_rating_nonzero, books, users = get_book_data(20)
-    y_pred, df_test_set = knn_uu_cosine(ratings, 15, movie=False)
+    ratings = pd.read_csv('ratings.csv')
+    #df_ratings, ratings, df_rating_nonzero, books, users = get_book_data(20)
+    y_pred, df_test_set = knn_uu_cosine(ratings, 15, movie=True)
     saving = all_performance_measures(*group_test_results(y_pred, df_test_set))
     saving = list(saving)
     for i in range(9):
-        y_pred, df_test_set = knn_uu_cosine(ratings, 15, movie=False)
+        y_pred, df_test_set = knn_uu_cosine(ratings, 15, movie=True)
         saving_tmp = all_performance_measures(*group_test_results(y_pred, df_test_set))
         for j in range(4):
             saving[j] += saving_tmp[j]
         print('step ', i)
     for k in range(4):
         saving[k] *= 1/10
-        saving[k].to_csv('perf/person_user_book_'+str(k))
+        saving[k].to_csv('perf/person_user_'+str(k)+'.csv')
     print()
 
 
