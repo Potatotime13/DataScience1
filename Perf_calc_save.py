@@ -8,7 +8,7 @@ from scipy.spatial.distance import hamming, euclidean, chebyshev, cityblock
 import urllib.request
 
 
-def main():
+def main_old():
     sum_temp = np.load('perf/NCF_summaries/sum_0.npy')
     y_pred = sum_temp[0]
     df_test_set = sum_temp[1]
@@ -30,21 +30,21 @@ def main():
     print()
 
 
-def main_old():
-    ratings = pd.read_csv('ratings.csv')
-    #df_ratings, ratings, df_rating_nonzero, books, users = get_book_data(20)
-    y_pred, df_test_set = knn_uu_cosine(ratings, 15, movie=True)
+def main():
+    #ratings = pd.read_csv('ratings.csv')
+    df_ratings, ratings, df_rating_nonzero, books, users = get_book_data(200)
+    y_pred, df_test_set = knn_uu_cosine(ratings, 15, movie=False)
     saving = all_performance_measures(*group_test_results(y_pred, df_test_set))
     saving = list(saving)
     for i in range(9):
-        y_pred, df_test_set = knn_uu_cosine(ratings, 15, movie=True)
+        y_pred, df_test_set = knn_uu_cosine(ratings, 15, movie=False)
         saving_tmp = all_performance_measures(*group_test_results(y_pred, df_test_set))
         for j in range(4):
             saving[j] += saving_tmp[j]
         print('step ', i)
     for k in range(4):
         saving[k] *= 1/10
-        saving[k].to_csv('perf/person_user_'+str(k)+'.csv')
+        saving[k].to_csv('perf/person_user_book_'+str(k)+'.csv')
     print()
 
 
@@ -74,10 +74,9 @@ def get_book_data(filter_tr, like_to_value=True):
     df_rating_nonzero = ratings.loc[ratings["rating"].values != 0]
     if like_to_value:
         percentiles = df_ratings.describe(include='all').iloc[6].values
+        percentiles += (percentiles == 0) * np.mean(percentiles[percentiles != 0])
         df_zeros = df_ratings.values == 0
         df_ratings = df_ratings + df_zeros * percentiles
-        df_zeros = df_ratings == 0
-        df_ratings = df_ratings + df_zeros * np.mean(percentiles[percentiles != 0])
         ratings["rating"] = df_ratings.stack().values
 
     # second output has the raw data format
