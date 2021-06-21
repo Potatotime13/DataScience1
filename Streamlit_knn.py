@@ -12,7 +12,7 @@ import urllib.request
 def main():
     st.title('Data Science: Recommender Systems')
     with st.sidebar:
-        st.write('Dataset selection')
+        st.write('Page selection')
 
     c_task = st.sidebar.selectbox(
         "",
