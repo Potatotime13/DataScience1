@@ -295,8 +295,9 @@ def knn_uu_cosine(ratings, k_users, movie=True):
             w_sum_k = ratings_k @ corr_k
             mv_rated = df_rating_raw.loc[test_mov_id].iloc[:, sorted_index[1:k_users + 1]].notnull().values
             seen_sim_len = mv_rated @ corr_k
-            seen_sim_len = 1 / (seen_sim_len + (seen_sim_len == 0))
-            recommended = w_sum_k / seen_sim_len + df_rating_raw[user_number].mean()
+            seen_sim_len[seen_sim_len == 0] = np.nan
+            seen_sim_len = 1 / seen_sim_len
+            recommended = w_sum_k * seen_sim_len + df_rating_raw[user_number].mean()
             y_pred += list(recommended)
 
     return np.array(y_pred).T, df_test_set.T.stack().values
