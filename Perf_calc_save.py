@@ -10,7 +10,7 @@ import urllib.request
 
 def main():
     #ratings = pd.read_csv('ratings.csv')
-    df_ratings, ratings, df_rating_nonzero, books, users = get_book_data(200)
+    df_ratings, ratings, df_rating_nonzero, books, users = get_book_data(20)
     for i in range(10):
         y_pred, df_test_set = knn_uu_cosine(ratings, 15, movie=False)
         saving = all_performance_measures(*group_test_results(y_pred, df_test_set))

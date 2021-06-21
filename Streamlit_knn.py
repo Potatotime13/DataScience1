@@ -453,7 +453,6 @@ def task1():
     ratings = pd.read_csv('ratings.csv')
     tags = pd.read_csv('tags.csv')
     links = pd.read_csv('links.csv')
-    st.write('K nearest neighbor')
 
     # get settings from sidebar
     user_number = st.sidebar.selectbox("User ID", (10, 12, 69, 52, 153))
@@ -525,7 +524,7 @@ def task1():
     # get movie info / covers
     url, info = movie_url(links.iloc[sorted_mov[0:3]][['tmdbId']].values)
 
-    st.write('Deine Top auswahl')
+    st.write('your top recommendations - calculated with knn')
 
     col1, col2, col3 = st.beta_columns(3)
     col4, col5, col6 = st.beta_columns(3)
