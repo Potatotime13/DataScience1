@@ -9,12 +9,21 @@ import urllib.request
 
 
 def main():
-    #ratings = pd.read_csv('ratings.csv')
+    # ratings = pd.read_csv('ratings.csv')
     df_ratings, ratings, df_rating_nonzero, books, users = get_book_data(20)
-    for i in range(10):
+    y_pred, df_test_set = knn_uu_cosine(ratings, 15, movie=False)
+    saving = all_performance_measures(*group_test_results(y_pred, df_test_set))
+    saving = list(saving)
+    for i in range(9):
         y_pred, df_test_set = knn_uu_cosine(ratings, 15, movie=False)
-        saving = all_performance_measures(*group_test_results(y_pred, df_test_set))
-        print()
+        saving_tmp = all_performance_measures(*group_test_results(y_pred, df_test_set))
+        for j in range(4):
+            saving[j] += saving_tmp[j]
+        print('step ', i)
+    for k in range(4):
+        saving[k] *= 1/10
+        saving[k].to_csv('perf/person_user_book_'+str(k))
+    print()
 
 
 def get_book_data(filter_tr, like_to_value=True):
@@ -266,7 +275,7 @@ def knn_uu_cosine(ratings, k_users, movie=True):
             mv_rated = df_rating_raw.loc[test_mov_id].iloc[:, sorted_index[1:k_users + 1]].notnull().values
             seen_sim_len = mv_rated @ corr_k
             seen_sim_len = 1 / (seen_sim_len + (seen_sim_len == 0))
-            recommended = w_sum_k * seen_sim_len + df_rating_raw[user_number].mean()
+            recommended = w_sum_k / seen_sim_len + df_rating_raw[user_number].mean()
             y_pred += list(recommended)
 
     return np.array(y_pred).T, df_test_set.T.stack().values
