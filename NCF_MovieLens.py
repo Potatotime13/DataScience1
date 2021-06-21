@@ -226,6 +226,23 @@ def main():
 
     summary = np.concatenate([y_pred.T, np.array([values_v]), classes.T])
 
+    saving = True
+    if saving:
+        mfg_i = pd.DataFrame(mf_g.item_features_).to_csv('NCF_recources/mfg_i.csv')
+        mfg_ib = pd.DataFrame(mf_g.bias.item_offsets_).to_csv('NCF_recources/mfg_ib.csv')
+        mfg_u = pd.DataFrame(mf_g.user_features_).to_csv('NCF_recources/mfg_u.csv')
+        mfg_ub = pd.DataFrame(mf_g.bias.user_offsets_).to_csv('NCF_recources/mfg_ub.csv')
+
+        mlg_i = pd.DataFrame(mf_m.item_features_).to_csv('NCF_recources/mlg_i.csv')
+        mlg_ib = pd.DataFrame(mf_m.bias.item_offsets_).to_csv('NCF_recources/mlg_ib.csv')
+        mlg_u = pd.DataFrame(mf_m.user_features_).to_csv('NCF_recources/mlg_u.csv')
+        mlg_ub = pd.DataFrame(mf_m.bias.user_offsets_).to_csv('NCF_recources/mlg_ub.csv')
+
+        u_ind = pd.DataFrame(mf_g.user_index_).to_csv('NCF_recources/u_ind.csv')
+        i_ind = pd.DataFrame(mf_g.item_index_).to_csv('NCF_recources/i_ind.csv')
+        neu.save('./NCF_recources')
+
+
     return summary
 
 

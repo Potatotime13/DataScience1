@@ -7,6 +7,7 @@ from tmdbv3api import TMDb
 from tmdbv3api import Movie
 from scipy.spatial.distance import hamming, euclidean, chebyshev, cityblock
 import urllib.request
+import tensorflow as tf
 
 
 def main():
@@ -30,6 +31,8 @@ def main():
         task5()
     if c_task == "Books (item/item)":
         task6()
+    if c_task == "MovieLens (AI)":
+        task7()
 
 
 # Data set methods
@@ -801,5 +804,94 @@ def task6():
     st.write(fig)
 
 
+def task7():
+    # read movie lens
+    movies = pd.read_csv('movies.csv')
+    ratings = pd.read_csv('ratings.csv')
+    tags = pd.read_csv('tags.csv')
+    links = pd.read_csv('links.csv')
+
+    # get settings from sidebar
+    user_number = st.sidebar.selectbox("User ID", (10, 12, 69, 52, 153))
+    list_len = st.sidebar.selectbox("Recommendations", (10, 40))
+
+    # split the genres per movie
+    movies["genres"] = movies["genres"].str.split('|')
+
+    # load net
+    neu = tf.keras.models.load_model('./NCF_recources', compile=True)
+
+    # load inputs
+    mfg_i = pd.read_csv('NCF_recources/mfg_i.csv')
+    mfg_ib = pd.read_csv('NCF_recources/mfg_ib.csv')
+    mfg_u = pd.read_csv('NCF_recources/mfg_u.csv')
+    mfg_ub = pd.read_csv('NCF_recources/mfg_ub.csv')
+
+    mlg_i = pd.read_csv('NCF_recources/mlg_i.csv')
+    mlg_ib = pd.read_csv('NCF_recources/mlg_ib.csv')
+    mlg_u = pd.read_csv('NCF_recources/mlg_u.csv')
+    mlg_ub = pd.read_csv('NCF_recources/mlg_ub.csv')
+
+    u_ind = pd.read_csv('NCF_recources/u_ind.csv')
+    i_ind = pd.read_csv('NCF_recources/i_ind.csv')
+
+    user_input_vg = np.ones((9512, 20)) * np.array([mfg_u.iloc[user_number, 1:]])
+    item_input_vg = mfg_i.values[:, 1:]
+    user_bias_vg = np.ones((9512, 1)) * mfg_ub['u_off'].iloc[10]
+    item_bias_vg = mfg_ib['i_off'].values
+    user_input_vm = np.ones((9512, 31)) * np.concatenate([mlg_u.values[user_number, 1:], np.array([mlg_ub['u_off'].values[user_number]])])
+    item_input_vm = np.concatenate([mlg_i.values[:, 1:], np.array([mlg_ib['i_off'].values]).T], axis=1)
+
+    y_pred = neu.predict([user_input_vg, item_input_vg, user_bias_vg, item_bias_vg, user_input_vm, item_input_vm],
+                         batch_size=1)
+    # normalization procedure
+    rec = y_pred
+    sorted_mov = list(np.argsort(y_pred.T[0]))[::-1]
+    mov_ids = i_ind['item'].iloc[sorted_mov[0:list_len]].values
+    movies.set_index(movies['movieId'], inplace=True)
+    output = movies.loc[mov_ids][['title', 'genres']]
+    out2 = y_pred[sorted_mov[0:list_len]]
+
+    # display results
+    rec_header = list(output.columns)
+    rec_header.insert(0, 'predict')
+
+    layout = go.Layout(
+        margin=dict(r=1, l=1, b=20, t=20))
+
+    fig = go.Figure(data=[go.Table(
+        columnwidth=[100, 300, 300],
+        header=dict(values=rec_header,
+                    line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
+                    fill_color=['rgb(14, 17, 23)', 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
+                    align='center', font=dict(color='white', size=20), height=50
+                    ),
+        cells=dict(values=[np.round(out2, 2), output.title, output.genres],
+                   line_color=['rgb(49, 51, 63)', 'rgb(49, 51, 63)', 'rgb(49, 51, 63)'],
+                   fill_color=[np.array(color_descends(rec)), 'rgb(14, 17, 23)', 'rgb(14, 17, 23)'],
+                   align='center', font=dict(color='white', size=14), height=30
+                   ))
+    ], layout=layout)
+
+    # get movie info / covers
+    links.set_index(links['movieId'], inplace=True)
+    url, info = movie_url(links.loc[mov_ids[0:3]][['tmdbId']].values)
+
+    st.write('your top recommendations - calculated with user/user knn')
+
+    col1, col2, col3 = st.beta_columns(3)
+    col4, col5, col6 = st.beta_columns(3)
+
+    col1.header(info[0])
+    col4.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[0])
+    col2.header(info[1])
+    col5.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[1])
+    col3.header(info[2])
+    col6.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[2])
+
+    st.write('All recommendations for you:')
+    st.write(fig)
+
+
 if __name__ == "__main__":
-    main()
+    task7()
