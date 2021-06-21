@@ -536,7 +536,7 @@ def task1():
     col3.header(info[2])
     col6.image('https://www.themoviedb.org/t/p/w600_and_h900_bestv2/' + url[2])
 
-    st.write('Alle Empfehlungen für dich:')
+    st.write('All recommendations for you:')
     st.write(fig)
 
 
@@ -628,7 +628,7 @@ def task2():
 
 
 def task3():
-    st.write('K nearest neighbor')
+    st.write('your top recommendations - calculated with knn')
 
     # load data
     df_rating, ratings, df_rating_nonzero, books, users = get_book_data(200)
@@ -639,7 +639,7 @@ def task3():
     list_len = st.sidebar.selectbox("Recommendations", (10, 40))
     normalization = st.sidebar.selectbox("Normalization",
                                          ('centering + division by variance', 'centering', "None"))
-    distance_measure = st.sidebar.selectbox("distance_measure",
+    distance_measure = st.sidebar.selectbox("Distance measure",
                                             ('pearson', "euclidean", "manhattan (city block)", "hamming",
                                              "chebyshev"))
 
@@ -697,7 +697,7 @@ def task3():
     # get book info / covers
     url = books.iloc[sorted_bok[0:3]][['imageUrlL']].values
     info = books.iloc[sorted_bok[0:3]][['bookTitle']].values
-    st.write('Deine Top auswahl')
+    st.write('your top recommendations - calculated with knn')
 
     col1, col2, col3 = st.beta_columns(3)
     col4, col5, col6 = st.beta_columns(3)
@@ -713,7 +713,7 @@ def task3():
     col3.header(info[2][0])
     col6.image(r3.read())
 
-    st.write('Alle Empfehlungen für dich:')
+    st.write('All recommendations for you:')
     st.write(fig)
 
 
