@@ -226,8 +226,12 @@ def main():
 
     summary = np.concatenate([y_pred.T, np.array([values_v]), classes.T])
 
-    print('testlab')
+    return summary
 
 
 if __name__ == "__main__":
-    main()
+    for i in range(1, 5):
+        sum_temp = main()
+        np.save('perf/NCF_summaries/sum_'+str(i), sum_temp)
+        print(i)
+    print('fin')

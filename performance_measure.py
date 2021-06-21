@@ -30,10 +30,10 @@ def get_book_data(filter_tr, like_to_value=True):
     df_rating_nonzero = ratings.loc[ratings["rating"].values != 0]
     if like_to_value:
         percentiles = df_ratings.describe(include='all').iloc[6].values
-        per_mean = np.mean(percentiles[percentiles != 0])
-        percentiles += (percentiles == 0) * per_mean
         df_zeros = df_ratings.values == 0
         df_ratings = df_ratings + df_zeros * percentiles
+        df_zeros = df_ratings == 0
+        df_ratings = df_ratings + df_zeros * np.mean(percentiles[percentiles != 0])
         ratings["rating"] = df_ratings.stack().values
 
     # second output has the raw data format
