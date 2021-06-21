@@ -694,7 +694,6 @@ def task4():
     st.table(result_item[0])
     st.table(result_distance[0])
 
-task1()
-task3()
+
 if __name__ == "__main__":
     main()
