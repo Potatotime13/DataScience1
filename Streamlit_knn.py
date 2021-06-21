@@ -560,7 +560,7 @@ def task1():
 
     st.write('All recommendations for you:')
     st.write(fig)
-task1()
+
 
 def task2():
     # load data
@@ -796,5 +796,4 @@ def task4():
 
 
 if __name__ == "__main__":
-    #main()
-    pass
+    main()
