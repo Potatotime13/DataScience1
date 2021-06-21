@@ -845,7 +845,7 @@ def task7():
     y_pred = neu.predict([user_input_vg, item_input_vg, user_bias_vg, item_bias_vg, user_input_vm, item_input_vm],
                          batch_size=1)
     # normalization procedure
-    rec = y_pred
+    rec = y_pred.T[0]
     sorted_mov = list(np.argsort(y_pred.T[0]))[::-1]
     mov_ids = i_ind['item'].iloc[sorted_mov[0:list_len]].values
     movies.set_index(movies['movieId'], inplace=True)
@@ -894,4 +894,4 @@ def task7():
 
 
 if __name__ == "__main__":
-    main()
+    task7()
