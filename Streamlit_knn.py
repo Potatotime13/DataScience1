@@ -288,116 +288,6 @@ def load_results():
     return result_item, result_distances
 
 
-def item_item_cf_heuristik(df_rating, user_number=69, neighbours = 15, no_similar_to_favorite = 5, no_of_recommendations= 3, corr_matrix = False):
-    favorites = df_rating[user_number][df_rating[user_number] == df_rating[user_number].max()].index
-    favorites = np.random.permutation(favorites)
-
-    ### replace problematic values in corr matrix
-    if corr_matrix is False:
-        corr_matrix = create_corr_matrix(df_rating)
-    else:
-        corr_matrix = corr_matrix
-    corr_matrix = corr_matrix.fillna(-20)
-
-    corr_matrix_reduced = corr_matrix.copy()
-    corr_matrix = corr_matrix.drop(list(df_rating[user_number].dropna().index), axis=0)
-    #corr_matrix_reduced = corr_matrix_reduced.drop(favorites, axis=0)
-    corr_matrix_reduced = corr_matrix_reduced.drop(favorites, axis=1)
-    most_correlated = []
-    correlation_of_most_correlated = []
-    already_removed = []
-    for x in favorites:
-        k = np.argpartition(corr_matrix[x], -no_similar_to_favorite)[-no_similar_to_favorite:]
-        similar_to_favorite = corr_matrix[x].iloc[k].index
-        most_correlated.append(similar_to_favorite)
-        already_removed.extend(similar_to_favorite)
-        for y in similar_to_favorite:
-            if y in already_removed:
-                pass
-            else:
-                corr_matrix_reduced = corr_matrix_reduced.drop(y, axis=0)
-    corr_matrix_local = corr_matrix_reduced
-    similar_to_favorites_rated = []
-    c = 0
-    for x in most_correlated:
-        l = []
-        for y in x:
-            #corr_matrix_local = corr_matrix_reduced.drop(favorites[c], axis=0)
-            h = np.argpartition(corr_matrix_local[y], -neighbours)[-neighbours:]
-            correlations_to_neighbours = np.partition(corr_matrix_local[y], -neighbours)[-neighbours:]
-            index_neighbours = corr_matrix_local[y].iloc[h].index
-            if favorites[c] in index_neighbours:
-                index_neighbours = index_neighbours.drop(favorites[c])
-            rating = np.nanmean(df_rating[user_number][index_neighbours])
-            l.append(np.nanmean(df_rating[user_number][index_neighbours]))
-            # get neighbours most correlated keep correlation
-            # calc mean among them in df_rating weighted by correlation
-            # save results
-        similar_to_favorites_rated.append(l)
-        c +=1
-    df_similar_to_favorites_rated = pd.DataFrame(np.array(similar_to_favorites_rated).T, columns = favorites)
-    idx = np.random.permutation(df_similar_to_favorites_rated.index)
-    df_names = pd.DataFrame(np.array(most_correlated).T, columns = favorites)
-    df_similar_to_favorites_rated = df_similar_to_favorites_rated.reindex(idx)
-    df_names = df_names.reindex(idx)
-    ratings = df_similar_to_favorites_rated.fillna(-10).stack().nlargest(3)
-    index = list(ratings.index)#df_similar_to_favorites_rated.max().fillna(-10).nlargest(no_of_recommendations).index
-    for x in range(len(index)):
-        index[x] = index[x][1]
-    max_index = df_similar_to_favorites_rated.loc[:,index].idxmax()
-    best_movies = []
-    c = 0
-    for x in index:
-        try:
-            best_movies.append(df_names[x][list(max_index)[c]])
-            c += 1
-        except:
-            best_movies.append(np.nan)
-            c += 1
-    ratings.index = best_movies
-
-    ratings = ratings[~ratings.index.duplicated(keep='first')]
-    return ratings, index, best_movies
-
-
-def get_items_heuristik(user_number=1, movie=True):
-    if movie:
-        ### user_number muss flexibel
-        user_number = 1
-        ratings = pd.read_csv('ratings.csv')
-        movies = pd.read_csv('movies.csv')
-        df_rating = ratings.pivot(index="movieId", columns="userId", values="rating")
-        result = item_item_cf_heuristik(df_rating, user_number)
-        rated_movies, liked_movie, recommended_movies = result[0],result[1], result[2]
-        df_rows = []
-        df = []
-        if x in range(len(rated_movies)):
-            df_rows.append([rated_movies[x], liked_movie[x], recommended_movies[x]])
-        df_heuristik = pd.DataFrame(df_rows, columns = ["predicted rating", "Because you liked", "you might like"])
-        return df_heuristik
-
-    else:
-        rating = pd.read_csv('BX-Book-Ratings.csv', sep=';', error_bad_lines=False, encoding="latin-1")
-        rating.columns = ["userId", "ISBN", "rating"]
-
-        rating = rating.drop_duplicates(subset=["userId", "ISBN"])
-        u = rating.userId.value_counts()
-        b = rating.ISBN.value_counts()
-        rating = rating[rating.userId.isin(u.index[u.gt(20)])]
-        rating = rating[rating.ISBN.isin(b.index[b.gt(20)])]
-        df_rating = rating.pivot(index="ISBN", columns="userId", values="rating")
-
-        user_number = 79186
-        result = item_item_cf_heuristik(df_rating, user_number)
-        liked_books, recommended_movies = result[1], result[2]
-        books = pd.read_csv('BX-Books.csv', sep=';', error_bad_lines=False, encoding="latin-1")
-        books.columns = ['ISBN', 'bookTitle', 'bookAuthor', 'yearOfPublication', 'publisher', 'imageUrlS', 'imageUrlM',
-                         'imageUrlL']
-
-        for x in range(len(liked_books)):
-            print("Because you liked",books[["bookTitle","bookAuthor"]][books["ISBN"]==liked_books[x]]," \n you might like:")
-            print(books[["bookTitle","bookAuthor"]][books["ISBN"]==recommended_movies[x]])
-
 def moviePrediction_item_item_cf():
     rating = pd.read_csv('ratings.csv')
     df_rating = rating.pivot(index="movieId", columns="userId", values="rating")
@@ -467,7 +357,7 @@ def task1():
     normalization = st.sidebar.selectbox("Normalization",
                                          ('centering + division by variance', 'centering', "None"))
     distance_measure = st.sidebar.selectbox("Distance measure",
-                                            ("euclidean",'pearson', "euclidean", "manhattan (city block)", "hamming",
+                                            ('pearson', "euclidean", "manhattan (city block)", "hamming",
                                              "chebyshev"))
     # split the genres per movie
     movies["genres"] = movies["genres"].str.split('|')
@@ -504,8 +394,7 @@ def task1():
         sorted_mov = list(np.argsort(predicted_ratings))[::-1]
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
         out2 = predicted_ratings.sort_values(ascending=False)[0:list_len]
-        print(output)
-        print()
+
     else:
         k_items = k_users
         corr_matrix = create_corr_matrix(df_rating_raw)
@@ -516,9 +405,7 @@ def task1():
         sorted_mov = list(np.argsort(predicted_ratings))[::-1]
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
         out2 = predicted_ratings.sort_values(ascending=False)[0:list_len]
-        print(output)
-        print()
-    sorted = np.argsort(predicted_ratings)  # [::-1]
+
 
 
 
@@ -660,7 +547,7 @@ def task3():
     normalization = st.sidebar.selectbox("Normalization",
                                          ('centering + division by variance', 'centering', "None"))
     distance_measure = st.sidebar.selectbox("Distance measure",
-                                            ("euclidean",'pearson', "euclidean", "manhattan (city block)", "hamming",
+                                            ('pearson', "euclidean", "manhattan (city block)", "hamming",
                                              "chebyshev"))
 
     df_rating_raw = df_rating
@@ -693,7 +580,7 @@ def task3():
         sorted_bok = list(np.argsort(predicted_ratings))[::-1]
         output = books.iloc[sorted_bok[0:list_len]][['bookTitle', 'bookAuthor']]
         out2 = predicted_ratings.sort_values(ascending=False)[0:list_len]
-        print(output)
+
 
     else:
         k_items = k_users
@@ -705,9 +592,6 @@ def task3():
         sorted_bok = list(np.argsort(predicted_ratings))[::-1]
         output = books.iloc[sorted_bok[0:list_len]][['bookTitle', 'bookAuthor']]
         out2 = predicted_ratings.sort_values(ascending=False)[0:list_len]
-        print(output)
-        print()
-
 
     # display results
     rec_header = list(output.columns)
@@ -810,7 +694,7 @@ def task4():
     st.table(result_item[0])
     st.table(result_distance[0])
 
-
-
+task1()
+task3()
 if __name__ == "__main__":
     main()
