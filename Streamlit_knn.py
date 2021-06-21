@@ -192,7 +192,8 @@ def create_corr_matrix(df_rating, normalization='centering'):
         df_rating = df_rating - df_rating.mean()
         df_rating = df_rating.fillna(0)
     elif normalization == 'centering + division by variance':
-        'centering + division by variance'
+        df_rating = (df_rating - df_rating.mean()) / df_rating.var() ** 0.5
+        df_rating = df_rating.fillna(0)
     elif normalization == "None":
         df_rating = df_rating.fillna(df_rating.mean())
 
@@ -466,7 +467,7 @@ def task1():
     normalization = st.sidebar.selectbox("Normalization",
                                          ('centering + division by variance', 'centering', "None"))
     distance_measure = st.sidebar.selectbox("Distance measure",
-                                            ('pearson', "euclidean", "manhattan (city block)", "hamming",
+                                            ("euclidean",'pearson', "euclidean", "manhattan (city block)", "hamming",
                                              "chebyshev"))
     # split the genres per movie
     movies["genres"] = movies["genres"].str.split('|')
@@ -493,7 +494,7 @@ def task1():
         output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
         out2 = recommended[sorted_mov[0:list_len]]
 
-    else:
+    elif False:
         similarities = similarity_calculation_distances(df_rating, distance_measure, user_number)
         user_average = df_rating_raw[user_number].mean()
         predicted_ratings = predicted_ratings_distances(df_rating_raw, similarities, user_number, k_users,
@@ -505,6 +506,22 @@ def task1():
         out2 = predicted_ratings.sort_values(ascending=False)[0:list_len]
         print(output)
         print()
+    else:
+        k_items = k_users
+        corr_matrix = create_corr_matrix(df_rating_raw)
+        predicted_ratings = item_item_cf(df_rating_raw, corr_matrix, user_number, k_items)  ##for movies replace 79186 with i e [1:610]
+        predicted_ratings.fillna(0, inplace=True)
+        recommended = predicted_ratings.copy()
+        rec = recommended.copy()
+        sorted_mov = list(np.argsort(predicted_ratings))[::-1]
+        output = movies.iloc[sorted_mov[0:list_len]][['title', 'genres']]
+        out2 = predicted_ratings.sort_values(ascending=False)[0:list_len]
+        print(output)
+        print()
+    sorted = np.argsort(predicted_ratings)  # [::-1]
+
+
+
     # display results
     rec_header = list(output.columns)
     rec_header.insert(0, 'predict')
@@ -543,7 +560,7 @@ def task1():
 
     st.write('All recommendations for you:')
     st.write(fig)
-
+task1()
 
 def task2():
     # load data
