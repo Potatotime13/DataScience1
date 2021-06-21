@@ -472,7 +472,7 @@ def item_item_cf_heuristik(df_rating, user_number=69, neighbours = 15, no_simila
 
     corr_matrix_reduced = corr_matrix.copy()
     corr_matrix = corr_matrix.drop(list(df_rating[user_number].dropna().index), axis=0)
-    corr_matrix_reduced = corr_matrix_reduced.drop(favorites, axis=0)
+    #corr_matrix_reduced = corr_matrix_reduced.drop(favorites, axis=0)
     corr_matrix_reduced = corr_matrix_reduced.drop(favorites, axis=1)
     most_correlated = []
     correlation_of_most_correlated = []
@@ -487,19 +487,25 @@ def item_item_cf_heuristik(df_rating, user_number=69, neighbours = 15, no_simila
                 pass
             else:
                 corr_matrix_reduced = corr_matrix_reduced.drop(y, axis=0)
-
+    corr_matrix_local = corr_matrix_reduced
     similar_to_favorites_rated = []
+    c = 0
     for x in most_correlated:
         l = []
         for y in x:
-            h = np.argpartition(corr_matrix_reduced[y], -neighbours)[-neighbours:]
-            correlations_to_neighbours = np.partition(corr_matrix_reduced[y], -neighbours)[-neighbours:]
-            index_neighbours = corr_matrix_reduced[y].iloc[h].index
+            #corr_matrix_local = corr_matrix_reduced.drop(favorites[c], axis=0)
+            h = np.argpartition(corr_matrix_local[y], -neighbours)[-neighbours:]
+            correlations_to_neighbours = np.partition(corr_matrix_local[y], -neighbours)[-neighbours:]
+            index_neighbours = corr_matrix_local[y].iloc[h].index
+            if favorites[c] in index_neighbours:
+                index_neighbours = index_neighbours.drop(favorites[c])
+            rating = np.nanmean(df_rating[user_number][index_neighbours])
             l.append(np.nanmean(df_rating[user_number][index_neighbours]))
             # get neighbours most correlated keep correlation
             # calc mean among them in df_rating weighted by correlation
             # save results
         similar_to_favorites_rated.append(l)
+        c +=1
     df_similar_to_favorites_rated = pd.DataFrame(np.array(similar_to_favorites_rated).T, columns = favorites)
     idx = np.random.permutation(df_similar_to_favorites_rated.index)
     df_names = pd.DataFrame(np.array(most_correlated).T, columns = favorites)
