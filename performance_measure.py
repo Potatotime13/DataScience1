@@ -331,43 +331,6 @@ def test_generation_item_cf(ratings, movie=True):
     return predicted, actuals
 
 
-def test_generation_heuristik(ratings, movie= True):
-    """generates predictions for a test set with item-item cf"""
-
-    train, test = create_valid(ratings, 5000, movie)
-    df_rating = train
-    df_rating_raw = df_rating.copy()
-    c = 0
-    user_number = 1
-    predicted = []
-    actuals = []
-    corr_matrix = create_corr_matrix(df_rating_raw)
-
-    for x in test:
-        if c % 10 ==0:
-            print(c)
-        # check if any value for a user is in test set
-        if test[x].notna().values.any():
-            predicted_ratings = item_item_cf_heuristik(df_rating, x, corr_matrix=corr_matrix)[0]
-            if movie:
-                predicted_ratings = pd.Series(np.full(shape=len(predicted_ratings), fill_value=5),
-                                          index=predicted_ratings.index)
-            else:
-                predicted_ratings = pd.Series(np.full(shape=len(predicted_ratings), fill_value=10),
-                                          index=predicted_ratings.index)
-            in_common_movies = list(set(predicted_ratings.index).intersection(test.index))
-            predicted.append(list(predicted_ratings[in_common_movies]))
-            actuals.append(list(test[x][in_common_movies]))
-
-            c += 1
-            ###
-
-        else:
-            pass
-
-    return predicted, actuals
-
-
 def group_test_results(predicted, actuals):
     """groups preditions and actual values"""
     pred_vector = np.hstack(predicted)
@@ -539,13 +502,6 @@ def performance_item_item_cf(ratings, movie=True):
     return results
 
 
-def performance_heuristik(ratings, movie=True):
-    pred, actuals = test_generation_heuristik(ratings, movie)
-    g = group_test_results(pred, actuals)
-    results = all_performance_measures(*g)
-    return results
-
-
 def performance_user_user_cf_distances(ratings, movie=True):
     """performance for user user cf with distance != cosine"""
     pred, actuals = test_generation_distances(ratings, movie)
@@ -554,13 +510,12 @@ def performance_user_user_cf_distances(ratings, movie=True):
     return results
 
 
-def all_performances(movie= True, filter_tr = 200):
+def all_performances(movie= True, filter_tr = 20):
     if movie is True:
         rating = pd.read_csv('ratings.csv')
         result_item = performance_item_item_cf(rating.copy())
         result_distance = performance_user_user_cf_distances(rating.copy())
-        result_heuristik = performance_heuristik(rating.copy())
-        return  result_item, result_distance, result_heuristik #
+        return  result_item, result_distance
 
     else:
         rating = pd.read_csv('BX-Book-Ratings.csv', sep=';', error_bad_lines=False, encoding="latin-1")
@@ -572,5 +527,8 @@ def all_performances(movie= True, filter_tr = 200):
         rating = rating[rating.ISBN.isin(b.index[b.gt(filter_tr)])]
         result_item = performance_item_item_cf(rating.copy(), movie=False)
         result_distance = performance_user_user_cf_distances(rating.copy(), movie=False)
-        result_heuristik = performance_heuristik(rating.copy(), False)
-    return result_item, result_distance, result_heuristik
+    return result_item, result_distance
+
+item_movie, distance_movie  = all_performances()
+item_book, distance_book = all_performances(False)
+print()
