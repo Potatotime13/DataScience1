@@ -537,7 +537,7 @@ def task2():
 
 
 def task3():
-    # load data
+    #load data
     df_rating, ratings, df_rating_nonzero, books, users = get_book_data(200)
 
     # get settings from sidebar
