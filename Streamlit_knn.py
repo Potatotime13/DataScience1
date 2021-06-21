@@ -628,8 +628,6 @@ def task2():
 
 
 def task3():
-    st.write('your top recommendations - calculated with knn')
-
     # load data
     df_rating, ratings, df_rating_nonzero, books, users = get_book_data(200)
 
