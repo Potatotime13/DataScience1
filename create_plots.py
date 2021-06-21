@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
 def main():
-    results = load_results()
+    results = load_results_movie()
     width = 0.20
     x = np.arange(4)
     plt.bar(x-width, results[0][0].values[:, 1], width)
@@ -17,15 +17,15 @@ def main():
     print()
 
 
-def load_results():
+def load_results_movie():
     result_user = []
-    result_user_book = []
     result_ncf = []
+    result_user_eu = []
     for i in range(4):
         result_user.append(pd.read_csv('perf/person_user_' + str(i) + '.csv'))
-        result_user_book.append(pd.read_csv('perf/person_user_book_' + str(i) + '.csv'))
         result_ncf.append(pd.read_csv('perf/ncf_mov_' + str(i) + '.csv'))
-    return result_user, result_ncf, result_user_book
+    result_user_eu.append(pd.read_csv())
+    return result_user, result_ncf
 
 
 if __name__ == "__main__":
