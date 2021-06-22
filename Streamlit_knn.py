@@ -977,6 +977,7 @@ def task7():
     movies.set_index(movies['movieId'], inplace=True)
     output = movies.loc[mov_ids][['title', 'genres']]
     out2 = np.round(y_pred[sorted_mov[0:list_len]].T[0], 2).copy()
+    out2 = [str(i) for i in out2]
 
     # display results
     rec_header = list(output.columns)
