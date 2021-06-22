@@ -47,14 +47,14 @@ def perf_knn():
 
 def get_book_data(filter_tr, like_to_value=True):
     # load data from csv
-    books = pd.read_csv('BX-Books.csv', sep=';', error_bad_lines=False, encoding="latin-1")
+    books = pd.read_csv('Datasets/BX-Books.csv', sep=';', error_bad_lines=False, encoding="latin-1")
     books.columns = ['ISBN', 'bookTitle', 'bookAuthor', 'yearOfPublication', 'publisher', 'imageUrlS', 'imageUrlM',
                      'imageUrlL']
 
-    users = pd.read_csv('BX-Users.csv', sep=';', error_bad_lines=False, encoding="latin-1")
+    users = pd.read_csv('Datasets/BX-Users.csv', sep=';', error_bad_lines=False, encoding="latin-1")
     users.columns = ["userId", "location", "age"]
 
-    ratings = pd.read_csv('BX-Book-Ratings.csv', sep=';', error_bad_lines=False, encoding="latin-1")
+    ratings = pd.read_csv('Datasets/BX-Book-Ratings.csv', sep=';', error_bad_lines=False, encoding="latin-1")
     ratings.columns = ["userId", "ISBN", "rating"]
 
     ratings = ratings.drop_duplicates(subset=["userId", "ISBN"])

@@ -75,14 +75,14 @@ class NeuMF(tf.keras.Model):
 
 def get_book_data(filter_tr, like_to_value=True):
     # load data from csv
-    books = pd.read_csv('BX-Books.csv', sep=';', error_bad_lines=False, encoding="latin-1")
+    books = pd.read_csv('Datasets/BX-Books.csv', sep=';', error_bad_lines=False, encoding="latin-1")
     books.columns = ['ISBN', 'bookTitle', 'bookAuthor', 'yearOfPublication', 'publisher', 'imageUrlS', 'imageUrlM',
                      'imageUrlL']
 
-    users = pd.read_csv('BX-Users.csv', sep=';', error_bad_lines=False, encoding="latin-1")
+    users = pd.read_csv('Datasets/BX-Users.csv', sep=';', error_bad_lines=False, encoding="latin-1")
     users.columns = ["userId", "location", "age"]
 
-    ratings = pd.read_csv('BX-Book-Ratings.csv', sep=';', error_bad_lines=False, encoding="latin-1")
+    ratings = pd.read_csv('Datasets/BX-Book-Ratings.csv', sep=';', error_bad_lines=False, encoding="latin-1")
     ratings.columns = ["userId", "ISBN", "rating"]
 
     ratings = ratings.drop_duplicates(subset=["userId", "ISBN"])
@@ -142,7 +142,7 @@ def create_valid(dataset, test_len=5000, movie=True):
 
 def main():
     movie = True
-    ratings = pd.read_csv('ratings.csv')
+    ratings = pd.read_csv('Datasets/ratings.csv')
     in_min = ratings['rating'].min()
     in_max = ratings['rating'].max()
 

@@ -7,10 +7,10 @@ print("start")
 
 def item_item_cf():
     
-    movies = pd.read_csv('../movies.csv')
-    ratings = pd.read_csv('../ratings.csv')
-    tags = pd.read_csv('../tags.csv')
-    links = pd.read_csv('../links.csv')
+    movies = pd.read_csv('../Datasets/movies.csv')
+    ratings = pd.read_csv('../Datasets/ratings.csv')
+    tags = pd.read_csv('../Datasets/tags.csv')
+    links = pd.read_csv('../Datasets/links.csv')
     corr_movies = pd.read_csv("corr_movies.csv")
 
     user_number = 15

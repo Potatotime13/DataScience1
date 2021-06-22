@@ -5,9 +5,9 @@ from plotly.colors import n_colors
 from IPython.display import display
 
 # read movie lens
-movies = pandas.read_csv('../movies.csv')
-ratings = pandas.read_csv('../ratings.csv')
-tags = pandas.read_csv('../tags.csv')
+movies = pandas.read_csv('../Datasets/movies.csv')
+ratings = pandas.read_csv('../Datasets/ratings.csv')
+tags = pandas.read_csv('../Datasets/tags.csv')
 
 # split the genres per movie
 movies["genres"] = movies["genres"].str.split('|')

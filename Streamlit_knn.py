@@ -53,14 +53,14 @@ def movie_url(ids):
 
 def get_book_data(filter_tr, like_to_value=True):
     # load data from csv
-    books = pd.read_csv('BX-Books.csv', sep=';', error_bad_lines=False, encoding="latin-1")
+    books = pd.read_csv('Datasets/BX-Books.csv', sep=';', error_bad_lines=False, encoding="latin-1")
     books.columns = ['ISBN', 'bookTitle', 'bookAuthor', 'yearOfPublication', 'publisher', 'imageUrlS', 'imageUrlM',
                      'imageUrlL']
 
-    users = pd.read_csv('BX-Users.csv', sep=';', error_bad_lines=False, encoding="latin-1")
+    users = pd.read_csv('Datasets/BX-Users.csv', sep=';', error_bad_lines=False, encoding="latin-1")
     users.columns = ["userId", "location", "age"]
 
-    ratings = pd.read_csv('BX-Book-Ratings.csv', sep=';', error_bad_lines=False, encoding="latin-1")
+    ratings = pd.read_csv('Datasets/BX-Book-Ratings.csv', sep=';', error_bad_lines=False, encoding="latin-1")
     ratings.columns = ["userId", "ISBN", "rating"]
 
     ratings = ratings.drop_duplicates(subset=["userId", "ISBN"])
@@ -318,9 +318,9 @@ def load_results_book():
 
 
 def moviePrediction_item_item_cf():
-    rating = pd.read_csv('ratings.csv')
+    rating = pd.read_csv('Datasets/ratings.csv')
     df_rating = rating.pivot(index="movieId", columns="userId", values="rating")
-    movies = pd.read_csv('movies.csv')
+    movies = pd.read_csv('Datasets/movies.csv')
     df_rating_raw = df_rating.copy()
     corr_matrix = create_corr_matrix(df_rating_raw)
     predicted_ratings = item_item_cf(df_rating, corr_matrix, 1, 15)
@@ -372,10 +372,10 @@ def color_descends(rec):
 # streamlit pages
 def task1():
     # read movie lens
-    movies = pd.read_csv('movies.csv')
-    ratings = pd.read_csv('ratings.csv')
-    tags = pd.read_csv('tags.csv')
-    links = pd.read_csv('links.csv')
+    movies = pd.read_csv('Datasets/movies.csv')
+    ratings = pd.read_csv('Datasets/ratings.csv')
+    tags = pd.read_csv('Datasets/tags.csv')
+    links = pd.read_csv('Datasets/links.csv')
 
     # get settings from sidebar
     user_number = st.sidebar.selectbox("User ID", (10, 12, 69, 52, 153))
@@ -793,10 +793,10 @@ def task4():
 
 def task5():
     # read movie lens
-    movies = pd.read_csv('movies.csv')
-    ratings = pd.read_csv('ratings.csv')
-    tags = pd.read_csv('tags.csv')
-    links = pd.read_csv('links.csv')
+    movies = pd.read_csv('Datasets/movies.csv')
+    ratings = pd.read_csv('Datasets/ratings.csv')
+    tags = pd.read_csv('Datasets/tags.csv')
+    links = pd.read_csv('Datasets/links.csv')
 
     # get settings from sidebar
     user_number = st.sidebar.selectbox("User ID", (10, 12, 69, 52, 153))
@@ -927,10 +927,10 @@ def task6():
 
 def task7():
     # read movie lens
-    movies = pd.read_csv('movies.csv')
-    ratings = pd.read_csv('ratings.csv')
-    tags = pd.read_csv('tags.csv')
-    links = pd.read_csv('links.csv')
+    movies = pd.read_csv('Datasets/movies.csv')
+    ratings = pd.read_csv('Datasets/ratings.csv')
+    tags = pd.read_csv('Datasets/tags.csv')
+    links = pd.read_csv('Datasets/links.csv')
 
     # get settings from sidebar
     user_number = st.sidebar.selectbox("User ID", (10, 12, 69, 52, 153))

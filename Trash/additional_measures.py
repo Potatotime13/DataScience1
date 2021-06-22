@@ -19,10 +19,10 @@ from scipy.spatial.distance import cosine, hamming, euclidean, chebyshev, citybl
 
 def task1():
     # read movie lens
-    movies = pd.read_csv('../movies.csv')
-    ratings = pd.read_csv('../ratings.csv')
-    tags = pd.read_csv('../tags.csv')
-    links = pd.read_csv('../links.csv')
+    movies = pd.read_csv('../Datasets/movies.csv')
+    ratings = pd.read_csv('../Datasets/ratings.csv')
+    tags = pd.read_csv('../Datasets/tags.csv')
+    links = pd.read_csv('../Datasets/links.csv')
 ##    st.write('K nearest neighbor centered cosine distance')
 
     # get settings from sidebar
@@ -208,10 +208,10 @@ def task1():
 task1()
 def task2():
     # read movie lens
-    movies = pd.read_csv('../movies.csv')
-    ratings = pd.read_csv('../ratings.csv')
-    tags = pd.read_csv('../tags.csv')
-    links = pd.read_csv('../links.csv')
+    movies = pd.read_csv('../Datasets/movies.csv')
+    ratings = pd.read_csv('../Datasets/ratings.csv')
+    tags = pd.read_csv('../Datasets/tags.csv')
+    links = pd.read_csv('../Datasets/links.csv')
     st.write('K nearest neighbor centered cosine distance')
 
     # get settings from sidebar
