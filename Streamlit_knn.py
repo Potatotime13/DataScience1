@@ -387,7 +387,7 @@ def task1():
     k_users = st.sidebar.selectbox("K nearest", (5, 15, 20))
     list_len = st.sidebar.selectbox("Recommendations", (10, 40))
     normalization = st.sidebar.selectbox("Normalization",
-                                         ("None",'centering + division by variance', 'centering', ))
+                                         ('centering + division by variance', 'centering', "None",))
     distance_measure = st.sidebar.selectbox("Distance measure",
                                             ('pearson', "euclidean", "manhattan (city block)",
                                              "chebyshev"))
