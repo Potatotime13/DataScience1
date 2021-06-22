@@ -478,19 +478,19 @@ def task2():
     # result_item, result_distance = all_performances()
     if info_shown == "distribution measures":
         thr = 4.5
-        mask = result_user[3].loc[0].values[1:] <= thr
+        mask = result_user[3].loc[0].values[1:] >= thr
         vals = result_user[3].values[1:, 1:]
         vals = vals[:, mask]
         mse_4u = (vals[0, :] * vals[3, :]).sum() / vals[0, :].sum()
-        mask = result_user_eu[3].loc[0].values[1:] <= thr
+        mask = result_user_eu[3].loc[0].values[1:] >= thr
         vals = result_user_eu[3].values[1:, 1:]
         vals = vals[:, mask]
         mse_4ue = (vals[0, :] * vals[3, :]).sum() / vals[0, :].sum()
-        mask = result_ncf[3].loc[0].values[1:] <= thr
+        mask = result_ncf[3].loc[0].values[1:] >= thr
         vals = result_ncf[3].values[1:, 1:]
         vals = vals[:, mask]
         mse_4n = (vals[0, :] * vals[3, :]).sum() / vals[0, :].sum()
-        mask = result_item[3].loc[0].values[1:] <= thr
+        mask = result_item[3].loc[0].values[1:] >= thr
         vals = result_item[3].values[1:, 1:]
         vals = vals[:, mask]
         mse_4i = (vals[0, :] * vals[3, :]).sum() / vals[0, :].sum()
