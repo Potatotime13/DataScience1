@@ -657,7 +657,7 @@ def task4():
     st.write('K nearest neighbor - performance measures')
 
     # get settings from sidebar
-    info_shown = st.sidebar.selectbox("Measures", ("distribution measures","basic measures", ))
+    info_shown = st.sidebar.selectbox("Measures", ("basic measures", "distribution measures",))
 
     # result_item, result_distance = all_performances()
     if info_shown == "distribution measures":
