@@ -692,9 +692,9 @@ def task4():
             go.Bar(name='user / user pearson', x=categories, y=list(result_user[2].iloc[1][categories]))
         ])
         fig4 = go.Figure(data=[
-            go.Bar(name='item / item pearson', x=[1], y=list(mse_4i)),
-            go.Bar(name='user / user euclidean', x=[1], y=list(mse_4ue)),
-            go.Bar(name='user / user pearson', x=[1], y=list(mse_4u))
+            go.Bar(name='item / item pearson', x=list([1]), y=list(mse_4i)),
+            go.Bar(name='user / user euclidean', x=list([1]), y=list(mse_4ue)),
+            go.Bar(name='user / user pearson', x=list([1]), y=list(mse_4u))
         ])
 
         # Change display settings
