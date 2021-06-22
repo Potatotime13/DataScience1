@@ -120,7 +120,7 @@ def create_valid(dataset, test_len=5000, movie=True):
 # recommendation methods
 def pearson(df_rating, user_number, k_users, df_rating_raw, normalization):
     user_std = (df_rating * df_rating).mean() ** 0.5
-    user_number = list(df_rating.columns).index(user_number)
+    user_number = list(df_rating.columns).index(user_number)+1
     # calc correlation matrix
     user_corr = pd.DataFrame(np.corrcoef(df_rating.values.T))
     user_corr.index = [i for i in range(1, len(user_corr) + 1)]
