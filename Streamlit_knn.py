@@ -714,14 +714,12 @@ def task4():
 
         categories = list(result_item[1].iloc[:, 0])
         fig1 = go.Figure(data=[
-            go.Bar(name='ncf', x=categories, y=list(result_ncf[1].iloc[:, 1])),
             go.Bar(name='item / item pearson', x=categories, y=list(result_item[1].iloc[:, 1])),
             go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[1].iloc[:, 1])),
             go.Bar(name='user / user pearson', x=categories, y=list(result_user[1].iloc[:, 1]))
         ])
         categories2 = list(result_item[0].iloc[:, 0])
         fig2 = go.Figure(data=[
-            go.Bar(name='ncf', x=categories2, y=list(result_ncf[0].iloc[:, 1])),
             go.Bar(name='item / item pearson', x=categories2, y=list(result_item[0].iloc[:, 1])),
             go.Bar(name='user / user euclidean', x=categories2, y=list(result_user_eu[0].iloc[:, 1])),
             go.Bar(name='user / user pearson', x=categories2, y=list(result_user[0].iloc[:, 1]))
