@@ -660,7 +660,7 @@ def task4():
     normalization = st.sidebar.selectbox("Normalization", ('centering', 'centering + division by variance'))
 
     # result_item, result_distance = all_performances()
-    result_item, result_distance = load_results()
+    result_item, result_distance = load_results_book()
     categories = list(result_item[2].columns[1:])
     fig1 = go.Figure(data=[
         go.Bar(name='item / item', x=categories, y=list(result_item[2].iloc[4][categories])),
