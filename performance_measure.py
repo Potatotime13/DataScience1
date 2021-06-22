@@ -261,12 +261,12 @@ def mae(df):
 def test_generation_distances(ratings, movie=True):
 
     #### hyperparameters
-    k_users = 23
+    k_users = 119
     normalization = 'centering + division by variance'
     distance_measure = "euclidean"
     ####
 
-    train, test = create_valid(ratings,5000 ,movie)
+    train, test = create_valid(ratings, 5000, movie)
     df_rating = train
     df_rating_raw = df_rating.copy()
     if normalization == 'centering + division by variance':
@@ -614,5 +614,3 @@ def many_predictions(no_predictions=1):
     distance_book_errors_total.to_csv("perf/" + str(x) + "distance_book"+"_errors_total" + ".csv")
     distance_book_group_actual.to_csv("perf/" + str(x) + "distance_book"+"_group_actual" + ".csv")
     distance_book_group_predicted.to_csv("perf/" + str(x) + "distance_book"+"_group_predicted" + ".csv")
-
-many_predictions()
