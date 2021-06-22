@@ -283,13 +283,40 @@ def item_item_cf(df_rating, corr_matrix, user_number, k_items=15, test_labels=[]
     return predictions
 
 
-def load_results():
+def load_results_movie():
+    result_user = []
+    result_ncf = []
+    result_user_eu = []
     result_item = []
-    result_distances = []
     for i in range(4):
-        result_item.append(pd.read_csv('perf/result_item_' + str(i)))
-        result_distances.append(pd.read_csv('perf/result_distances_' + str(i)))
-    return result_item, result_distances
+        result_user.append(pd.read_csv('perf/person_user_' + str(i) + '.csv'))
+        result_ncf.append(pd.read_csv('perf/ncf_mov_' + str(i) + '.csv'))
+    result_user_eu.append(pd.read_csv('perf/0distance_movie_basic.csv'))
+    result_user_eu.append(pd.read_csv('perf/0distance_movie_errors_total.csv'))
+    result_user_eu.append(pd.read_csv('perf/0distance_movie_group_actual.csv'))
+    result_user_eu.append(pd.read_csv('perf/0distance_movie_group_predicted.csv'))
+    result_item.append(pd.read_csv('perf/0item_movie_basic.csv'))
+    result_item.append(pd.read_csv('perf/0item_movie_errors_total.csv'))
+    result_item.append(pd.read_csv('perf/0item_movie_group_actual.csv'))
+    result_item.append(pd.read_csv('perf/0item_movie_group_predicted.csv'))
+    return result_user, result_user_eu, result_ncf, result_item
+
+
+def load_results_book():
+    result_user = []
+    result_user_eu = []
+    result_item = []
+    for i in range(4):
+        result_user.append(pd.read_csv('perf/person_user_book_' + str(i) + '.csv'))
+    result_user_eu.append(pd.read_csv('perf/0distance_book_basic.csv'))
+    result_user_eu.append(pd.read_csv('perf/0distance_book_errors_total.csv'))
+    result_user_eu.append(pd.read_csv('perf/0distance_book_group_actual.csv'))
+    result_user_eu.append(pd.read_csv('perf/0distance_book_group_predicted.csv'))
+    result_item.append(pd.read_csv('perf/0item_book_basic.csv'))
+    result_item.append(pd.read_csv('perf/0item_book_errors_total.csv'))
+    result_item.append(pd.read_csv('perf/0item_book_group_actual.csv'))
+    result_item.append(pd.read_csv('perf/0item_book_group_predicted.csv'))
+    return result_user, result_user_eu, result_item
 
 
 def moviePrediction_item_item_cf():
@@ -440,7 +467,7 @@ def task1():
 
 def task2():
     # load data
-    result_item, result_distance = load_results()
+    result_user, result_user_eu, result_ncf, result_item = load_results_movie()
 
     # header
     st.write('K nearest neighbor - performance measures')
@@ -453,16 +480,22 @@ def task2():
 
         categories = list(result_item[2].columns[1:])
         fig1 = go.Figure(data=[
-            go.Bar(name='item / item', x=categories, y=list(result_item[2].iloc[4][categories])),
-            go.Bar(name='user / user', x=categories, y=list(result_distance[2].iloc[4][categories]))
+            go.Bar(name='ncf', x=categories, y=list(result_ncf[2].iloc[4][categories])),
+            go.Bar(name='item / item pearson', x=categories, y=list(result_item[2].iloc[4][categories])),
+            go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[2].iloc[4][categories])),
+            go.Bar(name='user / user pearson', x=categories, y=list(result_user[2].iloc[4][categories]))
         ])
         fig2 = go.Figure(data=[
-            go.Bar(name='item / item', x=categories, y=list(result_item[2].iloc[3][categories])),
-            go.Bar(name='user / user', x=categories, y=list(result_distance[2].iloc[3][categories]))
+            go.Bar(name='ncf', x=categories, y=list(result_ncf[2].iloc[3][categories])),
+            go.Bar(name='item / item pearson', x=categories, y=list(result_item[2].iloc[3][categories])),
+            go.Bar(name='item / item euclidean', x=categories, y=list(result_user_eu[2].iloc[3][categories])),
+            go.Bar(name='user / user pearson', x=categories, y=list(result_user[2].iloc[3][categories]))
         ])
         fig3 = go.Figure(data=[
-            go.Bar(name='item / item', x=categories, y=list(result_item[2].iloc[1][categories])),
-            go.Bar(name='user / user', x=categories, y=list(result_distance[2].iloc[1][categories]))
+            go.Bar(name='ncf', x=categories, y=list(result_ncf[2].iloc[1][categories])),
+            go.Bar(name='item / item pearson', x=categories, y=list(result_item[2].iloc[1][categories])),
+            go.Bar(name='item / item euclidean', x=categories, y=list(result_user_eu[2].iloc[1][categories])),
+            go.Bar(name='user / user pearson', x=categories, y=list(result_user[2].iloc[1][categories]))
         ])
 
         # Change display settings
@@ -496,13 +529,17 @@ def task2():
 
         categories = list(result_item[1].iloc[:, 0])
         fig1 = go.Figure(data=[
-            go.Bar(name='item / item', x=categories, y=list(result_item[1].iloc[:, 1])),
-            go.Bar(name='user / user', x=categories, y=list(result_distance[1].iloc[:, 1]))
+            go.Bar(name='ncf', x=categories, y=list(result_ncf[1].iloc[:, 1])),
+            go.Bar(name='item / item pearson', x=categories, y=list(result_item[1].iloc[:, 1])),
+            go.Bar(name='item / item euclidean', x=categories, y=list(result_user_eu[1].iloc[:, 1])),
+            go.Bar(name='user / user pearson', x=categories, y=list(result_user[1].iloc[:, 1]))
         ])
         categories2 = list(result_item[0].iloc[:, 0])
         fig2 = go.Figure(data=[
-            go.Bar(name='item / item', x=categories2, y=list(result_item[0].iloc[:, 1])),
-            go.Bar(name='user / user', x=categories2, y=list(result_distance[0].iloc[:, 1]))
+            go.Bar(name='ncf', x=categories2, y=list(result_ncf[0].iloc[:, 1])),
+            go.Bar(name='item / item pearson', x=categories2, y=list(result_item[0].iloc[:, 1])),
+            go.Bar(name='item / item euclidean', x=categories2, y=list(result_user_eu[0].iloc[:, 1])),
+            go.Bar(name='user / user pearson', x=categories2, y=list(result_user[0].iloc[:, 1]))
         ])
 
         # Change display settings
