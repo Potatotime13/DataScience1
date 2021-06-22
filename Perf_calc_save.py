@@ -8,7 +8,7 @@ from scipy.spatial.distance import hamming, euclidean, chebyshev, cityblock
 import urllib.request
 
 
-def main():
+def main_old():
     sum_temp = np.load('perf/NCF_summaries/sum_1.npy')
     y_pred = sum_temp[0]
     df_test_set = sum_temp[1]
@@ -31,13 +31,14 @@ def main():
     print()
 
 
-def main_old():
-    ratings = pd.read_csv('ratings.csv')
-    #df_ratings, ratings, df_rating_nonzero, books, users = get_book_data(20)
-    y_pred, df_test_set = knn_uu_cosine(ratings, 15, movie=True)
+def main():
+    #ratings = pd.read_csv('ratings.csv')
+    df_ratings, ratings, df_rating_nonzero, books, users = get_book_data(20)
+    y_pred, df_test_set = knn_uu_cosine(df_rating_nonzero, 15, movie=False)
     saving = all_performance_measures(*group_test_results(y_pred, df_test_set))
     saving = list(saving)
-    saving[3].to_csv('perf/person_user_' + str(3) + '.csv')
+    for k in range(4):
+        saving[k].to_csv('perf/person_user_test_' + str(k) + '.csv')
     for i in range(9):
         y_pred, df_test_set = knn_uu_cosine(ratings, 15, movie=False)
         saving_tmp = all_performance_measures(*group_test_results(y_pred, df_test_set))
