@@ -657,20 +657,20 @@ def task4():
     st.write('K nearest neighbor - performance measures')
 
     # get settings from sidebar
-    info_shown = st.sidebar.selectbox("Measures", ("basic measures", "distribution measures"))
+    info_shown = st.sidebar.selectbox("Measures", ("distribution measures","basic measures", ))
 
     # result_item, result_distance = all_performances()
     if info_shown == "distribution measures":
 
-        categories = list(result_item[2].columns[1:])
+        categories = [str(a) for a in np.arange(1., 11., 1)]
         fig1 = go.Figure(data=[
             go.Bar(name='item / item pearson', x=categories, y=list(result_item[2].iloc[4][categories])),
-            go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[2].iloc[4][categories])),
+            #go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[2].iloc[4][categories])),
             go.Bar(name='user / user pearson', x=categories, y=list(result_user[2].iloc[4][categories]))
         ])
         fig2 = go.Figure(data=[
             go.Bar(name='item / item pearson', x=categories, y=list(result_item[2].iloc[3][categories])),
-            go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[2].iloc[3][categories])),
+            #go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[2].iloc[3][categories])),
             go.Bar(name='user / user pearson', x=categories, y=list(result_user[2].iloc[3][categories]))
         ])
         '''
@@ -969,4 +969,4 @@ def task7():
 
 
 if __name__ == "__main__":
-    main()
+    task4()
