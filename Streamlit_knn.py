@@ -812,7 +812,7 @@ def task5():
 
     k_items = k_users
     corr_matrix = create_corr_matrix(df_rating_raw)
-    predicted_ratings = item_item_cf(df_rating_raw, corr_matrix, user_number, k_items)  ##for movies replace 79186 with i e [1:610]
+    predicted_ratings = item_item_cf(df_rating_raw, corr_matrix, user_number, k_items)
     predicted_ratings.fillna(0, inplace=True)
     recommended = predicted_ratings.copy()
     rec = recommended.copy()
@@ -861,7 +861,7 @@ def task5():
 
 
 def task6():
-    #load data
+    # load data
     df_rating, ratings, df_rating_nonzero, books, users = get_book_data(200)
 
     # get settings from sidebar
@@ -873,7 +873,7 @@ def task6():
 
     k_items = k_users
     corr_matrix = create_corr_matrix(df_rating_raw)
-    predicted_ratings = item_item_cf(df_rating_raw, corr_matrix, user_number, k_items)  ##for movies replace 79186 with i e [1:610]
+    predicted_ratings = item_item_cf(df_rating_raw, corr_matrix, user_number, k_items)
     predicted_ratings.fillna(0, inplace=True)
     recommended = predicted_ratings.copy()
     rec = recommended.copy()
