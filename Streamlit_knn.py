@@ -673,14 +673,12 @@ def task4():
             #go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[2].iloc[3][categories])),
             go.Bar(name='user / user pearson', x=categories, y=list(result_user[2].iloc[3][categories]))
         ])
-        '''
         fig3 = go.Figure(data=[
-            go.Bar(name='ncf', x=categories, y=list(result_ncf[2].iloc[1][categories])),
             go.Bar(name='item / item pearson', x=categories, y=list(result_item[2].iloc[1][categories])),
-            go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[2].iloc[1][categories])),
+            #go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[2].iloc[1][categories])),
             go.Bar(name='user / user pearson', x=categories, y=list(result_user[2].iloc[1][categories]))
         ])
-        '''
+
         # Change display settings
         fig1.update_layout(barmode='group',
                            title=go.layout.Title(
@@ -696,7 +694,6 @@ def task4():
                                x=0
                            ),
                            )
-        '''
         fig3.update_layout(barmode='group',
                            title=go.layout.Title(
                                text=result_item[2].iloc[1][0],
@@ -704,11 +701,11 @@ def task4():
                                x=0
                            ),
                            )
-        '''
+
         # display results
         st.write(fig1)
         st.write(fig2)
-        #st.write(fig3)
+        st.write(fig3)
 
     elif info_shown == "basic measures":
 
