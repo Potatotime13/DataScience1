@@ -388,7 +388,7 @@ def task1():
     normalization = st.sidebar.selectbox("Normalization",
                                          ('centering + division by variance', 'centering', "None"))
     distance_measure = st.sidebar.selectbox("Distance measure",
-                                            ('pearson', "euclidean", "manhattan (city block)", "hamming",
+                                            ('pearson', "euclidean", "manhattan (city block)",
                                              "chebyshev"))
     # split the genres per movie
     movies["genres"] = movies["genres"].str.split('|')
@@ -488,13 +488,13 @@ def task2():
         fig2 = go.Figure(data=[
             go.Bar(name='ncf', x=categories, y=list(result_ncf[2].iloc[3][categories])),
             go.Bar(name='item / item pearson', x=categories, y=list(result_item[2].iloc[3][categories])),
-            go.Bar(name='item / item euclidean', x=categories, y=list(result_user_eu[2].iloc[3][categories])),
+            go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[2].iloc[3][categories])),
             go.Bar(name='user / user pearson', x=categories, y=list(result_user[2].iloc[3][categories]))
         ])
         fig3 = go.Figure(data=[
             go.Bar(name='ncf', x=categories, y=list(result_ncf[2].iloc[1][categories])),
             go.Bar(name='item / item pearson', x=categories, y=list(result_item[2].iloc[1][categories])),
-            go.Bar(name='item / item euclidean', x=categories, y=list(result_user_eu[2].iloc[1][categories])),
+            go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[2].iloc[1][categories])),
             go.Bar(name='user / user pearson', x=categories, y=list(result_user[2].iloc[1][categories]))
         ])
 
@@ -531,14 +531,14 @@ def task2():
         fig1 = go.Figure(data=[
             go.Bar(name='ncf', x=categories, y=list(result_ncf[1].iloc[:, 1])),
             go.Bar(name='item / item pearson', x=categories, y=list(result_item[1].iloc[:, 1])),
-            go.Bar(name='item / item euclidean', x=categories, y=list(result_user_eu[1].iloc[:, 1])),
+            go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[1].iloc[:, 1])),
             go.Bar(name='user / user pearson', x=categories, y=list(result_user[1].iloc[:, 1]))
         ])
         categories2 = list(result_item[0].iloc[:, 0])
         fig2 = go.Figure(data=[
             go.Bar(name='ncf', x=categories2, y=list(result_ncf[0].iloc[:, 1])),
             go.Bar(name='item / item pearson', x=categories2, y=list(result_item[0].iloc[:, 1])),
-            go.Bar(name='item / item euclidean', x=categories2, y=list(result_user_eu[0].iloc[:, 1])),
+            go.Bar(name='user / user euclidean', x=categories2, y=list(result_user_eu[0].iloc[:, 1])),
             go.Bar(name='user / user pearson', x=categories2, y=list(result_user[0].iloc[:, 1]))
         ])
 
@@ -573,7 +573,7 @@ def task3():
     normalization = st.sidebar.selectbox("Normalization",
                                          ('centering + division by variance', 'centering', "None"))
     distance_measure = st.sidebar.selectbox("Distance measure",
-                                            ('pearson', "euclidean", "manhattan (city block)", "hamming",
+                                            ('pearson', "euclidean", "manhattan (city block)",
                                              "chebyshev"))
 
     df_rating_raw = df_rating
@@ -650,61 +650,101 @@ def task3():
 
 
 def task4():
-    df_ratings, ratings, df_rating_nonzero, books, users = get_book_data(200)
+    # load data
+    result_user, result_user_eu, result_item = load_results_book()
 
     # header
     st.write('K nearest neighbor - performance measures')
 
     # get settings from sidebar
-    k_users = st.sidebar.selectbox("K nearest", (15, 20))
-    normalization = st.sidebar.selectbox("Normalization", ('centering', 'centering + division by variance'))
+    info_shown = st.sidebar.selectbox("Measures", ("basic measures", "distribution measures"))
 
     # result_item, result_distance = all_performances()
-    result_item, result_distance = load_results_book()
-    categories = list(result_item[2].columns[1:])
-    fig1 = go.Figure(data=[
-        go.Bar(name='item / item', x=categories, y=list(result_item[2].iloc[4][categories])),
-        go.Bar(name='user / user', x=categories, y=list(result_distance[2].iloc[4][categories]))
-    ])
-    fig2 = go.Figure(data=[
-        go.Bar(name='item / item', x=categories, y=list(result_item[2].iloc[3][categories])),
-        go.Bar(name='user / user', x=categories, y=list(result_distance[2].iloc[3][categories]))
-    ])
-    fig3 = go.Figure(data=[
-        go.Bar(name='item / item', x=categories, y=list(result_item[2].iloc[1][categories])),
-        go.Bar(name='user / user', x=categories, y=list(result_distance[2].iloc[1][categories]))
-    ])
+    if info_shown == "distribution measures":
 
-    # Change display settings
-    fig1.update_layout(barmode='group',
-                       title=go.layout.Title(
-                           text=result_item[2].iloc[4][0],
-                           xref="paper",
-                           x=0
-                       ),
-                       )
-    fig2.update_layout(barmode='group',
-                       title=go.layout.Title(
-                           text=result_item[2].iloc[3][0],
-                           xref="paper",
-                           x=0
-                       ),
-                       )
-    fig3.update_layout(barmode='group',
-                       title=go.layout.Title(
-                           text=result_item[2].iloc[1][0],
-                           xref="paper",
-                           x=0
-                       ),
-                       )
+        categories = list(result_item[2].columns[1:])
+        fig1 = go.Figure(data=[
+            go.Bar(name='item / item pearson', x=categories, y=list(result_item[2].iloc[4][categories])),
+            go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[2].iloc[4][categories])),
+            go.Bar(name='user / user pearson', x=categories, y=list(result_user[2].iloc[4][categories]))
+        ])
+        fig2 = go.Figure(data=[
+            go.Bar(name='item / item pearson', x=categories, y=list(result_item[2].iloc[3][categories])),
+            go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[2].iloc[3][categories])),
+            go.Bar(name='user / user pearson', x=categories, y=list(result_user[2].iloc[3][categories]))
+        ])
+        '''
+        fig3 = go.Figure(data=[
+            go.Bar(name='ncf', x=categories, y=list(result_ncf[2].iloc[1][categories])),
+            go.Bar(name='item / item pearson', x=categories, y=list(result_item[2].iloc[1][categories])),
+            go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[2].iloc[1][categories])),
+            go.Bar(name='user / user pearson', x=categories, y=list(result_user[2].iloc[1][categories]))
+        ])
+        '''
+        # Change display settings
+        fig1.update_layout(barmode='group',
+                           title=go.layout.Title(
+                               text=result_item[2].iloc[4][0],
+                               xref="paper",
+                               x=0
+                           ),
+                           )
+        fig2.update_layout(barmode='group',
+                           title=go.layout.Title(
+                               text=result_item[2].iloc[3][0],
+                               xref="paper",
+                               x=0
+                           ),
+                           )
+        '''
+        fig3.update_layout(barmode='group',
+                           title=go.layout.Title(
+                               text=result_item[2].iloc[1][0],
+                               xref="paper",
+                               x=0
+                           ),
+                           )
+        '''
+        # display results
+        st.write(fig1)
+        st.write(fig2)
+        #st.write(fig3)
 
-    # display results
-    st.write(fig1)
-    st.write(fig2)
-    st.write(fig3)
-    st.write("average error of a random test set containing 5000 data points:")
-    st.table(result_item[0])
-    st.table(result_distance[0])
+    elif info_shown == "basic measures":
+
+        categories = list(result_item[1].iloc[:, 0])
+        fig1 = go.Figure(data=[
+            go.Bar(name='ncf', x=categories, y=list(result_ncf[1].iloc[:, 1])),
+            go.Bar(name='item / item pearson', x=categories, y=list(result_item[1].iloc[:, 1])),
+            go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[1].iloc[:, 1])),
+            go.Bar(name='user / user pearson', x=categories, y=list(result_user[1].iloc[:, 1]))
+        ])
+        categories2 = list(result_item[0].iloc[:, 0])
+        fig2 = go.Figure(data=[
+            go.Bar(name='ncf', x=categories2, y=list(result_ncf[0].iloc[:, 1])),
+            go.Bar(name='item / item pearson', x=categories2, y=list(result_item[0].iloc[:, 1])),
+            go.Bar(name='user / user euclidean', x=categories2, y=list(result_user_eu[0].iloc[:, 1])),
+            go.Bar(name='user / user pearson', x=categories2, y=list(result_user[0].iloc[:, 1]))
+        ])
+
+        # Change display settings
+        fig1.update_layout(barmode='group',
+                           title=go.layout.Title(
+                               text='basic measures of predictions',
+                               xref="paper",
+                               x=0
+                           ),
+                           )
+        fig2.update_layout(barmode='group',
+                           title=go.layout.Title(
+                               text='prediction summary',
+                               xref="paper",
+                               x=0
+                           ),
+                           )
+        # display results
+        st.write(fig1)
+        st.write(fig2)
 
 
 def task5():
