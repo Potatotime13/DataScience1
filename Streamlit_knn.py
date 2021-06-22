@@ -661,6 +661,19 @@ def task4():
 
     # result_item, result_distance = all_performances()
     if info_shown == "distribution measures":
+        thr = 8
+        mask = result_user[3].loc[0].values[1:] >= thr
+        vals = result_user[3].values[1:, 1:]
+        vals = vals[:, mask]
+        mse_4u = (vals[0, :] * vals[3, :]).sum() / vals[0, :].sum()
+        mask = result_user_eu[3].loc[0].values[1:] >= thr
+        vals = result_user_eu[3].values[1:, 1:]
+        vals = vals[:, mask]
+        mse_4ue = (vals[0, :] * vals[3, :]).sum() / vals[0, :].sum()
+        mask = result_item[3].loc[0].values[1:] >= thr
+        vals = result_item[3].values[1:, 1:]
+        vals = vals[:, mask]
+        mse_4i = (vals[0, :] * vals[3, :]).sum() / vals[0, :].sum()
 
         categories = [str(a) for a in np.arange(1., 11., 1)]
         fig1 = go.Figure(data=[
@@ -677,6 +690,11 @@ def task4():
             go.Bar(name='item / item pearson', x=categories, y=list(result_item[2].iloc[1][categories])),
             go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[2].iloc[1][categories])),
             go.Bar(name='user / user pearson', x=categories, y=list(result_user[2].iloc[1][categories]))
+        ])
+        fig4 = go.Figure(data=[
+            go.Bar(name='item / item pearson', x=[1], y=list(mse_4i)),
+            go.Bar(name='user / user euclidean', x=[1], y=list(mse_4ue)),
+            go.Bar(name='user / user pearson', x=[1], y=list(mse_4u))
         ])
 
         # Change display settings
@@ -701,9 +719,16 @@ def task4():
                                x=0
                            ),
                            )
-
+        fig4.update_layout(barmode='group',
+                           title=go.layout.Title(
+                               text=result_item[2].iloc[1][0],
+                               xref="paper",
+                               x=0
+                           ),
+                           )
         # display results
         st.write(fig1)
+        st.write(fig4)
         st.write(fig2)
         st.write(fig3)
 
