@@ -145,6 +145,7 @@ def pearson(df_rating, user_number, k_users, df_rating_raw, normalization):
         recommended = w_sum_k * seen_sim_len
     unseen = df_rating_raw[user_number].isnull().values
     recommended = recommended.T[0] * unseen
+    recommended = recommended - max(0, recommended.max() - df_rating_raw.max().max())
     return recommended
 
 
@@ -333,7 +334,7 @@ def bookprediction_item_item_cf():
     corr_matrix = create_corr_matrix(df_rating_raw)
     predicted_ratings = item_item_cf(df_rating, corr_matrix, 79186, 15)
     print(get_items_item_item_cf(books, item_item_cf(df_rating, corr_matrix, 79186, 10), 20, movies=False))  # books
-# end of example
+
 
 def get_items_item_item_cf(item_list, predicted_ratings, list_len, movies=True, na_filler=0):
     predicted_ratings.fillna(na_filler, inplace=True)
