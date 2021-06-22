@@ -41,10 +41,10 @@ def movie_url(ids):
 
 def task1():
     # read movie lens
-    movies = pd.read_csv('movies.csv')
-    ratings = pd.read_csv('ratings.csv')
-    tags = pd.read_csv('tags.csv')
-    links = pd.read_csv('links.csv')
+    movies = pd.read_csv('../movies.csv')
+    ratings = pd.read_csv('../ratings.csv')
+    tags = pd.read_csv('../tags.csv')
+    links = pd.read_csv('../links.csv')
     st.write('K nearest neighbor centered cosine distance')
 
     # get settings from sidebar
@@ -146,10 +146,10 @@ def task1():
 
 def task2():
     # read movie lens
-    movies = pd.read_csv('movies.csv')
-    ratings = pd.read_csv('ratings.csv')
-    tags = pd.read_csv('tags.csv')
-    links = pd.read_csv('links.csv')
+    movies = pd.read_csv('../movies.csv')
+    ratings = pd.read_csv('../ratings.csv')
+    tags = pd.read_csv('../tags.csv')
+    links = pd.read_csv('../links.csv')
     st.write('K nearest neighbor centered cosine distance')
 
     # get settings from sidebar

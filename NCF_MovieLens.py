@@ -141,10 +141,8 @@ def create_valid(dataset, test_len=5000, movie=True):
 
 
 def main():
-    #movie = False
     movie = True
     ratings = pd.read_csv('ratings.csv')
-    #df_ratings, ratings, ratings_nz, books, users = get_book_data(20)
     in_min = ratings['rating'].min()
     in_max = ratings['rating'].max()
 
@@ -241,7 +239,6 @@ def main():
         u_ind = pd.DataFrame(mf_g.user_index_).to_csv('NCF_recources/u_ind.csv')
         i_ind = pd.DataFrame(mf_g.item_index_).to_csv('NCF_recources/i_ind.csv')
         neu.save('./NCF_recources')
-
 
     return summary
 

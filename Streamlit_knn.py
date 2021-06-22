@@ -249,8 +249,6 @@ def item_item_cf(df_rating, corr_matrix, user_number, k_items=15, test_labels=[]
                     k_most_similar = k_most_similar[-k_items:]
 
                 # predict based on the average of the user for the k movies
-                #  print(df_rating_raw[user_number].iloc[k_most_similar])
-                # isnull().all()
                 # if all movies were not seen by the user append nan
                 if np.mean(df_rating_raw[user_number].iloc[k_most_similar]) != np.mean(
                         df_rating_raw[user_number].iloc[k_most_similar]):
@@ -325,7 +323,7 @@ def moviePrediction_item_item_cf():
     movies = pd.read_csv('movies.csv')
     df_rating_raw = df_rating.copy()
     corr_matrix = create_corr_matrix(df_rating_raw)
-    predicted_ratings = item_item_cf(df_rating, corr_matrix, 1, 15)  ##for movies replace 79186 with i e [1:610]
+    predicted_ratings = item_item_cf(df_rating, corr_matrix, 1, 15)
     print(get_items_item_item_cf(movies, item_item_cf(df_rating, corr_matrix, 1, 10), 20, movies=True))  # movies
 
 
@@ -335,7 +333,7 @@ def bookprediction_item_item_cf():
     corr_matrix = create_corr_matrix(df_rating_raw)
     predicted_ratings = item_item_cf(df_rating, corr_matrix, 79186, 15)
     print(get_items_item_item_cf(books, item_item_cf(df_rating, corr_matrix, 79186, 10), 20, movies=False))  # books
-#### end of example
+# end of example
 
 def get_items_item_item_cf(item_list, predicted_ratings, list_len, movies=True, na_filler=0):
     predicted_ratings.fillna(na_filler, inplace=True)
@@ -353,8 +351,6 @@ def get_favorite_movies(ratings, user_number):
     df_seen = ratings.loc[:, user_number].replace(0, np.nan)
     df_seen = df_seen.dropna(how="all", axis=0)
     # prints a sorted list of the users movies
-    # TODO ausgabe wird später als streamlit list erfolgen
-    # print("already seen:",df_seen.sort_values(ascending=True))
     return df_seen
 
 
@@ -593,7 +589,7 @@ def task2():
 
 
 def task3():
-    #load data
+    # load data
     df_rating, ratings, df_rating_nonzero, books, users = get_book_data(200)
 
     # get settings from sidebar

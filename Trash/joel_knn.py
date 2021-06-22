@@ -4,9 +4,9 @@ from scipy.sparse import csr_matrix
 from sklearn.neighbors import NearestNeighbors
 from scipy.spatial.distance import cosine, hamming, euclidean, minkowski, cityblock
 
-links = pd.read_csv("links.csv")
-movies = pd.read_csv("movies.csv")
-ratings = pd.read_csv("ratings.csv")
+links = pd.read_csv("../links.csv")
+movies = pd.read_csv("../movies.csv")
+ratings = pd.read_csv("../ratings.csv")
 print(ratings.head())
 # print(links.head())
 # print(movies.iloc[1,:])

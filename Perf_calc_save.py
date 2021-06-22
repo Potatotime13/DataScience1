@@ -1,20 +1,14 @@
 import numpy as np
 import pandas as pd
-import plotly.graph_objects as go
 import copy
-from tmdbv3api import TMDb
-from tmdbv3api import Movie
-from scipy.spatial.distance import hamming, euclidean, chebyshev, cityblock
-import urllib.request
 
 
-def main_old():
+def perf_ncf():
     sum_temp = np.load('perf/NCF_summaries/sum_1.npy')
     y_pred = sum_temp[0]
     df_test_set = sum_temp[1]
     saving = all_performance_measures(*group_test_results(y_pred, df_test_set))
     saving = list(saving)
-    saving[3].to_csv('perf/ncf_mov_' + str(3) + '.csv')
     print(np.mean((y_pred-df_test_set)**2))
     for i in range(1, 5):
         sum_temp = np.load('perf/NCF_summaries/sum_'+str(i)+'.npy')
@@ -31,8 +25,8 @@ def main_old():
     print()
 
 
-def main():
-    #ratings = pd.read_csv('ratings.csv')
+def perf_knn():
+    # ratings = pd.read_csv('ratings.csv')
     df_ratings, ratings, df_rating_nonzero, books, users = get_book_data(20)
     y_pred, df_test_set = knn_uu_cosine(df_rating_nonzero, 15, movie=False)
     saving = all_performance_measures(*group_test_results(y_pred, df_test_set))
@@ -132,7 +126,7 @@ def mse(df):
     df = df.dropna()
     actual = df["actual"]
     pred = df["predicted"]
-    if len(pred)== 0 or len(actual) == 0:
+    if len(pred) == 0 or len(actual) == 0:
         return 0
     else:
         return sum((actual - pred) ** 2) * 1 / len(pred)
@@ -143,7 +137,7 @@ def rmse(df):
     df = df.dropna()
     actual = df["actual"]
     pred = df["predicted"]
-    if len(pred)== 0 or len(actual) == 0:
+    if len(pred) == 0 or len(actual) == 0:
         return 0
     else:
         return (sum((actual - pred) ** 2) * 1 / len(pred)) ** 0.5
@@ -154,7 +148,7 @@ def mae(df):
     df = df.dropna()
     actual = df["actual"]
     pred = df["predicted"]
-    if len(pred)== 0 or len(actual) == 0:
+    if len(pred) == 0 or len(actual) == 0:
         return 0
     else:
         return sum(np.abs(actual - pred)) * 1 / len(pred)
@@ -172,15 +166,13 @@ def all_performance_measures(df_actual_pred, groups_by_actual, group_header_actu
     # iterates through the groups within the actual ratings and
     # calcs performance measures
     c = 0
-    df_groups_actual = [] # for testing of heuristik
+    df_groups_actual = []  # for testing of heuristik
     plot_groups_actual = []
     for x in groups_by_actual:
 
         if len(x["predicted"].dropna()) == 0:
             group_header_actual.pop(c)
             continue
-        #            print("One group doesnt have predictions: ENDING PROGRAM",x)
-        #            quit()
         plot_parameters = []
         plot_parameters.append(group_header_actual[c])
         plot_parameters.append(len(x["predicted"].dropna()))
@@ -201,7 +193,6 @@ def all_performance_measures(df_actual_pred, groups_by_actual, group_header_actu
         plot_groups_actual.append(copy.deepcopy(plot_parameters))
 
     # optional not to have too many groups
-    # groups_by_pred = list(groups_by_pred[:], groups_by_pred[-3:])
     c = 0
     plot_groups_pred = []
     for x in groups_by_pred:
@@ -307,4 +298,4 @@ def knn_uu_cosine(ratings, k_users, movie=True):
 
 
 if __name__ == "__main__":
-    main()
+    perf_knn()

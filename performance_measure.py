@@ -70,7 +70,8 @@ def create_valid(dataset, test_len=5000, movie=True):
 
     return dataset, test_set
 
-## get sim and predictions for distances != cosine
+
+# get sim and predictions for distances != cosine
 def similarity_calculation_distances(df_rating, distance_measure, user_number):
     distances = []
     similarities = []
@@ -98,7 +99,8 @@ def predicted_ratings_distances(df_rating, similarities, user_number, k_users, d
                                 , replacenan=False, replacement=0, weigthing=False, testing=False, weighting=True):
     sorted_index = list(np.argsort(similarities))[::-1][1:k_users + 1]
     rated = df_rating.iloc[:, sorted_index]
-    if testing is False: rated = rated[df_rating_raw[user_number].isnull()]
+    if testing is False:
+        rated = rated[df_rating_raw[user_number].isnull()]
     if weighting is False:
         predicted_ratings = rated.mean(axis=1)
     else:
@@ -171,8 +173,6 @@ def item_item_cf(df_rating, corr_matrix, user_number, k_items=15, test_labels=[]
                     k_most_similar = k_most_similar[-k_items:]
 
                 # predict based on the average of the user for the k movies
-                #  print(df_rating_raw[user_number].iloc[k_most_similar])
-                # isnull().all()
                 # if all movies were not seen by the user append nan
                 if np.mean(df_rating_raw[user_number].iloc[k_most_similar]) != np.mean(
                         df_rating_raw[user_number].iloc[k_most_similar]):
@@ -230,7 +230,7 @@ def mse(df):
     df = df.dropna()
     actual = df["actual"]
     pred = df["predicted"]
-    if len(pred)== 0 or len(actual) == 0:
+    if len(pred) == 0 or len(actual) == 0:
         return 0
     else:
         return sum((actual - pred) ** 2) * 1 / len(pred)
@@ -241,7 +241,7 @@ def rmse(df):
     df = df.dropna()
     actual = df["actual"]
     pred = df["predicted"]
-    if len(pred)== 0 or len(actual) == 0:
+    if len(pred) == 0 or len(actual) == 0:
         return 0
     else:
         return np.sqrt(sum((actual - pred) ** 2) * 1 / len(pred))
@@ -252,19 +252,17 @@ def mae(df):
     df = df.dropna()
     actual = df["actual"]
     pred = df["predicted"]
-    if len(pred)== 0 or len(actual) == 0:
+    if len(pred) == 0 or len(actual) == 0:
         return 0
     else:
         return sum(np.abs(actual - pred)) * 1 / len(pred)
 
 
 def test_generation_distances(ratings, movie=True):
-
-    #### hyperparameters
+    # hyperparameters
     k_users = 119
     normalization = 'centering + division by variance'
     distance_measure = "euclidean"
-    ####
 
     train, test = create_valid(ratings, 5000, movie)
     df_rating = train
@@ -277,13 +275,14 @@ def test_generation_distances(ratings, movie=True):
         df_rating = df_rating.fillna(0)
     elif normalization == "None":
         df_rating = df_rating.fillna(df_rating.mean())
-    ###### the part ends here
+
     c = 0
     predicted = []
     actuals = []
     for x in test:
         # check if any value for a user is in test set
-        if c % 10 == 0: print(c)
+        if c % 10 == 0:
+            print(c)
         if test[x].notna().values.any():
             similarities = similarity_calculation_distances(df_rating, distance_measure, x)
             user_average = df_rating_raw[x].mean()
@@ -324,9 +323,6 @@ def test_generation_item_cf(ratings, movie=True):
             predicted.append(predicted_ratings[predicted_ratings.index.isin(index)])
             actuals.append(actual)
             c += 1
-            ###
-        else:
-            pass
     return predicted, actuals
 
 
@@ -364,15 +360,13 @@ def all_performance_measures(df_actual_pred, groups_by_actual, group_header_actu
     # iterates through the groups within the actual ratings and
     # calcs performance measures
     c = 0
-    df_groups_actual = [] # for testing of heuristik
+    df_groups_actual = []  # for testing of heuristik
     plot_groups_actual = []
     for x in groups_by_actual:
 
         if len(x["predicted"].dropna()) == 0:
             group_header_actual.pop(c)
             continue
-        #            print("One group doesnt have predictions: ENDING PROGRAM",x)
-        #            quit()
         plot_parameters = []
         plot_parameters.append(group_header_actual[c])
         plot_parameters.append(len(x["predicted"].dropna()))
@@ -393,7 +387,6 @@ def all_performance_measures(df_actual_pred, groups_by_actual, group_header_actu
         plot_groups_actual.append(copy.deepcopy(plot_parameters))
 
     # optional not to have too many groups
-    # groups_by_pred = list(groups_by_pred[:], groups_by_pred[-3:])
     c = 0
     plot_groups_pred = []
     for x in groups_by_pred:
@@ -421,11 +414,11 @@ def all_performance_measures(df_actual_pred, groups_by_actual, group_header_actu
     return df_basic_measures_for_all_testpoints, df_performance_for_all_testpoints, df_groups_actual, df_groups_pred
 
 
-def item_item_cf_heuristik(df_rating, user_number=69, neighbours = 15, no_similar_to_favorite = 5, no_of_recommendations= 3, corr_matrix = False):
+def item_item_cf_heuristik(df_rating, user_number=69, neighbours=15, no_similar_to_favorite=5, no_of_recommendations=3, corr_matrix=False):
     favorites = df_rating[user_number][df_rating[user_number] == df_rating[user_number].max()].index
     favorites = np.random.permutation(favorites)
 
-    ### replace problematic values in corr matrix
+    # replace problematic values in corr matrix
     if corr_matrix is False:
         corr_matrix = create_corr_matrix(df_rating)
     else:
@@ -434,10 +427,8 @@ def item_item_cf_heuristik(df_rating, user_number=69, neighbours = 15, no_simila
 
     corr_matrix_reduced = corr_matrix.copy()
     corr_matrix = corr_matrix.drop(list(df_rating[user_number].dropna().index), axis=0)
-    #corr_matrix_reduced = corr_matrix_reduced.drop(favorites, axis=0)
     corr_matrix_reduced = corr_matrix_reduced.drop(favorites, axis=1)
     most_correlated = []
-    correlation_of_most_correlated = []
     already_removed = []
     for x in favorites:
         k = np.argpartition(corr_matrix[x], -no_similar_to_favorite)[-no_similar_to_favorite:]
@@ -455,7 +446,6 @@ def item_item_cf_heuristik(df_rating, user_number=69, neighbours = 15, no_simila
     for x in most_correlated:
         l = []
         for y in x:
-            #corr_matrix_local = corr_matrix_reduced.drop(favorites[c], axis=0)
             h = np.argpartition(corr_matrix_local[y], -neighbours)[-neighbours:]
             correlations_to_neighbours = np.partition(corr_matrix_local[y], -neighbours)[-neighbours:]
             index_neighbours = corr_matrix_local[y].iloc[h].index
@@ -474,7 +464,7 @@ def item_item_cf_heuristik(df_rating, user_number=69, neighbours = 15, no_simila
     df_similar_to_favorites_rated = df_similar_to_favorites_rated.reindex(idx)
     df_names = df_names.reindex(idx)
     ratings = df_similar_to_favorites_rated.fillna(-10).stack().nlargest(3)
-    index = list(ratings.index)#df_similar_to_favorites_rated.max().fillna(-10).nlargest(no_of_recommendations).index
+    index = list(ratings.index)
     for x in range(len(index)):
         index[x] = index[x][1]
     max_index = df_similar_to_favorites_rated.loc[:,index].idxmax()
@@ -509,7 +499,7 @@ def performance_user_user_cf_distances(ratings, movie=True):
     return results
 
 
-def all_performances(movie= True, filter_tr = 20):
+def all_performances(movie= True, filter_tr=20):
     if movie is True:
         rating = pd.read_csv('ratings.csv')
         result_item = performance_item_item_cf(rating.copy())
@@ -527,8 +517,7 @@ def all_performances(movie= True, filter_tr = 20):
 
 
 def many_predictions(no_predictions=1):
-
-    item_movie, distance_movie  = all_performances()
+    item_movie, distance_movie = all_performances()
     item_book, distance_book = all_performances(False)
 
     item_movie_basic = item_movie[0]
@@ -573,7 +562,6 @@ def many_predictions(no_predictions=1):
         distance_book_errors_total += distance_book[1]
         distance_book_group_actual += distance_book[2]
         distance_book_group_predicted += distance_book[3]
-
 
         item_movie_basic = item_movie_basic / no_predictions
         item_movie_errors_total = item_movie_errors_total / no_predictions
