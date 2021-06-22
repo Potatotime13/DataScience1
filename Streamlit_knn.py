@@ -870,7 +870,7 @@ def task6():
     df_rating, ratings, df_rating_nonzero, books, users = get_book_data(200)
 
     # get settings from sidebar
-    user_number = st.sidebar.selectbox("User ID", (79186, 207782))
+    user_number = st.sidebar.selectbox("User ID", (6, 19, 24727, 79186, 145434, 195550, 207782))
     k_users = st.sidebar.selectbox("K nearest", (5, 15, 20))
     list_len = st.sidebar.selectbox("Recommendations", (10, 40))
 
@@ -1021,4 +1021,4 @@ def task7():
 
 
 if __name__ == "__main__":
-    main()
+    task6()
