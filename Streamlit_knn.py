@@ -470,7 +470,7 @@ def task2():
     result_user, result_user_eu, result_ncf, result_item = load_results_movie()
 
     # header
-    st.write('K nearest neighbor - performance measures')
+    st.write('performance measure comparison for the MovieLens dataset')
 
     # get settings from sidebar
     info_shown = st.sidebar.selectbox("Measures", ("basic measures", "distribution measures"))
@@ -684,10 +684,10 @@ def task4():
     result_user, result_user_eu, result_item = load_results_book()
 
     # header
-    st.write('K nearest neighbor - performance measures')
+    st.write('performance measure comparison for the Book-Crossing dataset')
 
     # get settings from sidebar
-    info_shown = st.sidebar.selectbox("Measures", ("distribution measures","basic measures", ))
+    info_shown = st.sidebar.selectbox("Measures", ("basic measures", "distribution measures",))
 
     # result_item, result_distance = all_performances()
     if info_shown == "distribution measures":
