@@ -308,10 +308,10 @@ def load_results_book():
     result_item = []
     for i in range(4):
         result_user.append(pd.read_csv('perf/person_user_book_' + str(i) + '.csv'))
-    result_user_eu.append(pd.read_csv('perf/0distance_book_basic.csv'))
-    result_user_eu.append(pd.read_csv('perf/0distance_book_errors_total.csv'))
-    result_user_eu.append(pd.read_csv('perf/0distance_book_group_actual.csv'))
-    result_user_eu.append(pd.read_csv('perf/0distance_book_group_predicted.csv'))
+    result_user_eu.append(pd.read_csv('perf/5distance_book_basic.csv'))
+    result_user_eu.append(pd.read_csv('perf/5distance_book_errors_total.csv'))
+    result_user_eu.append(pd.read_csv('perf/5distance_book_group_actual.csv'))
+    result_user_eu.append(pd.read_csv('perf/5distance_book_group_predicted.csv'))
     result_item.append(pd.read_csv('perf/0item_book_basic.csv'))
     result_item.append(pd.read_csv('perf/0item_book_errors_total.csv'))
     result_item.append(pd.read_csv('perf/0item_book_group_actual.csv'))
@@ -665,17 +665,17 @@ def task4():
         categories = [str(a) for a in np.arange(1., 11., 1)]
         fig1 = go.Figure(data=[
             go.Bar(name='item / item pearson', x=categories, y=list(result_item[2].iloc[4][categories])),
-            #go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[2].iloc[4][categories])),
+            go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[2].iloc[4][categories])),
             go.Bar(name='user / user pearson', x=categories, y=list(result_user[2].iloc[4][categories]))
         ])
         fig2 = go.Figure(data=[
             go.Bar(name='item / item pearson', x=categories, y=list(result_item[2].iloc[3][categories])),
-            #go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[2].iloc[3][categories])),
+            go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[2].iloc[3][categories])),
             go.Bar(name='user / user pearson', x=categories, y=list(result_user[2].iloc[3][categories]))
         ])
         fig3 = go.Figure(data=[
             go.Bar(name='item / item pearson', x=categories, y=list(result_item[2].iloc[1][categories])),
-            #go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[2].iloc[1][categories])),
+            go.Bar(name='user / user euclidean', x=categories, y=list(result_user_eu[2].iloc[1][categories])),
             go.Bar(name='user / user pearson', x=categories, y=list(result_user[2].iloc[1][categories]))
         ])
 
