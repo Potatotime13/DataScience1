@@ -692,7 +692,7 @@ def task4():
             go.Bar(name='user / user pearson', x=categories, y=list(result_user[2].iloc[1][categories]))
         ])
         fig4 = go.Figure(data=[
-            go.Bar(name='item / item pearson', y=[mse_4i, mse_4ue, mse_4u]),
+            go.Bar(name='item / item pearson', x=['item / item pearson','user / user euclidean','user / user pearson'], y=[mse_4i, mse_4ue, mse_4u]),
             #go.Bar(name='user / user euclidean', y=mse_4ue),
             #go.Bar(name='user / user pearson', y=mse_4u)
         ])
@@ -721,7 +721,7 @@ def task4():
                            )
         fig4.update_layout(barmode='group',
                            title=go.layout.Title(
-                               text=result_item[2].iloc[1][0],
+                               text='mse for predicted ratings >8',
                                xref="paper",
                                x=0
                            ),
