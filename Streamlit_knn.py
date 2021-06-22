@@ -657,7 +657,7 @@ def task4():
     st.write('K nearest neighbor - performance measures')
 
     # get settings from sidebar
-    info_shown = st.sidebar.selectbox("Measures", ("basic measures", "distribution measures",))
+    info_shown = st.sidebar.selectbox("Measures", ("distribution measures","basic measures", ))
 
     # result_item, result_distance = all_performances()
     if info_shown == "distribution measures":
@@ -692,9 +692,9 @@ def task4():
             go.Bar(name='user / user pearson', x=categories, y=list(result_user[2].iloc[1][categories]))
         ])
         fig4 = go.Figure(data=[
-            go.Bar(name='item / item pearson', y=mse_4i),
-            go.Bar(name='user / user euclidean', y=mse_4ue),
-            go.Bar(name='user / user pearson', y=mse_4u)
+            go.Bar(name='item / item pearson', y=[mse_4i, mse_4ue, mse_4u]),
+            #go.Bar(name='user / user euclidean', y=mse_4ue),
+            #go.Bar(name='user / user pearson', y=mse_4u)
         ])
 
         # Change display settings
@@ -991,4 +991,4 @@ def task7():
 
 
 if __name__ == "__main__":
-    main()
+    task4()
