@@ -122,7 +122,7 @@ def pearson(df_rating, user_number, k_users, df_rating_raw, normalization):
     user_std = (df_rating * df_rating).mean() ** 0.5
 
     # calc correlation matrix
-    user_corr = df_rating.cov() / (user_std.values.reshape((-1, 1)) @ user_std.values.reshape((1, -1)))
+    user_corr = df_rating.corr() #/ (user_std.values.reshape((-1, 1)) @ user_std.values.reshape((1, -1)))
     user_corr = user_corr.fillna(0)
 
     # index of nearest users
@@ -135,7 +135,6 @@ def pearson(df_rating, user_number, k_users, df_rating_raw, normalization):
     mv_rated = df_rating_raw.iloc[:, sorted_index[1:k_users + 1]].notnull().values
     seen_sim_len = mv_rated @ corr_k
     seen_sim_len = 1 / (seen_sim_len + (seen_sim_len == 0))
-    recommended = w_sum_k * seen_sim_len
     if normalization == 'centering + division by variance':
         recommended = w_sum_k * seen_sim_len * df_rating_raw[user_number].var() ** 0.5 + df_rating_raw[
             user_number].mean()
@@ -386,7 +385,7 @@ def task1():
     k_users = st.sidebar.selectbox("K nearest", (5, 15, 20))
     list_len = st.sidebar.selectbox("Recommendations", (10, 40))
     normalization = st.sidebar.selectbox("Normalization",
-                                         ('centering + division by variance', 'centering', "None"))
+                                         ("None",'centering + division by variance', 'centering', ))
     distance_measure = st.sidebar.selectbox("Distance measure",
                                             ('pearson', "euclidean", "manhattan (city block)",
                                              "chebyshev"))
@@ -405,7 +404,7 @@ def task1():
         df_rating = df_rating - df_rating.mean()
         df_rating = df_rating.fillna(0)
     elif normalization == "None":
-        df_rating = df_rating.fillna(df_rating.mean())
+        df_rating = df_rating.fillna(0)
 
     # distance calculation and prediction
     if distance_measure == "pearson":
