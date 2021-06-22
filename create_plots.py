@@ -63,76 +63,76 @@ def main():
         plt.title('Book-Crossing')
         plt.show()
 
-        mask = [str(a) for a in np.arange(1., 11., 1)]
-        x = np.arange(len(mask))
-        plt.bar(x-width, results_b[0][2][mask].values[4], width, color='cyan')
-        #plt.bar(x,       results_b[1][2].values[4, 1:], width, color='orange')
-        plt.bar(x+width, results_b[2][2][mask].values[4], width, color='green')
-        plt.xticks(x, mask)
-        plt.legend(["user/user pearson", "user/user euclidean", "item/item pearson"])
-        plt.title('Book-Crossing - MSE distribution')
+        thr = 2.5
+        mask = results_m[0][3].loc[0].values[1:] <= thr
+        vals = results_m[0][3].values[1:, 1:]
+        vals = vals[:, mask]
+        mse_4u = (vals[0, :] * vals[3, :]).sum() / vals[0, :].sum()
+        mask = results_m[1][3].loc[0].values[1:] <= thr
+        vals = results_m[1][3].values[1:, 1:]
+        vals = vals[:, mask]
+        mse_4ue = (vals[0, :] * vals[3, :]).sum() / vals[0, :].sum()
+        mask = results_m[2][3].loc[0].values[1:] <= thr
+        vals = results_m[2][3].values[1:, 1:]
+        vals = vals[:, mask]
+        mse_4n = (vals[0, :] * vals[3, :]).sum() / vals[0, :].sum()
+        mask = results_m[3][3].loc[0].values[1:] <= thr
+        vals = results_m[3][3].values[1:, 1:]
+        vals = vals[:, mask]
+        mse_4i = (vals[0, :] * vals[3, :]).sum() / vals[0, :].sum()
+
+        x = np.arange(1)
+        plt.bar(x - width * 1.5, mse_4u, width, color='cyan')
+        plt.bar(x - width * 0.5, mse_4ue, width, color='orange')
+        plt.bar(x + width * 0.5, mse_4n, width, color='green')
+        plt.bar(x + width * 1.5, mse_4i, width, color='blue')
+        plt.xticks(x, [''])
+        plt.ylabel('average mse')
+        plt.legend(["user/user pearson", "user/user euclidean", "ncf", "item/item pearson"])
+        plt.title('MovieLens - mse for predictions <'+str(thr))
         plt.show()
-        mask = [str(a) for a in np.arange(1., 11., 1)]
-        x = np.arange(len(mask))
-        plt.bar(x-width, results_b[0][2][mask].values[6], width, color='cyan')
-        #plt.bar(x,       results_b[1][2].values[4, 1:], width, color='orange')
-        plt.bar(x+width, results_b[2][2][mask].values[6], width, color='green')
-        plt.xticks(x, mask)
+
+        thr = 5
+        mask = results_b[0][3].loc[0].values[1:] <= thr
+        vals = results_b[0][3].values[1:, 1:]
+        vals = vals[:, mask]
+        mse_4u = (vals[0, :] * vals[3, :]).sum() / vals[0, :].sum()
+        mask = results_b[1][3].loc[0].values[1:] <= thr
+        vals = results_b[1][3].values[1:, 1:]
+        vals = vals[:, mask]
+        mse_4ue = (vals[0, :] * vals[3, :]).sum() / vals[0, :].sum()
+        mask = results_b[2][3].loc[0].values[1:] <= thr
+        vals = results_b[2][3].values[1:, 1:]
+        vals = vals[:, mask]
+        mse_4i = (vals[0, :] * vals[3, :]).sum() / vals[0, :].sum()
+
+        x = np.arange(1)
+        plt.bar(x - width, mse_4u, width, color='cyan')
+        plt.bar(x, mse_4ue, width, color='orange')
+        plt.bar(x + width, mse_4i, width, color='green')
+        plt.xticks(x, [''])
+        plt.ylabel('average mse')
         plt.legend(["user/user pearson", "user/user euclidean", "item/item pearson"])
-        plt.title('Book-Crossing - MAE distribution')
+        plt.title('Book-Crossing - mse for predictions <' + str(thr))
         plt.show()
 
-    thr = 2.5
-    mask = results_m[0][3].loc[0].values[1:] <= thr
-    vals = results_m[0][3].values[1:, 1:]
-    vals = vals[:, mask]
-    mse_4u = (vals[0, :] * vals[3, :]).sum() / vals[0, :].sum()
-    mask = results_m[1][3].loc[0].values[1:] <= thr
-    vals = results_m[1][3].values[1:, 1:]
-    vals = vals[:, mask]
-    mse_4ue = (vals[0, :] * vals[3, :]).sum() / vals[0, :].sum()
-    mask = results_m[2][3].loc[0].values[1:] <= thr
-    vals = results_m[2][3].values[1:, 1:]
-    vals = vals[:, mask]
-    mse_4n = (vals[0, :] * vals[3, :]).sum() / vals[0, :].sum()
-    mask = results_m[3][3].loc[0].values[1:] <= thr
-    vals = results_m[3][3].values[1:, 1:]
-    vals = vals[:, mask]
-    mse_4i = (vals[0, :] * vals[3, :]).sum() / vals[0, :].sum()
-
-    x = np.arange(1)
-    plt.bar(x - width * 1.5, mse_4u, width, color='cyan')
-    plt.bar(x - width * 0.5, mse_4ue, width, color='orange')
-    plt.bar(x + width * 0.5, mse_4n, width, color='green')
-    plt.bar(x + width * 1.5, mse_4i, width, color='blue')
-    plt.xticks(x, [''])
-    plt.ylabel('average mse')
-    plt.legend(["user/user pearson", "user/user euclidean", "ncf", "item/item pearson"])
-    plt.title('MovieLens - mse for predictions <'+str(thr))
-    plt.show()
-
-    thr = 5
-    mask = results_b[0][3].loc[0].values[1:] <= thr
-    vals = results_b[0][3].values[1:, 1:]
-    vals = vals[:, mask]
-    mse_4u = (vals[0, :] * vals[3, :]).sum() / vals[0, :].sum()
-    mask = results_b[1][3].loc[0].values[1:] <= thr
-    vals = results_b[1][3].values[1:, 1:]
-    vals = vals[:, mask]
-    mse_4ue = (vals[0, :] * vals[3, :]).sum() / vals[0, :].sum()
-    mask = results_b[2][3].loc[0].values[1:] <= thr
-    vals = results_b[2][3].values[1:, 1:]
-    vals = vals[:, mask]
-    mse_4i = (vals[0, :] * vals[3, :]).sum() / vals[0, :].sum()
-
-    x = np.arange(1)
-    plt.bar(x - width, mse_4u, width, color='cyan')
-    plt.bar(x, mse_4ue, width, color='orange')
-    plt.bar(x + width, mse_4i, width, color='green')
-    plt.xticks(x, [''])
-    plt.ylabel('average mse')
+    mask = [str(a) for a in np.arange(1., 11., 1)]
+    x = np.arange(len(mask))
+    plt.bar(x-width, results_b[0][2][mask].values[4], width, color='cyan')
+    plt.bar(x,       results_b[1][2][mask].values[4], width, color='orange')
+    plt.bar(x+width, results_b[2][2][mask].values[4], width, color='green')
+    plt.xticks(x, mask)
     plt.legend(["user/user pearson", "user/user euclidean", "item/item pearson"])
-    plt.title('Book-Crossing - mse for predictions <' + str(thr))
+    plt.title('Book-Crossing - MSE distribution')
+    plt.show()
+    mask = [str(a) for a in np.arange(1., 11., 1)]
+    x = np.arange(len(mask))
+    plt.bar(x-width, results_b[0][2][mask].values[6], width, color='cyan')
+    plt.bar(x,       results_b[1][2][mask].values[6], width, color='orange')
+    plt.bar(x+width, results_b[2][2][mask].values[6], width, color='green')
+    plt.xticks(x, mask)
+    plt.legend(["user/user pearson", "user/user euclidean", "item/item pearson"])
+    plt.title('Book-Crossing - MAE distribution')
     plt.show()
 
     print()
@@ -163,10 +163,10 @@ def load_results_book():
     result_item = []
     for i in range(4):
         result_user.append(pd.read_csv('perf/person_user_book_' + str(i) + '.csv'))
-    result_user_eu.append(pd.read_csv('perf/0distance_book_basic.csv'))
-    result_user_eu.append(pd.read_csv('perf/0distance_book_errors_total.csv'))
-    result_user_eu.append(pd.read_csv('perf/0distance_book_group_actual.csv'))
-    result_user_eu.append(pd.read_csv('perf/0distance_book_group_predicted.csv'))
+    result_user_eu.append(pd.read_csv('perf/5distance_book_basic.csv'))
+    result_user_eu.append(pd.read_csv('perf/5distance_book_errors_total.csv'))
+    result_user_eu.append(pd.read_csv('perf/5distance_book_group_actual.csv'))
+    result_user_eu.append(pd.read_csv('perf/5distance_book_group_predicted.csv'))
     result_item.append(pd.read_csv('perf/0item_book_basic.csv'))
     result_item.append(pd.read_csv('perf/0item_book_errors_total.csv'))
     result_item.append(pd.read_csv('perf/0item_book_group_actual.csv'))
